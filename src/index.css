@@ -1,0 +1,165 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 2%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 2%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 2%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 2%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --radius: 0.625rem;
+  }
+
+  body {
+    @apply bg-[#050505] text-white;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  html.lenis, html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto;
+  }
+
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+}
+
+#intro-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  overflow: hidden;
+}
+
+.intro-gate-ring {
+  position: absolute;
+  width: min(92vw, 58rem);
+  aspect-ratio: 1;
+  opacity: 0.78;
+  will-change: transform, opacity, filter;
+}
+
+.intro-gate-ring-1 {
+  --intro-ring-radius: min(-36vw, -22.4rem);
+}
+
+.intro-gate-ring-2 {
+  width: min(72vw, 44rem);
+  opacity: 0.56;
+  --intro-ring-radius: min(-28vw, -17rem);
+}
+
+.intro-gate-ring-3 {
+  width: min(52vw, 31rem);
+  opacity: 0.42;
+  --intro-ring-radius: min(-20vw, -12rem);
+}
+
+.intro-gate-ring span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: 0 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(1.12rem, 1.32vw, 1.42rem);
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  color: rgba(255, 255, 255, 0.88);
+  text-transform: uppercase;
+  white-space: pre;
+}
+
+.intro-gate-ring-2 span {
+  font-size: clamp(0.92rem, 1.08vw, 1.14rem);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.68);
+  letter-spacing: 0.2em;
+}
+
+.intro-gate-ring-3 span {
+  font-size: clamp(0.78rem, 0.92vw, 0.98rem);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.54);
+  letter-spacing: 0.16em;
+}
+
+.intro-gate-counter {
+  position: relative;
+  z-index: 2;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(3.6rem, 8vw, 7rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+  cursor: default;
+  opacity: 1;
+  will-change: transform, opacity, letter-spacing;
+}
+
+.intro-gate-counter.is-ready {
+  cursor: pointer;
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  font-weight: 500;
+  padding: 1rem 1.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  transition:
+    color 220ms ease,
+    background-color 220ms ease,
+    border-color 220ms ease,
+    transform 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.intro-gate-counter.is-ready:hover,
+.intro-gate-counter.is-ready:focus-visible {
+  color: #050505;
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 0 34px rgba(255, 255, 255, 0.16),
+    0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+}
