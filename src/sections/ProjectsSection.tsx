@@ -1,6 +1,7 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import TargetCursor from '../components/TargetCursor';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -31,10 +32,35 @@ const projects = [
   },
 ];
 
+const projectDetails: Record<string, { detail: string; scope: string[]; outcome: string }> = {
+  '01': {
+    detail: '围绕品牌定位、标志系统、色彩语言与版式规范建立完整视觉识别，帮助品牌在商业触点中保持稳定、清晰且可延展的表达。',
+    scope: ['品牌定位梳理', 'Logo 与识别系统', '色彩/字体/版式规范', '核心应用延展'],
+    outcome: '形成一套能够用于官网、社媒、提案和线下物料的品牌视觉系统。',
+  },
+  '02': {
+    detail: '从产品包装到线下触点，建立具有落地感的视觉物料系统，让品牌在真实消费场景中保持统一识别。',
+    scope: ['包装结构视觉', '线下海报与折页', '材质与工艺建议', '生产交付规范'],
+    outcome: '提升产品陈列辨识度，并让包装与品牌主视觉保持一致。',
+  },
+  '03': {
+    detail: '将设计语言拆解为可执行的规则，包括标志用法、色彩比例、字体层级、图形资产和应用示例。',
+    scope: ['视觉规范手册', '组件化设计资产', '应用模板', '错误示例与边界说明'],
+    outcome: '让团队在后续传播和设计执行中拥有统一、明确的判断标准。',
+  },
+  '04': {
+    detail: '以角色设定、造型语言和表情体系构建品牌人格，让品牌叙事拥有更具记忆点的视觉载体。',
+    scope: ['角色设定', '基础造型与比例', '表情/动作延展', '场景化应用'],
+    outcome: '建立可持续运营的品牌 IP 资产，用于社媒、活动和品牌传播。',
+  },
+};
+
 export default function ProjectsSection() {
   const sectionRef = useRef<HTMLDivElement>(null!);
   const headingRef = useRef<HTMLDivElement>(null!);
   const listRef = useRef<HTMLDivElement>(null!);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const [activeProject, setActiveProject] = useState<(typeof projects)[number] | null>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -78,12 +104,32 @@ export default function ProjectsSection() {
     return () => ctx.revert();
   }, []);
 
+  useEffect(() => {
+    if (!activeProject || !modalRef.current) return;
+
+    gsap.fromTo(
+      modalRef.current,
+      { autoAlpha: 0, y: 28, scale: 0.96 },
+      { autoAlpha: 1, y: 0, scale: 1, duration: 0.35, ease: 'power3.out' }
+    );
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setActiveProject(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeProject]);
+
   return (
     <section
       ref={sectionRef}
       className="relative w-full"
       style={{ paddingTop: '20vh', paddingBottom: '20vh', zIndex: 10 }}
     >
+      <TargetCursor scopeRef={sectionRef} targetSelector=".cursor-target" />
       <div className="mx-auto px-6 md:px-12" style={{ maxWidth: '1100px' }}>
         {/* Section label */}
         <div ref={headingRef} className="mb-16">
@@ -125,7 +171,9 @@ export default function ProjectsSection() {
           {projects.map((project, i) => (
             <div
               key={i}
-              className="group rounded-xl p-6 md:p-8 transition-all duration-300"
+              className="cursor-target group rounded-xl p-6 md:p-8 transition-all duration-300"
+              role="button"
+              tabIndex={0}
               style={{
                 background: 'rgba(5, 5, 5, 0.4)',
                 backdropFilter: 'blur(16px)',
@@ -139,6 +187,13 @@ export default function ProjectsSection() {
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background = 'rgba(5, 5, 5, 0.4)';
                 (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255, 255, 255, 0.08)';
+              }}
+              onClick={() => setActiveProject(project)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setActiveProject(project);
+                }
               }}
             >
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -197,6 +252,50 @@ export default function ProjectsSection() {
           ))}
         </div>
       </div>
+
+      {activeProject && (
+        <div className="project-modal-backdrop" onClick={() => setActiveProject(null)}>
+          <div
+            ref={modalRef}
+            className="project-floating-card"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="project-modal-close"
+              onClick={() => setActiveProject(null)}
+              aria-label="Close project details"
+            >
+              ×
+            </button>
+
+            <p className="project-modal-kicker">PROJECT {activeProject.year}</p>
+            <h3>{activeProject.title}</h3>
+            <p className="project-modal-desc">{projectDetails[activeProject.year].detail}</p>
+
+            <div className="project-modal-tags">
+              {activeProject.tags.map((tag) => (
+                <span key={tag}>{tag}</span>
+              ))}
+            </div>
+
+            <div className="project-modal-grid">
+              <div>
+                <p className="project-modal-label">Scope</p>
+                <ul>
+                  {projectDetails[activeProject.year].scope.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="project-modal-label">Outcome</p>
+                <p className="project-modal-outcome">{projectDetails[activeProject.year].outcome}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
