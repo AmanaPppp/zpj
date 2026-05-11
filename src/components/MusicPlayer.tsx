@@ -1,10 +1,9 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface Track {
   title: string;
   artist: string;
   src: string;
-  duration: number;
 }
 
 const builtInTracks: Track[] = [
@@ -12,203 +11,233 @@ const builtInTracks: Track[] = [
     title: 'Seven (basecamp Remix)',
     artist: 'Jung Kook feat. Latto',
     src: '/music/track1.mp3',
-    duration: 0,
   },
   {
     title: 'My jealousy',
     artist: 'DJMAX',
     src: '/music/track2.mp3',
-    duration: 0,
   },
   {
     title: 'Track 03',
     artist: 'AmanaP Selection',
     src: '/music/track3.mp3',
-    duration: 0,
   },
   {
     title: 'Track 04',
     artist: 'AmanaP Selection',
     src: '/music/track4.mp3',
-    duration: 0,
   },
   {
     title: 'Track 05',
     artist: 'AmanaP Selection',
     src: '/music/track5.mp3',
-    duration: 0,
   },
 ];
 
 function formatTime(seconds: number): string {
-  if (!isFinite(seconds) || seconds < 0) return '0:00';
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
+  if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+  const minutes = Math.floor(seconds / 60);
+  const rest = Math.floor(seconds % 60);
+  return `${minutes}:${rest.toString().padStart(2, '0')}`;
+}
+
+function getRandomTrackIndex(excludeIndex?: number): number {
+  if (builtInTracks.length <= 1) return 0;
+
+  let nextIndex = Math.floor(Math.random() * builtInTracks.length);
+  while (nextIndex === excludeIndex) {
+    nextIndex = Math.floor(Math.random() * builtInTracks.length);
+  }
+
+  return nextIndex;
 }
 
 export default function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [tracks] = useState<Track[]>(builtInTracks);
+  const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.7);
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
-  const [hasInteracted, setHasInteracted] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const progressRef = useRef<HTMLDivElement | null>(null);
+  const isSeekingRef = useRef(false);
+  const hasEnteredRef = useRef(false);
+  const shouldPlayAfterTrackChangeRef = useRef(false);
 
-  const track = tracks[currentTrack];
+  const track = builtInTracks[currentTrack];
 
-  // --- 核心：创建并管理单一 audio 实例，只换 src 不重建 ---
   const ensureAudio = useCallback(() => {
-    if (!audioRef.current) {
-      const audio = new Audio();
-      audio.preload = 'auto';
-      audio.volume = volume;
+    if (audioRef.current) return audioRef.current;
 
-      audio.addEventListener('timeupdate', () => {
+    const audio = new Audio();
+    audio.preload = 'auto';
+    audio.volume = volume;
+
+    audio.addEventListener('timeupdate', () => {
+      if (!isSeekingRef.current) {
         setCurrentTime(audio.currentTime);
-      });
-
-      audio.addEventListener('ended', () => {
-        // 自动下一首
-        setCurrentTrack((prev) => (prev + 1) % tracks.length);
-      });
-
-      audio.addEventListener('error', (e) => {
-        const err = (e.target as HTMLAudioElement).error;
-        let msg = '音频加载失败';
-        if (err?.code === 4) msg = '音频文件未找到';
-        else if (err?.code === 2) msg = '网络错误，无法加载音频';
-        else if (err?.code === 3) msg = '音频解码错误';
-        setAudioError(msg);
-        setIsPlaying(false);
-      });
-
-      audio.addEventListener('canplaythrough', () => {
-        setAudioError(null);
-        // 一旦可以流畅播放，如果用户已交互过，自动开始
-        if (hasInteracted || document.visibilityState === 'visible') {
-          audio.play().then(() => setIsPlaying(true)).catch(() => {});
-        }
-      });
-
-      audioRef.current = audio;
-    }
-    return audioRef.current;
-  }, [tracks.length, volume, hasInteracted]);
-
-  // --- 加载当前曲目并立即播放 ---
-  const loadAndPlay = useCallback(() => {
-    const audio = ensureAudio();
-
-    // 切换 src
-    if (audio.src !== window.location.origin + track.src) {
-      audio.src = track.src;
-      audio.load();
-    }
-
-    // 立刻尝试播放，不等任何事件
-    const playPromise = audio.play();
-    playPromise
-      .then(() => {
-        setIsPlaying(true);
-        setAudioError(null);
-      })
-      .catch(() => {
-        // 被浏览器阻止或还没交互过 —— 没关系，等用户交互后会重试
-        setIsPlaying(false);
-      });
-
-    return playPromise;
-  }, [ensureAudio, track.src]);
-
-  // --- mount 时：立即加载第一首并尝试播放（零延迟）---
-  useEffect(() => {
-    loadAndPlay();
-
-    // 监听用户第一次交互，然后强制播放
-    const onInteract = () => {
-      setHasInteracted(true);
-      const audio = audioRef.current;
-      if (audio && audio.paused) {
-        audio.play().then(() => setIsPlaying(true)).catch(() => {});
       }
+    });
+
+    const syncDuration = () => {
+      setDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
     };
 
-    document.addEventListener('click', onInteract, { once: true });
-    document.addEventListener('scroll', onInteract, { once: true });
-    document.addEventListener('keydown', onInteract, { once: true });
-    document.addEventListener('touchstart', onInteract, { once: true });
+    audio.addEventListener('loadedmetadata', syncDuration);
+    audio.addEventListener('durationchange', syncDuration);
+
+    audio.addEventListener('ended', () => {
+      shouldPlayAfterTrackChangeRef.current = true;
+      setCurrentTrack((prev) => getRandomTrackIndex(prev));
+    });
+
+    audio.addEventListener('error', () => {
+      setAudioError('Audio failed to load');
+      setIsPlaying(false);
+    });
+
+    audio.addEventListener('canplay', () => {
+      setAudioError(null);
+    });
+
+    audioRef.current = audio;
+    return audio;
+  }, [volume]);
+
+  const loadTrack = useCallback(
+    (shouldPlay: boolean) => {
+      const audio = ensureAudio();
+      const nextSrc = new URL(track.src, window.location.origin).href;
+
+      if (audio.src !== nextSrc) {
+        audio.src = track.src;
+        audio.load();
+        setCurrentTime(0);
+        setDuration(0);
+      }
+
+      if (!shouldPlay) return;
+
+      audio
+        .play()
+        .then(() => {
+          setIsPlaying(true);
+          setAudioError(null);
+        })
+        .catch(() => {
+          setIsPlaying(false);
+        });
+    },
+    [ensureAudio, track.src]
+  );
+
+  useEffect(() => {
+    const handleEnter = () => {
+      hasEnteredRef.current = true;
+      shouldPlayAfterTrackChangeRef.current = true;
+      setCurrentTrack(getRandomTrackIndex(currentTrack));
+    };
+
+    window.addEventListener('portfolio-enter', handleEnter, { once: true });
 
     return () => {
-      document.removeEventListener('click', onInteract);
-      document.removeEventListener('scroll', onInteract);
-      document.removeEventListener('keydown', onInteract);
-      document.removeEventListener('touchstart', onInteract);
+      window.removeEventListener('portfolio-enter', handleEnter);
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.src = '';
         audioRef.current = null;
       }
     };
-  }, []); // eslint-disable-line
-
-  // --- currentTrack 变化时：切换曲目并立即播放 ---
-  useEffect(() => {
-    loadAndPlay();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTrack]);
 
-  // --- volume 变化 ---
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
     }
   }, [volume]);
 
+  useEffect(() => {
+    if (hasEnteredRef.current) {
+      const shouldPlay = shouldPlayAfterTrackChangeRef.current || isPlaying;
+      shouldPlayAfterTrackChangeRef.current = false;
+      loadTrack(shouldPlay);
+    }
+  }, [currentTrack, isPlaying, loadTrack]);
+
   const togglePlay = useCallback(() => {
+    if (!hasEnteredRef.current) {
+      hasEnteredRef.current = true;
+    }
+
     const audio = ensureAudio();
+    loadTrack(false);
+
     if (isPlaying) {
       audio.pause();
       setIsPlaying(false);
-    } else {
-      audio.play().then(() => setIsPlaying(true)).catch(() => {});
+      return;
     }
-  }, [ensureAudio, isPlaying]);
+
+    audio
+      .play()
+      .then(() => {
+        setIsPlaying(true);
+        setAudioError(null);
+      })
+      .catch(() => {
+        setIsPlaying(false);
+      });
+  }, [ensureAudio, isPlaying, loadTrack]);
 
   const handleNext = useCallback(() => {
-    setCurrentTrack((t) => (t + 1) % tracks.length);
-  }, [tracks.length]);
+    shouldPlayAfterTrackChangeRef.current = isPlaying;
+    setCurrentTrack((value) => getRandomTrackIndex(value));
+  }, [isPlaying]);
 
   const handlePrev = useCallback(() => {
-    setCurrentTrack((t) => (t - 1 + tracks.length) % tracks.length);
-  }, [tracks.length]);
+    setCurrentTrack((value) => (value - 1 + builtInTracks.length) % builtInTracks.length);
+  }, []);
 
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const audio = audioRef.current;
-    if (!audio || !track.duration) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = Math.max(0, Math.min(1, x / rect.width));
-    const newTime = percentage * track.duration;
-    audio.currentTime = newTime;
-    setCurrentTime(newTime);
+  const seekToClientX = useCallback(
+    (clientX: number) => {
+      const audio = audioRef.current;
+      const progress = progressRef.current;
+      if (!audio || !progress || duration <= 0) return;
+
+      const rect = progress.getBoundingClientRect();
+      const percent = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      const nextTime = percent * duration;
+      audio.currentTime = nextTime;
+      setCurrentTime(nextTime);
+    },
+    [duration]
+  );
+
+  const handleProgressPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    isSeekingRef.current = true;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    seekToClientX(event.clientX);
   };
 
-  const progressPercent = track.duration > 0 ? (currentTime / track.duration) * 100 : 0;
+  const handleProgressPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!isSeekingRef.current) return;
+    seekToClientX(event.clientX);
+  };
 
-  const barHeights = isPlaying
-    ? [
-        `${4 + Math.abs(Math.sin(Date.now() / 180)) * 14}px`,
-        `${4 + Math.abs(Math.sin(Date.now() / 260 + 1.2)) * 14}px`,
-        `${4 + Math.abs(Math.sin(Date.now() / 220 + 2.5)) * 14}px`,
-        `${4 + Math.abs(Math.sin(Date.now() / 310 + 0.7)) * 14}px`,
-      ]
-    : ['4px', '4px', '4px', '4px'];
+  const endSeek = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!isSeekingRef.current) return;
+    seekToClientX(event.clientX);
+    isSeekingRef.current = false;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  const progressPercent = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
 
   return (
     <div
@@ -221,12 +250,13 @@ export default function MusicPlayer() {
       }}
     >
       <style>{`
-        @keyframes barBounce {
-          0%, 100% { height: 4px; }
-          50% { height: 16px; }
+        @keyframes musicBarBounce {
+          0%, 100% { transform: scaleY(0.25); }
+          50% { transform: scaleY(1); }
         }
         .music-bar-anim {
-          animation: barBounce 0.6s infinite ease-in-out;
+          animation: musicBarBounce 0.68s infinite ease-in-out;
+          transform-origin: bottom;
         }
       `}</style>
 
@@ -240,13 +270,12 @@ export default function MusicPlayer() {
           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
           border: '1px solid rgba(255, 255, 255, 0.12)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-          fontFamily: "'Inter', -apple-system, system-ui, sans-serif",
           color: 'white',
-          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          fontFamily: "'Inter', -apple-system, system-ui, sans-serif",
+          transition: 'width 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="mb-3 flex items-center justify-between">
           <span
             style={{
               fontSize: '0.7rem',
@@ -258,26 +287,26 @@ export default function MusicPlayer() {
             MUSIC
           </span>
           <button
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={() => setIsExpanded((value) => !value)}
+            aria-label={isExpanded ? 'Collapse music player' : 'Expand music player'}
             style={{
               width: '28px',
               height: '28px',
               borderRadius: '50%',
               border: 'none',
               background: 'rgba(255, 255, 255, 0.06)',
+              color: 'rgba(255, 255, 255, 0.68)',
               cursor: 'pointer',
-              color: 'rgba(255, 255, 255, 0.6)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '16px',
             }}
           >
-            {isExpanded ? '−' : '+'}
+            {isExpanded ? '-' : '+'}
           </button>
         </div>
 
-        {/* Error */}
         {audioError && isExpanded && (
           <div
             className="mb-3 rounded-lg px-3 py-2 text-xs"
@@ -291,8 +320,7 @@ export default function MusicPlayer() {
           </div>
         )}
 
-        {/* Track Info */}
-        <div className="flex items-center gap-3 mb-3">
+        <div className="mb-3 flex items-center gap-3">
           <div
             style={{
               width: isExpanded ? '52px' : '36px',
@@ -307,46 +335,36 @@ export default function MusicPlayer() {
               justifyContent: 'center',
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 18V5l12-2v13" />
               <circle cx="6" cy="18" r="3" />
               <circle cx="18" cy="16" r="3" />
             </svg>
           </div>
 
-          <div className="flex-1 min-w-0">
-            <div
-              className="truncate font-semibold"
-              style={{ fontSize: isExpanded ? '1em' : '0.85em', transition: 'font-size 0.3s' }}
-            >
+          <div className="min-w-0 flex-1">
+            <div className="truncate font-semibold" style={{ fontSize: isExpanded ? '1em' : '0.85em' }}>
               {track.title}
             </div>
-            <div
-              className="truncate"
-              style={{
-                fontSize: '0.75em',
-                color: 'rgba(255, 255, 255, 0.5)',
-                marginTop: '2px',
-              }}
-            >
+            <div className="truncate" style={{ fontSize: '0.75em', color: 'rgba(255, 255, 255, 0.5)', marginTop: '2px' }}>
               {track.artist}
             </div>
           </div>
 
           {isExpanded && (
-            <div
-              className="flex items-end gap-[2px]"
-              style={{ width: '28px', height: '22px' }}
-            >
-              {[0, 1, 2, 3].map((i) => (
+            <div className="flex items-end gap-[2px]" style={{ width: '28px', height: '22px' }}>
+              {[0, 1, 2, 3].map((item) => (
                 <div
-                  key={i}
+                  key={item}
+                  className={isPlaying ? 'music-bar-anim' : undefined}
                   style={{
                     width: '3px',
+                    height: '18px',
                     borderRadius: '2px',
                     background: 'linear-gradient(180deg, #5c6bc0, #9fa8da)',
-                    height: barHeights[i],
-                    transition: isPlaying ? 'height 0.15s ease' : 'height 0.3s ease',
+                    animationDelay: `${item * 0.1}s`,
+                    transform: isPlaying ? undefined : 'scaleY(0.25)',
+                    transformOrigin: 'bottom',
                   }}
                 />
               ))}
@@ -356,35 +374,53 @@ export default function MusicPlayer() {
 
         {isExpanded && (
           <>
-            {/* Progress */}
             <div className="mb-3">
-              <div className="flex justify-between mb-1">
+              <div className="mb-1 flex justify-between">
                 <span style={{ fontSize: '0.7em', color: 'rgba(255,255,255,0.4)' }}>
                   {formatTime(currentTime)}
                 </span>
                 <span style={{ fontSize: '0.7em', color: 'rgba(255,255,255,0.4)' }}>
-                  {formatTime(track.duration)}
+                  {formatTime(duration)}
                 </span>
               </div>
 
               <div
-                onClick={handleProgressClick}
+                ref={progressRef}
+                onPointerDown={handleProgressPointerDown}
+                onPointerMove={handleProgressPointerMove}
+                onPointerUp={endSeek}
+                onPointerCancel={() => {
+                  isSeekingRef.current = false;
+                }}
                 style={{
                   width: '100%',
-                  height: '4px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  borderRadius: '2px',
-                  cursor: 'pointer',
+                  height: '14px',
+                  borderRadius: '999px',
+                  cursor: duration > 0 ? 'grab' : 'default',
                   position: 'relative',
+                  touchAction: 'none',
                 }}
               >
                 <div
                   style={{
-                    height: '100%',
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    top: '5px',
+                    height: '4px',
+                    borderRadius: '999px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '5px',
+                    height: '4px',
                     width: `${progressPercent}%`,
+                    borderRadius: '999px',
                     background: 'linear-gradient(90deg, #5c6bc0, #9fa8da)',
-                    borderRadius: '2px',
-                    transition: 'width 0.05s linear',
                   }}
                 />
                 <div
@@ -393,34 +429,18 @@ export default function MusicPlayer() {
                     top: '50%',
                     left: `${progressPercent}%`,
                     transform: 'translate(-50%, -50%)',
-                    width: '10px',
-                    height: '10px',
-                    backgroundColor: 'white',
+                    width: '12px',
+                    height: '12px',
                     borderRadius: '50%',
+                    backgroundColor: 'white',
                     boxShadow: '0 0 8px rgba(0, 0, 0, 0.5)',
-                    transition: 'left 0.05s linear',
                   }}
                 />
               </div>
             </div>
 
-            {/* Controls */}
             <div className="flex items-center justify-between gap-2">
-              <button
-                onClick={handlePrev}
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  border: 'none',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  cursor: 'pointer',
-                  color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
+              <button onClick={handlePrev} style={iconButtonStyle}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="19 20 9 12 19 4 19 20" />
                   <line x1="5" y1="19" x2="5" y2="5" />
@@ -430,16 +450,10 @@ export default function MusicPlayer() {
               <button
                 onClick={togglePlay}
                 style={{
+                  ...iconButtonStyle,
                   width: '44px',
                   height: '44px',
-                  borderRadius: '50%',
-                  border: 'none',
                   background: 'rgba(92, 107, 192, 0.25)',
-                  cursor: 'pointer',
-                  color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
                 }}
               >
                 {isPlaying ? (
@@ -454,21 +468,7 @@ export default function MusicPlayer() {
                 )}
               </button>
 
-              <button
-                onClick={handleNext}
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  border: 'none',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  cursor: 'pointer',
-                  color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
+              <button onClick={handleNext} style={iconButtonStyle}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="5 4 15 12 5 20 5 4" />
                   <line x1="19" y1="5" x2="19" y2="19" />
@@ -486,7 +486,7 @@ export default function MusicPlayer() {
                   max="1"
                   step="0.01"
                   value={volume}
-                  onChange={(e) => setVolume(parseFloat(e.target.value))}
+                  onChange={(event) => setVolume(parseFloat(event.target.value))}
                   style={{
                     width: '50px',
                     height: '3px',
@@ -498,19 +498,14 @@ export default function MusicPlayer() {
 
               <button
                 onClick={() => fileInputRef.current?.click()}
+                title="Import local audio"
                 style={{
+                  ...iconButtonStyle,
                   width: '32px',
                   height: '32px',
                   borderRadius: '8px',
-                  border: 'none',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  cursor: 'pointer',
                   color: 'rgba(255, 255, 255, 0.5)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
                 }}
-                title="导入本地音频"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -520,53 +515,59 @@ export default function MusicPlayer() {
               </button>
             </div>
 
-            {/* Track List */}
             <div className="mt-3 space-y-1" style={{ maxHeight: '80px', overflowY: 'auto', scrollbarWidth: 'thin' }}>
-              {tracks.map((t, i) => (
+              {builtInTracks.map((item, index) => (
                 <button
-                  key={i}
-                  onClick={() => setCurrentTrack(i)}
-                  className="w-full text-left flex items-center gap-2 rounded-lg px-3 py-1.5 transition-all"
+                  key={item.src}
+                  onClick={() => setCurrentTrack(index)}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left transition-all"
                   style={{
-                    background: i === currentTrack ? 'rgba(92, 107, 192, 0.15)' : 'transparent',
+                    background: index === currentTrack ? 'rgba(92, 107, 192, 0.15)' : 'transparent',
                     border: 'none',
                     cursor: 'pointer',
-                    color: i === currentTrack ? '#fff' : 'rgba(255,255,255,0.4)',
+                    color: index === currentTrack ? '#fff' : 'rgba(255,255,255,0.4)',
                   }}
                 >
-                  {i === currentTrack && isPlaying && (
-                    <span className="flex gap-[2px] items-end" style={{ height: '10px' }}>
-                      {[0, 1, 2].map((j) => (
+                  {index === currentTrack && isPlaying && (
+                    <span className="flex items-end gap-[2px]" style={{ height: '10px' }}>
+                      {[0, 1, 2].map((bar) => (
                         <span
-                          key={j}
+                          key={bar}
                           className="music-bar-anim"
                           style={{
                             width: '2px',
+                            height: '10px',
                             background: '#5c6bc0',
                             borderRadius: '1px',
-                            height: '4px',
-                            animationDelay: `${j * 0.12}s`,
+                            animationDelay: `${bar * 0.12}s`,
                           }}
                         />
                       ))}
                     </span>
                   )}
-                  <span className="truncate text-sm">{t.title}</span>
+                  <span className="truncate text-sm">{item.title}</span>
                 </button>
               ))}
             </div>
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="audio/*"
-              multiple
-              onChange={() => {}}
-              style={{ display: 'none' }}
-            />
+            <input ref={fileInputRef} type="file" accept="audio/*" multiple onChange={() => {}} style={{ display: 'none' }} />
           </>
         )}
       </div>
     </div>
   );
 }
+
+const iconButtonStyle: React.CSSProperties = {
+  width: '36px',
+  height: '36px',
+  borderRadius: '50%',
+  border: 'none',
+  background: 'rgba(255, 255, 255, 0.05)',
+  color: '#fff',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+};

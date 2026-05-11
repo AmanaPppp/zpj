@@ -164,6 +164,23 @@
     0 0 0 1px rgba(255, 255, 255, 0.4) inset;
 }
 
+.rgb-split-filter {
+  position: fixed;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+[data-rgb-split-target='true'] {
+  --rgb-split-blur: 0px;
+}
+
+[data-rgb-split-target='true'].rgb-split-active {
+  filter: url('#rgb-split-filter') blur(var(--rgb-split-blur));
+  will-change: filter;
+}
+
 .target-cursor-wrapper {
   position: fixed;
   left: 0;
@@ -249,12 +266,49 @@
   box-shadow:
     0 30px 90px rgba(0, 0, 0, 0.55),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.project-grainient-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.92;
+  pointer-events: none;
+  filter: saturate(1.08) contrast(1.04);
+}
+
+.grainient-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.project-card-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 86%, rgba(116, 207, 186, 0.12), transparent 28%),
+    linear-gradient(90deg, rgba(4, 4, 7, 0.76) 0%, rgba(5, 7, 14, 0.42) 48%, rgba(5, 5, 9, 0.72) 100%),
+    linear-gradient(180deg, rgba(3, 3, 6, 0.24), rgba(3, 3, 6, 0.74));
+}
+
+.project-floating-card > :not(.project-grainient-bg):not(.project-card-scrim) {
+  position: relative;
+  z-index: 2;
 }
 
 .project-modal-close {
   position: absolute;
   top: 18px;
   right: 18px;
+  z-index: 3;
   width: 34px;
   height: 34px;
   border-radius: 999px;

@@ -41,11 +41,13 @@ export default function CameraController({
         duration: 1.65,
         ease: 'power4.inOut',
         onUpdate: () => {
+          camera.up.set(0, 1, 0);
           camera.lookAt(0, 0, 0);
         },
         onComplete: () => {
           introActive.current = false;
           camera.position.set(0, 0, 5);
+          camera.up.set(0, 1, 0);
           smoothedLookAt.current.set(0, 0, 0);
           window.dispatchEvent(new CustomEvent('earth-hero-visible'));
         },

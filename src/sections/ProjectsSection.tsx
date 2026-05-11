@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Grainient from '../components/Grainient';
 import TargetCursor from '../components/TargetCursor';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -125,6 +126,7 @@ export default function ProjectsSection() {
 
   return (
     <section
+      id="项目"
       ref={sectionRef}
       className="relative w-full"
       style={{ paddingTop: '20vh', paddingBottom: '20vh', zIndex: 10 }}
@@ -260,6 +262,33 @@ export default function ProjectsSection() {
             className="project-floating-card"
             onClick={(event) => event.stopPropagation()}
           >
+            <div className="project-grainient-bg">
+              <Grainient
+                color1="#414141"
+                color2="#5540ac"
+                color3="#87328f"
+                timeSpeed={1.6}
+                colorBalance={0}
+                warpStrength={0.95}
+                warpFrequency={5}
+                warpSpeed={2}
+                warpAmplitude={50}
+                blendAngle={-16}
+                blendSoftness={0}
+                rotationAmount={710}
+                noiseScale={2.35}
+                grainAmount={0.1}
+                grainScale={0.2}
+                grainAnimated={false}
+                contrast={1.5}
+                gamma={1}
+                saturation={0.95}
+                centerX={0}
+                centerY={0}
+                zoom={1.05}
+              />
+            </div>
+            <div className="project-card-scrim" />
             <button
               type="button"
               className="project-modal-close"
