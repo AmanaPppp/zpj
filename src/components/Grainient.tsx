@@ -243,10 +243,15 @@ export default function Grainient({
     const mesh = new Mesh(gl, { geometry, program });
 
     const setSize = () => {
-      const rect = container.getBoundingClientRect();
-      const width = Math.max(1, Math.floor(rect.width));
-      const height = Math.max(1, Math.floor(rect.height));
+      const width = Math.max(1, Math.floor(container.clientWidth));
+      const height = Math.max(1, Math.floor(container.clientHeight));
       renderer.setSize(width, height);
+      Object.assign(canvas.style, {
+        position: 'absolute',
+        inset: '0',
+        width: '100%',
+        height: '100%',
+      });
       const resolution = program.uniforms.iResolution.value as Float32Array;
       resolution[0] = gl.drawingBufferWidth;
       resolution[1] = gl.drawingBufferHeight;
@@ -256,6 +261,9 @@ export default function Grainient({
     const ro = new ResizeObserver(setSize);
     ro.observe(container);
     setSize();
+    const rafSize = requestAnimationFrame(setSize);
+    const timeoutSize = window.setTimeout(setSize, 420);
+    window.addEventListener('resize', setSize);
 
     let raf = 0;
     const t0 = performance.now();
@@ -268,6 +276,9 @@ export default function Grainient({
 
     return () => {
       cancelAnimationFrame(raf);
+      cancelAnimationFrame(rafSize);
+      window.clearTimeout(timeoutSize);
+      window.removeEventListener('resize', setSize);
       ro.disconnect();
       if (canvas.parentElement === container) {
         container.removeChild(canvas);
