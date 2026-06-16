@@ -46,12 +46,12 @@
   user-select: none;
   position: absolute;
   top: 50%;
-  left: 1.6em;
+  left: clamp(1.25rem, 5vw, 4.5rem);
   font-weight: 900;
-  font-size: 3rem;
+  font-size: clamp(2.25rem, 3vw, 3rem);
   color: #fff;
-  transform: translate(20%, -50%);
-  max-width: 12ch;
+  transform: translate(0, -50%);
+  max-width: 6ch;
   line-height: 0.95;
   letter-spacing: 0;
   text-shadow: 0 0 28px rgba(0, 0, 0, 0.45);
@@ -59,7 +59,7 @@
 
 .face-title.active {
   opacity: 1;
-  transform: translate(20%, -50%);
+  transform: translate(0, -50%);
   pointer-events: auto;
   transition: 0.5s ease;
 }

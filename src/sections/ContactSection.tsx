@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import SplitText from '../components/SplitText';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -53,41 +54,50 @@ export default function ContactSection() {
             border: '1px solid rgba(255, 255, 255, 0.08)',
           }}
         >
-          <p
+          <SplitText
+            tag="p"
+            text="Contact"
             className="uppercase tracking-[0.3em] mb-6"
+            delay={34}
+            duration={0.7}
+            splitType="chars"
+            threshold={0.2}
+            rootMargin="-80px"
             style={{
               fontSize: '0.75rem',
               fontFamily: "'JetBrains Mono', monospace",
               color: 'rgba(255, 255, 255, 0.4)',
             }}
-          >
-            Contact
-          </p>
+          />
 
-          <h2
+          <SplitText
+            tag="h2"
+            text={"\u4e00\u8d77\u521b\u9020\u6709\u8bb0\u5fc6\u70b9\u7684\u54c1\u724c\u89c6\u89c9"}
             className="text-white font-bold mb-6"
+            delay={44}
+            duration={0.82}
+            ease="power3.out"
+            splitType="chars"
+            threshold={0.2}
+            rootMargin="-80px"
             style={{
               fontSize: 'clamp(2rem, 4vw, 3.5rem)',
               fontFamily: "'Inter', sans-serif",
               letterSpacing: '-0.02em',
               lineHeight: 1.15,
             }}
-          >
-            一起创造{' '}
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #5c6bc0, #9fa8da)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              有记忆点的品牌视觉
-            </span>
-          </h2>
+          />
 
-          <p
+          <SplitText
+            tag="p"
+            text={"\u6b22\u8fce\u54c1\u724c\u89c6\u89c9\u3001\u5305\u88c5\u3001\u89c4\u8303\u624b\u518c\u4e0e IP \u5f62\u8c61\u76f8\u5173\u7684\u5408\u4f5c\u3002\u4e5f\u6b22\u8fce\u4f60\u5e26\u7740\u4e00\u4e2a\u8fd8\u6ca1\u6210\u5f62\u7684\u6982\u5ff5\u6765\u804a\uff0c\u6211\u4eec\u53ef\u4ee5\u4ece\u7b56\u7565\u548c\u89c6\u89c9\u65b9\u5411\u4e00\u8d77\u63a8\u5bfc\u3002"}
             className="mb-10 mx-auto"
+            delay={28}
+            duration={0.72}
+            ease="power3.out"
+            splitType="words"
+            threshold={0.2}
+            rootMargin="-80px"
             style={{
               fontSize: 'clamp(0.9rem, 1.1vw, 1.05rem)',
               color: 'rgba(255, 255, 255, 0.5)',
@@ -95,9 +105,7 @@ export default function ContactSection() {
               lineHeight: 1.7,
               maxWidth: '500px',
             }}
-          >
-            欢迎品牌视觉、包装、规范手册与 IP 形象相关的合作。也欢迎你带着一个还没成形的概念来聊，我们可以从策略和视觉方向一起推导。
-          </p>
+          />
 
           <div className="flex flex-wrap justify-center gap-4">
             {links.map((link, i) => (

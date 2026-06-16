@@ -1,7 +1,9 @@
 import { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import BorderGlow from '../components/BorderGlow';
 import Grainient from '../components/Grainient';
+import SplitText from '../components/SplitText';
 import TargetCursor from '../components/TargetCursor';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -135,61 +137,61 @@ export default function ProjectsSection() {
       <div className="mx-auto px-6 md:px-12" style={{ maxWidth: '1100px' }}>
         {/* Section label */}
         <div ref={headingRef} className="mb-16">
-          <p
+          <SplitText
+            tag="p"
+            text="Projects"
             className="uppercase tracking-[0.3em] mb-4"
+            delay={34}
+            duration={0.7}
+            splitType="chars"
+            threshold={0.2}
+            rootMargin="-80px"
+            textAlign="left"
             style={{
               fontSize: '0.75rem',
               fontFamily: "'JetBrains Mono', monospace",
               color: 'rgba(255, 255, 255, 0.4)',
             }}
-          >
-            Projects
-          </p>
-          <h2
+          />
+          <SplitText
+            tag="h2"
+            text={"\u7cfb\u7edf\u5316\u7684\u54c1\u724c\u9879\u76ee"}
             className="text-white font-bold"
+            delay={48}
+            duration={0.82}
+            ease="power3.out"
+            splitType="chars"
+            threshold={0.2}
+            rootMargin="-80px"
+            textAlign="left"
             style={{
               fontSize: 'clamp(1.8rem, 3.5vw, 3rem)',
               fontFamily: "'Inter', sans-serif",
               letterSpacing: '-0.02em',
               lineHeight: 1.2,
             }}
-          >
-            系统化的{' '}
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #5c6bc0, #9fa8da)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              品牌项目
-            </span>
-          </h2>
+          />
         </div>
 
         {/* Project list */}
         <div ref={listRef} className="space-y-4">
           {projects.map((project, i) => (
-            <div
+            <BorderGlow
               key={i}
-              className="cursor-target group rounded-xl p-6 md:p-8 transition-all duration-300"
+              className="cursor-target group transition-all duration-300"
               role="button"
               tabIndex={0}
-              style={{
-                background: 'rgba(5, 5, 5, 0.4)',
-                backdropFilter: 'blur(16px)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'rgba(5, 5, 5, 0.6)';
-                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(92, 107, 192, 0.3)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'rgba(5, 5, 5, 0.4)';
-                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255, 255, 255, 0.08)';
-              }}
+              edgeSensitivity={24}
+              glowColor="248 92 78"
+              backgroundColor="rgba(5, 5, 5, 0.42)"
+              borderRadius={12}
+              glowRadius={34}
+              glowIntensity={0.9}
+              coneSpread={22}
+              fillOpacity={0.18}
+              animated={i === 0}
+              colors={['#7c3aed', '#38bdf8', '#f472b6']}
+              style={{ cursor: 'pointer', backdropFilter: 'blur(16px)' }}
               onClick={() => setActiveProject(project)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -198,7 +200,7 @@ export default function ProjectsSection() {
                 }
               }}
             >
-              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 p-6 md:p-8">
                 <div className="flex-1">
                   <div className="flex items-center gap-4 mb-3">
                     <h3
@@ -250,7 +252,7 @@ export default function ProjectsSection() {
                   ))}
                 </div>
               </div>
-            </div>
+            </BorderGlow>
           ))}
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import SplitText from '../components/SplitText';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -58,37 +59,40 @@ export default function AboutSection() {
       <div className="mx-auto px-6 md:px-12" style={{ maxWidth: '1100px' }}>
         {/* Section label */}
         <div ref={headingRef} className="mb-12">
-          <p
+          <SplitText
+            tag="p"
+            text="About me"
             className="uppercase tracking-[0.3em] mb-4"
+            delay={34}
+            duration={0.7}
+            splitType="chars"
+            threshold={0.2}
+            rootMargin="-80px"
+            textAlign="left"
             style={{
               fontSize: '0.75rem',
               fontFamily: "'JetBrains Mono', monospace",
               color: 'rgba(255, 255, 255, 0.4)',
             }}
-          >
-            About me
-          </p>
-          <h2
+          />
+          <SplitText
+            tag="h2"
+            text={"\u5468\u7efc\u827a | \u54c1\u724c\u8bbe\u8ba1\u5e08 / \u89c6\u89c9\u521b\u610f\u63a2\u7d22\u8005"}
             className="text-white font-bold"
+            delay={42}
+            duration={0.82}
+            ease="power3.out"
+            splitType="chars"
+            threshold={0.2}
+            rootMargin="-80px"
+            textAlign="left"
             style={{
               fontSize: 'clamp(1.8rem, 3.5vw, 3rem)',
               fontFamily: "'Inter', sans-serif",
               letterSpacing: '-0.02em',
               lineHeight: 1.2,
             }}
-          >
-            周粽艺 |{' '}
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #5c6bc0, #9fa8da)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              品牌设计师 / 视觉创意探索者
-            </span>
-          </h2>
+          />
         </div>
 
         {/* Content card */}

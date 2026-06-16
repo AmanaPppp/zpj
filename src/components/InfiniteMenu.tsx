@@ -95,6 +95,7 @@ export interface InfiniteMenuItem {
 interface InfiniteMenuProps {
   items?: InfiniteMenuItem[];
   scale?: number;
+  onOpenItem?: (item: InfiniteMenuItem) => void;
 }
 
 class Face {
@@ -773,7 +774,7 @@ const defaultItems: InfiniteMenuItem[] = [
   },
 ];
 
-export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuProps) {
+export default function InfiniteMenu({ items = [], scale = 1.0, onOpenItem }: InfiniteMenuProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [activeItem, setActiveItem] = useState<InfiniteMenuItem | null>(null);
   const [isMoving, setIsMoving] = useState(false);
@@ -804,6 +805,10 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
 
   const handleButtonClick = () => {
     if (!activeItem?.link) return;
+    if (onOpenItem) {
+      onOpenItem(activeItem);
+      return;
+    }
     if (activeItem.link.startsWith('http')) window.open(activeItem.link, '_blank');
   };
 

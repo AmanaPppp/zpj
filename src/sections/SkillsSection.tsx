@@ -1,7 +1,10 @@
-import { useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import InfiniteMenu from '../components/InfiniteMenu';
+import { ArrowLeft } from 'lucide-react';
+import InfiniteMenu, { type InfiniteMenuItem } from '../components/InfiniteMenu';
+import SplitText from '../components/SplitText';
+import StellarCardGallerySingle from '../components/ui/3d-image-gallery';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,9 +16,9 @@ const portfolioItems = [
     description: 'Logo design & brand systems',
   },
   {
-    image: '/avatar2.png',
+    image: '/logo-design-cover.png',
     link: '#',
-    title: 'Packaging Design',
+    title: 'Logo Design',
     description: 'Product & packaging visual',
   },
   {
@@ -30,6 +33,9 @@ export default function SkillsSection() {
   const sectionRef = useRef<HTMLDivElement>(null!);
   const headingRef = useRef<HTMLDivElement>(null!);
   const menuRef = useRef<HTMLDivElement>(null!);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const closingRef = useRef(false);
+  const [selectedWork, setSelectedWork] = useState<InfiniteMenuItem | null>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -70,6 +76,83 @@ export default function SkillsSection() {
     return () => ctx.revert();
   }, []);
 
+  useEffect(() => {
+    if (!selectedWork || !overlayRef.current) return;
+
+    document.body.style.overflow = 'hidden';
+    closingRef.current = false;
+
+    const ctx = gsap.context(() => {
+      gsap
+        .timeline()
+        .fromTo(
+          overlayRef.current,
+          {
+            autoAlpha: 0,
+            clipPath: 'circle(0% at calc(100% - 42px) 42px)',
+          },
+          {
+            autoAlpha: 1,
+            clipPath: 'circle(150% at 50% 50%)',
+            duration: 0.72,
+            ease: 'power3.inOut',
+          }
+        )
+        .fromTo(
+          '.work-fullscreen-close',
+          { autoAlpha: 0, y: -10, scale: 0.92 },
+          { autoAlpha: 1, y: 0, scale: 1, duration: 0.34, ease: 'back.out(1.8)' },
+          '-=0.26'
+        );
+    }, overlayRef);
+
+    const closeWorkPage = () => {
+      if (!overlayRef.current || closingRef.current) return;
+      closingRef.current = true;
+
+      gsap
+        .timeline({
+          onComplete: () => {
+            setSelectedWork(null);
+          },
+        })
+        .to('.work-fullscreen-close', {
+          autoAlpha: 0,
+          y: -8,
+          scale: 0.92,
+          duration: 0.18,
+          ease: 'power2.in',
+        })
+        .to(
+          overlayRef.current,
+          {
+            autoAlpha: 0,
+            clipPath: 'circle(0% at calc(100% - 42px) 42px)',
+            duration: 0.58,
+            ease: 'power3.inOut',
+          },
+          0.04
+        );
+    };
+
+    const closeButton = overlayRef.current.querySelector<HTMLButtonElement>('.work-fullscreen-close');
+    closeButton?.addEventListener('click', closeWorkPage);
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeWorkPage();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+      closeButton?.removeEventListener('click', closeWorkPage);
+      ctx.revert();
+    };
+  }, [selectedWork]);
+
   return (
     <section
       id="作品"
@@ -79,18 +162,31 @@ export default function SkillsSection() {
     >
       <div className="mx-auto px-6 md:px-12" style={{ maxWidth: '1200px' }}>
         <div ref={headingRef} className="mb-8 text-center">
-          <p
-            className="uppercase tracking-[0.3em] mb-4"
+          <SplitText
+            tag="p"
+            text="Portfolio"
+            className="mb-4 uppercase tracking-[0.3em]"
+            delay={34}
+            duration={0.7}
+            splitType="chars"
+            threshold={0.2}
+            rootMargin="-80px"
             style={{
               fontSize: '0.75rem',
               fontFamily: "'JetBrains Mono', monospace",
               color: '#9fa8da',
             }}
-          >
-            Portfolio
-          </p>
-          <h2
+          />
+          <SplitText
+            tag="h2"
+            text={"\u4f5c\u54c1\u5c55\u793a"}
             className="font-bold"
+            delay={56}
+            duration={0.82}
+            ease="power3.out"
+            splitType="chars"
+            threshold={0.2}
+            rootMargin="-80px"
             style={{
               fontSize: 'clamp(1.4rem, 2.8vw, 2.2rem)',
               fontFamily: "'Inter', sans-serif",
@@ -98,15 +194,28 @@ export default function SkillsSection() {
               lineHeight: 1.2,
               color: '#ffffff',
             }}
-          >
-            作品展示
-          </h2>
+          />
         </div>
 
         <div ref={menuRef}>
-          <InfiniteMenu items={portfolioItems} scale={1} />
+          <InfiniteMenu items={portfolioItems} scale={1} onOpenItem={setSelectedWork} />
         </div>
       </div>
+
+      {selectedWork && (
+        <div ref={overlayRef} className="work-fullscreen-page">
+          <button
+            type="button"
+            className="work-fullscreen-close"
+            aria-label="Close work page"
+          >
+            <ArrowLeft className="work-fullscreen-close-icon" strokeWidth={1.8} />
+            <span>BACK</span>
+          </button>
+
+          <StellarCardGallerySingle />
+        </div>
+      )}
     </section>
   );
 }
