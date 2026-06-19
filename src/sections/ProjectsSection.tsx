@@ -1,10 +1,10 @@
 import { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import BorderGlow from '../components/BorderGlow';
 import Grainient from '../components/Grainient';
 import SplitText from '../components/SplitText';
 import TargetCursor from '../components/TargetCursor';
+import BorderGlow from '../components/BorderGlow';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -178,20 +178,22 @@ export default function ProjectsSection() {
           {projects.map((project, i) => (
             <BorderGlow
               key={i}
-              className="cursor-target group transition-all duration-300"
+              className="project-list-card cursor-target group transition-all duration-300"
+              edgeSensitivity={26}
+              glowColor="230 84 76"
+              backgroundColor="rgba(10, 10, 18, 0.52)"
+              borderRadius={14}
+              glowRadius={42}
+              glowIntensity={1.05}
+              coneSpread={24}
+              animated={i === 0}
+              fillOpacity={0}
+              colors={['#c084fc', '#f472b6', '#38bdf8']}
               role="button"
               tabIndex={0}
-              edgeSensitivity={24}
-              glowColor="248 92 78"
-              backgroundColor="rgba(5, 5, 5, 0.42)"
-              borderRadius={12}
-              glowRadius={34}
-              glowIntensity={0.9}
-              coneSpread={22}
-              fillOpacity={0.18}
-              animated={i === 0}
-              colors={['#7c3aed', '#38bdf8', '#f472b6']}
-              style={{ cursor: 'pointer', backdropFilter: 'blur(16px)' }}
+              style={{
+                cursor: 'pointer',
+              }}
               onClick={() => setActiveProject(project)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {

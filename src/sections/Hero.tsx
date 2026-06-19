@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import ParticleHeroTitle from '../components/ParticleHeroTitle';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -211,27 +212,18 @@ export default function Hero({ scrollProgressRef, mouseRef }: HeroProps) {
           </div>
         </nav>
 
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center -translate-y-10 md:-translate-y-16">
           <div ref={titleRef} className="text-center">
-            <h1
-              className="text-white font-extrabold tracking-tight"
-              style={{
-                fontSize: 'clamp(3rem, 10vw, 8rem)',
-                fontFamily: "'Inter', sans-serif",
-                letterSpacing: '-0.03em',
-                lineHeight: 1.1,
-                textShadow: '0 0 60px rgba(92, 107, 192, 0.3)',
-              }}
-            >
-              AmanaP
+            <h1 className="particle-hero-heading" aria-label="AmanaP">
+              <ParticleHeroTitle text="AmanaP" />
             </h1>
           </div>
 
-          <div ref={subtitleRef} className="text-center mt-2">
+          <div ref={subtitleRef} className="text-center -mt-16 md:-mt-24">
             <p
               className="font-medium tracking-[0.2em] uppercase"
               style={{
-                fontSize: 'clamp(0.8rem, 1.5vw, 1.2rem)',
+                fontSize: 'clamp(1rem, 2vw, 1.55rem)',
                 fontFamily: "'JetBrains Mono', monospace",
                 color: 'rgba(255, 255, 255, 0.7)',
               }}
@@ -241,7 +233,7 @@ export default function Hero({ scrollProgressRef, mouseRef }: HeroProps) {
             <p
               className="mt-1 tracking-[0.35em] uppercase"
               style={{
-                fontSize: 'clamp(0.6rem, 1.2vw, 0.85rem)',
+                fontSize: 'clamp(0.72rem, 1.35vw, 1rem)',
                 fontFamily: "'JetBrains Mono', monospace",
                 color: 'rgba(255, 255, 255, 0.3)',
               }}

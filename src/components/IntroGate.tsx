@@ -117,32 +117,71 @@ export default function IntroGate() {
       counter.style.pointerEvents = 'none';
       idleTweens.forEach((tween) => tween.kill());
 
-      gsap.to(counter, {
-        autoAlpha: 0,
-        scale: 0.92,
-        duration: 0.4,
-        ease: 'power3.inOut',
-      });
+      gsap.killTweensOf([counter, rings, overlay]);
+      window.dispatchEvent(new CustomEvent('portfolio-enter'));
 
-      gsap.to(rings, {
-        autoAlpha: 0,
-        scale: (index) => [1.08, 0.9, 0.72][index] ?? 1,
-        duration: 0.55,
-        ease: 'power3.inOut',
-      });
-
-      gsap.to(overlay, {
-        backgroundColor: 'rgba(0, 0, 0, 0)',
-        duration: 1.25,
-        delay: 0.18,
-        ease: 'power2.inOut',
-        onStart: () => {
-          window.dispatchEvent(new CustomEvent('portfolio-enter'));
-        },
-        onComplete: () => {
-          overlay.remove();
-        },
-      });
+      gsap
+        .timeline({
+          defaults: { ease: 'power4.inOut' },
+          onComplete: () => {
+            overlay.remove();
+          },
+        })
+        .set(rings, {
+          transformOrigin: '50% 50%',
+          willChange: 'transform, opacity, filter',
+        })
+        .to(
+          counter,
+          {
+            autoAlpha: 0,
+            duration: 0.32,
+            ease: 'power2.inOut',
+          },
+          0
+        )
+        .to(
+          rings[0],
+          {
+            rotate: '+=900',
+            autoAlpha: 0,
+            filter: 'blur(2px)',
+            duration: 0.74,
+            ease: 'power4.inOut',
+          },
+          0
+        )
+        .to(
+          rings[1],
+          {
+            rotate: '-=960',
+            autoAlpha: 0,
+            filter: 'blur(2px)',
+            duration: 0.78,
+            ease: 'power4.inOut',
+          },
+          0
+        )
+        .to(
+          rings[2],
+          {
+            rotate: '+=1080',
+            autoAlpha: 0,
+            filter: 'blur(2px)',
+            duration: 0.82,
+            ease: 'power4.inOut',
+          },
+          0
+        )
+        .to(
+          overlay,
+          {
+            backgroundColor: 'rgba(0, 0, 0, 0)',
+            duration: 1.05,
+            ease: 'power2.inOut',
+          },
+          0
+        );
     };
 
     counter.addEventListener('click', enter);
