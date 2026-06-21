@@ -25,6 +25,7 @@ type GrainientProps = {
   color2?: string;
   color3?: string;
   className?: string;
+  dpr?: number;
 };
 
 const hexToRgb = (hex: string) => {
@@ -184,6 +185,7 @@ export default function Grainient({
   color2 = '#5227FF',
   color3 = '#B497CF',
   className = '',
+  dpr,
 }: GrainientProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -195,7 +197,7 @@ export default function Grainient({
       webgl: 2,
       alpha: true,
       antialias: false,
-      dpr: Math.min(window.devicePixelRatio || 1, 2),
+      dpr: dpr ?? Math.min(window.devicePixelRatio || 1, 2),
     });
 
     const gl = renderer.gl;
@@ -294,6 +296,7 @@ export default function Grainient({
     color3,
     colorBalance,
     contrast,
+    dpr,
     gamma,
     grainAmount,
     grainAnimated,

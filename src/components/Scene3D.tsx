@@ -45,7 +45,7 @@ export default function Scene3D({ scrollProgress, mouseRef }: Scene3DProps) {
       <pointLight position={[0, -1, 0]} intensity={0.65} color="#5c6bc0" distance={20} decay={2} />
 
       <ParticlesField mouseRef={mouseRef} />
-      <FloatingGeometries mouseRef={mouseRef} />
+      <FloatingGeometries scrollProgress={scrollProgress} mouseRef={mouseRef} />
       <GlassKnot mouseRef={mouseRef} />
     </Canvas>
   );

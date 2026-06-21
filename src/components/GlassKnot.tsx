@@ -15,6 +15,7 @@ interface GlassKnotProps {
 export default function GlassKnot({ mouseRef }: GlassKnotProps) {
   const groupRef = useRef<THREE.Group>(null!);
   const cloudsRef = useRef<THREE.Mesh | null>(null);
+  const nightLightsRef = useRef<THREE.Mesh | null>(null);
   const rotationY = useRef(0);
 
   useEffect(() => {
@@ -22,6 +23,7 @@ export default function GlassKnot({ mouseRef }: GlassKnotProps) {
 
     const earth = createRealisticEarth(groupRef.current);
     cloudsRef.current = earth.clouds;
+    nightLightsRef.current = earth.nightLights;
 
     return () => earth.dispose();
   }, []);
@@ -48,6 +50,10 @@ export default function GlassKnot({ mouseRef }: GlassKnotProps) {
 
     if (cloudsRef.current) {
       cloudsRef.current.rotation.y += delta * 0.025;
+    }
+
+    if (nightLightsRef.current) {
+      nightLightsRef.current.rotation.y = groupRef.current.rotation.y;
     }
 
     mouseRef.current.x = THREE.MathUtils.lerp(

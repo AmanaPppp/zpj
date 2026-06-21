@@ -1,10 +1,12 @@
 import * as THREE from 'three';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
 const textureUrls = {
-  diffuse: 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
-  bump: 'https://threejs.org/examples/textures/planets/earth_bump_2048.jpg',
-  specular: 'https://threejs.org/examples/textures/planets/earth_specular_2048.jpg',
-  clouds: 'https://threejs.org/examples/textures/planets/earth_clouds_1024.png',
+  diffuse: '/models/earth-photorealistic/textures/earth-color.webp',
+  bump: '/models/earth-photorealistic/textures/earth-bump.webp',
+  specular: '/models/earth-photorealistic/textures/earth-gloss.webp',
+  clouds: '/models/earth-photorealistic/textures/earth-clouds-a.webp',
+  night: '/models/earth-photorealistic/textures/earth-night.webp',
 };
 
 function disposeMaterial(material: THREE.Material | THREE.Material[]) {
@@ -47,26 +49,73 @@ export function createRealisticEarth(targetGroup: THREE.Group) {
   const bumpMap = textureLoader.load(textureUrls.bump);
   const specularMap = textureLoader.load(textureUrls.specular);
   const cloudMap = textureLoader.load(textureUrls.clouds);
+  const nightMap = textureLoader.load(textureUrls.night);
 
   diffuseMap.colorSpace = THREE.SRGBColorSpace;
   cloudMap.colorSpace = THREE.SRGBColorSpace;
+  nightMap.colorSpace = THREE.SRGBColorSpace;
 
   const earthGeometry = new THREE.SphereGeometry(2.1, 96, 96);
   const earthMaterial = new THREE.MeshPhysicalMaterial({
     map: diffuseMap,
     bumpMap,
-    bumpScale: 0.08,
-    roughness: 0.62,
+    bumpScale: 0.045,
+    roughness: 0.54,
     metalness: 0.0,
-    specularIntensity: 0.85,
+    specularIntensity: 0.58,
     specularIntensityMap: specularMap,
-    clearcoat: 0.18,
+    clearcoat: 0.12,
     clearcoatRoughness: 0.42,
   });
 
   const earth = new THREE.Mesh(earthGeometry, earthMaterial);
   earth.name = 'RealisticEarthSurface';
   targetGroup.add(earth);
+
+  const loader = new OBJLoader();
+  loader.load('/models/earth-photorealistic/earth.obj', (object) => {
+    const modelMeshes: THREE.Mesh[] = [];
+    object.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        modelMeshes.push(child);
+      }
+    });
+
+    if (modelMeshes.length === 0 || !targetGroup.children.includes(earth)) return;
+
+    const box = new THREE.Box3().setFromObject(object);
+    const size = new THREE.Vector3();
+    const center = new THREE.Vector3();
+    box.getSize(size);
+    box.getCenter(center);
+    const scale = 4.2 / Math.max(size.x, size.y, size.z, 1);
+
+    targetGroup.remove(earth);
+    earth.geometry.dispose();
+    object.position.sub(center);
+    object.scale.setScalar(scale);
+    object.name = 'PhotorealisticEarthOBJ';
+
+    modelMeshes.forEach((mesh) => {
+      mesh.material = earthMaterial;
+      mesh.castShadow = false;
+      mesh.receiveShadow = false;
+    });
+
+    targetGroup.add(object);
+  });
+
+  const nightGeometry = new THREE.SphereGeometry(2.105, 96, 96);
+  const nightMaterial = new THREE.MeshBasicMaterial({
+    map: nightMap,
+    transparent: true,
+    opacity: 0.28,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  const nightLights = new THREE.Mesh(nightGeometry, nightMaterial);
+  nightLights.name = 'RealisticEarthNightLights';
+  targetGroup.add(nightLights);
 
   const cloudGeometry = new THREE.SphereGeometry(2.14, 96, 96);
   const cloudMaterial = new THREE.MeshStandardMaterial({
@@ -93,6 +142,7 @@ export function createRealisticEarth(targetGroup: THREE.Group) {
 
   return {
     earth,
+    nightLights,
     clouds,
     ambientLight,
     sunLight,
