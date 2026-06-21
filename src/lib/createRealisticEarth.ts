@@ -2,11 +2,11 @@ import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
 const textureUrls = {
-  diffuse: '/models/earth-photorealistic/textures/earth-color.webp',
-  bump: '/models/earth-photorealistic/textures/earth-bump.webp',
-  specular: '/models/earth-photorealistic/textures/earth-gloss.webp',
-  clouds: '/models/earth-photorealistic/textures/earth-clouds-a.webp',
-  night: '/models/earth-photorealistic/textures/earth-night.webp',
+  diffuse: '/models/earth-hires/textures/earth-color.png',
+  bump: '/models/earth-hires/textures/earth-bump.png',
+  specular: '/models/earth-hires/textures/earth-gloss.png',
+  clouds: '/models/earth-hires/textures/earth-clouds-a.png',
+  night: '/models/earth-hires/textures/earth-night.png',
 };
 
 function disposeMaterial(material: THREE.Material | THREE.Material[]) {
@@ -55,6 +55,15 @@ export function createRealisticEarth(targetGroup: THREE.Group) {
   cloudMap.colorSpace = THREE.SRGBColorSpace;
   nightMap.colorSpace = THREE.SRGBColorSpace;
 
+  [diffuseMap, bumpMap, specularMap, cloudMap, nightMap].forEach((texture) => {
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.generateMipmaps = true;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.anisotropy = 16;
+  });
+
   const earthGeometry = new THREE.SphereGeometry(2.1, 96, 96);
   const earthMaterial = new THREE.MeshPhysicalMaterial({
     map: diffuseMap,
@@ -73,7 +82,7 @@ export function createRealisticEarth(targetGroup: THREE.Group) {
   targetGroup.add(earth);
 
   const loader = new OBJLoader();
-  loader.load('/models/earth-photorealistic/earth.obj', (object) => {
+  loader.load('/models/earth-hires/earth.obj', (object) => {
     const modelMeshes: THREE.Mesh[] = [];
     object.traverse((child) => {
       if (child instanceof THREE.Mesh) {

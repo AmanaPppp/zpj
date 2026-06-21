@@ -13,6 +13,17 @@ interface CameraControllerProps {
   }>;
 }
 
+const SECOND_SECTION_START = 0.58;
+const HERO_CAMERA = new THREE.Vector3(0.04, 0.95, 5.35);
+const HERO_LOOK_AT = new THREE.Vector3(0.04, -2.25, 0);
+const SECTION_CAMERA = new THREE.Vector3(0, 0.08, 5.45);
+const SECTION_LOOK_AT = new THREE.Vector3(0, 0, 0);
+
+const smoothStep = (value: number) => {
+  const t = THREE.MathUtils.clamp(value, 0, 1);
+  return t * t * (3 - 2 * t);
+};
+
 export default function CameraController({
   scrollProgress,
   mouseRef,
@@ -31,24 +42,26 @@ export default function CameraController({
 
   // Camera initial position
   useEffect(() => {
-    camera.position.set(0, 0, 58);
-    camera.lookAt(0, 0, 0);
-    smoothedLookAt.current.set(0, 0, 0);
+    camera.position.set(HERO_CAMERA.x, HERO_CAMERA.y, 58);
+    camera.lookAt(HERO_LOOK_AT);
+    smoothedLookAt.current.copy(HERO_LOOK_AT);
 
     const handleEnter = () => {
       gsap.to(camera.position, {
-        z: 5,
+        x: HERO_CAMERA.x,
+        y: HERO_CAMERA.y,
+        z: HERO_CAMERA.z,
         duration: 1.65,
         ease: 'power4.inOut',
         onUpdate: () => {
           camera.up.set(0, 1, 0);
-          camera.lookAt(0, 0, 0);
+          camera.lookAt(HERO_LOOK_AT);
         },
         onComplete: () => {
           introActive.current = false;
-          camera.position.set(0, 0, 5);
+          camera.position.copy(HERO_CAMERA);
           camera.up.set(0, 1, 0);
-          smoothedLookAt.current.set(0, 0, 0);
+          smoothedLookAt.current.copy(HERO_LOOK_AT);
           window.dispatchEvent(new CustomEvent('earth-hero-visible'));
         },
       });
@@ -59,22 +72,21 @@ export default function CameraController({
   }, [camera]);
 
   useFrame((_state, delta) => {
-    const scroll = scrollProgress.current;
+    const transitionProgress = smoothStep(scrollProgress.current / SECOND_SECTION_START);
+    const interactionProgress = smoothStep((scrollProgress.current - SECOND_SECTION_START) / (1 - SECOND_SECTION_START));
     const dt = Math.min(delta, 0.05);
 
     // ===== Orbital A: Scroll-driven base position =====
-    // Z: 5 -> 10 (moderate pull back / zoom out)
-    const targetZ = THREE.MathUtils.lerp(5, 10, scroll);
-    // Y: 0 -> -5 (camera sinks deep, model flies upward dramatically)
-    const targetY = THREE.MathUtils.lerp(0, -5, scroll);
-    // X: 0 (no scroll-driven horizontal movement)
-    const targetBaseX = 0;
+    // Hero starts as a high-angle close pass, then settles into the second-section full Earth view.
+    const targetBaseX = THREE.MathUtils.lerp(HERO_CAMERA.x, SECTION_CAMERA.x, transitionProgress);
+    const targetY = THREE.MathUtils.lerp(HERO_CAMERA.y, SECTION_CAMERA.y, transitionProgress);
+    const targetZ = THREE.MathUtils.lerp(HERO_CAMERA.z, SECTION_CAMERA.z, transitionProgress);
 
     basePosition.current.set(targetBaseX, targetY, targetZ);
 
     // ===== Orbital B: Mouse parallax offset =====
-    // Much stronger mouse influence
-    const parallaxStrength = 1.2;
+    // Disabled for the hero close-up; fades in once the second section is reached.
+    const parallaxStrength = 0.85 * interactionProgress;
     const targetOffsetX = mouseRef.current.targetX * parallaxStrength;
     const targetOffsetY = mouseRef.current.targetY * parallaxStrength;
 
@@ -98,7 +110,7 @@ export default function CameraController({
     const finalZ = basePosition.current.z;
 
     if (introActive.current) {
-      camera.lookAt(0, 0, 0);
+      camera.lookAt(HERO_LOOK_AT);
       return;
     }
 
@@ -120,9 +132,11 @@ export default function CameraController({
     );
 
     // ===== LookAt target =====
-    // Start at center, look much higher as scroll progresses
-    const targetLookY = THREE.MathUtils.lerp(0, 3.5, scroll);
-    lookAtTarget.current.set(0, targetLookY, 0);
+    lookAtTarget.current.set(
+      THREE.MathUtils.lerp(HERO_LOOK_AT.x, SECTION_LOOK_AT.x, transitionProgress),
+      THREE.MathUtils.lerp(HERO_LOOK_AT.y, SECTION_LOOK_AT.y, transitionProgress),
+      THREE.MathUtils.lerp(HERO_LOOK_AT.z, SECTION_LOOK_AT.z, transitionProgress),
+    );
 
     // Smooth lookAt interpolation
     smoothedLookAt.current.x = THREE.MathUtils.lerp(

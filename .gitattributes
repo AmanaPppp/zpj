@@ -1,0 +1,2 @@
+public/models/earth-hires/**/*.png filter=lfs diff=lfs merge=lfs -text
+public/models/earth-hires/**/*.obj filter=lfs diff=lfs merge=lfs -text

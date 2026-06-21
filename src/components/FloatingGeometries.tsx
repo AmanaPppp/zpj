@@ -4,7 +4,6 @@ import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
 interface FloatingGeometriesProps {
-  scrollProgress: React.MutableRefObject<number>;
   mouseRef: React.MutableRefObject<{ x: number; y: number; targetX: number; targetY: number }>;
 }
 
@@ -97,9 +96,7 @@ function createAsteroidMaterial(id: number, textureLoader: THREE.TextureLoader) 
   });
 }
 
-const INTERACTIVE_START = 0.58;
-
-export default function FloatingGeometries({ scrollProgress, mouseRef }: FloatingGeometriesProps) {
+export default function FloatingGeometries({ mouseRef }: FloatingGeometriesProps) {
   const groupRef = useRef<THREE.Group>(null!);
   const objects = useLoader(OBJLoader, ASTEROID_IDS.map((id) => `${MODEL_ROOT}/asteroid${id}/model.obj`));
 
@@ -166,9 +163,6 @@ export default function FloatingGeometries({ scrollProgress, mouseRef }: Floatin
 
   useFrame((state) => {
     if (!groupRef.current) return;
-    const interactive = scrollProgress.current >= INTERACTIVE_START;
-    groupRef.current.visible = interactive;
-    if (!interactive) return;
 
     const time = state.clock.elapsedTime;
 
