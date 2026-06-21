@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import CameraController from './CameraController';
@@ -45,8 +46,11 @@ export default function Scene3D({ scrollProgress, mouseRef }: Scene3DProps) {
       <pointLight position={[0, -1, 0]} intensity={0.65} color="#5c6bc0" distance={20} decay={2} />
 
       <ParticlesField mouseRef={mouseRef} />
-      <FloatingGeometries mouseRef={mouseRef} />
+      <Suspense fallback={null}>
+        <FloatingGeometries mouseRef={mouseRef} />
+      </Suspense>
       <GlassKnot scrollProgress={scrollProgress} mouseRef={mouseRef} />
     </Canvas>
   );
 }
+

@@ -22,7 +22,7 @@ type AsteroidModel = {
   scaleBias: number;
 };
 
-const ASTEROID_IDS = [1, 2, 3, 4, 8];
+const ASTEROID_IDS = [1, 4, 8];
 const MODEL_ROOT = '/models/asteroids-pbr';
 
 function normalizeGeometry(sourceGeometry: THREE.BufferGeometry) {
@@ -116,7 +116,7 @@ export default function FloatingGeometries({ mouseRef }: FloatingGeometriesProps
 
   const asteroids = useMemo(() => {
     const items: FloatingAsteroid[] = [];
-    const count = 34;
+    const count = 22;
     const modelCount = Math.max(asteroidModels.length, 1);
 
     for (let i = 0; i < count; i += 1) {
