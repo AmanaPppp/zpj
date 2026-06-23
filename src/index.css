@@ -172,6 +172,110 @@
   pointer-events: none;
 }
 
+.section-particle-effect {
+  --particle-feather-x: 14%;
+  --particle-feather-y: 13%;
+  --particle-mask-top: 0%;
+  --particle-mask-bottom: 100%;
+  position: absolute;
+  inset: -28% -8% -48% -24%;
+  min-height: 920px;
+  overflow: visible;
+  opacity: 0.95;
+  pointer-events: none;
+  transform: translate(-7vw, 8vh) scale(0.96);
+  transform-origin: center;
+  -webkit-mask-image:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      #000 var(--particle-feather-x),
+      #000 calc(100% - var(--particle-feather-x)),
+      transparent 100%
+    ),
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      #000 var(--particle-feather-y),
+      #000 calc(100% - var(--particle-feather-y)),
+      transparent 100%
+    ),
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent var(--particle-mask-top),
+      #000 calc(var(--particle-mask-top) + 12%),
+      #000 calc(var(--particle-mask-bottom) - 12%),
+      transparent var(--particle-mask-bottom),
+      transparent 100%
+    );
+  mask-image:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      #000 var(--particle-feather-x),
+      #000 calc(100% - var(--particle-feather-x)),
+      transparent 100%
+    ),
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      #000 var(--particle-feather-y),
+      #000 calc(100% - var(--particle-feather-y)),
+      transparent 100%
+    ),
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent var(--particle-mask-top),
+      #000 calc(var(--particle-mask-top) + 12%),
+      #000 calc(var(--particle-mask-bottom) - 12%),
+      transparent var(--particle-mask-bottom),
+      transparent 100%
+    );
+  -webkit-mask-composite: source-in, source-in;
+  mask-composite: intersect;
+}
+
+.section-particle-effect canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.section-particle-effect--about {
+  inset: -30% -10% -34% -20%;
+  --particle-feather-x: 16%;
+  --particle-feather-y: 12%;
+  --particle-mask-bottom: 94%;
+  opacity: 0.82;
+  transform: translate(-6vw, 5vh) scale(0.94);
+}
+
+.section-particle-effect--projects {
+  inset: 50% auto auto 50%;
+  --particle-feather-x: 17%;
+  --particle-feather-y: 15%;
+  --particle-mask-top: 10%;
+  width: min(110vw, 1320px);
+  height: min(150vh, 1180px);
+  min-height: 980px;
+  transform: translate(-44%, -42%) scale(1.08);
+}
+
+.section-particle-effect--portfolio-backdrop {
+  z-index: 0;
+  inset: 50% auto auto 50%;
+  width: min(138vw, 2100px);
+  height: min(124vh, 1280px);
+  min-height: 820px;
+  --particle-feather-x: 13%;
+  --particle-feather-y: 14%;
+  --particle-mask-top: 2%;
+  --particle-mask-bottom: 82%;
+  opacity: 0.34;
+  transform: translate(-50%, -40%) scale(1.14);
+}
+
 .space-nav-shell {
   position: relative;
   overflow: hidden;
@@ -564,33 +668,24 @@
   inset: 0;
   z-index: 120;
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   justify-content: center;
   padding: 0;
-  background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.76) 72%),
-    rgba(0, 0, 0, 0.36);
-  backdrop-filter: blur(16px) saturate(82%) brightness(0.72);
-  -webkit-backdrop-filter: blur(16px) saturate(82%) brightness(0.72);
+  background: #fff;
   animation: projectBackdropIn 0.34s ease-out both;
 }
 
 .project-floating-card {
   position: relative;
   width: 100vw;
-  height: 50dvh;
-  min-height: 50dvh;
-  max-height: 50dvh;
+  height: 100dvh;
+  min-height: 100dvh;
+  max-height: 100dvh;
   border-radius: 0;
   padding: 0;
-  background:
-    radial-gradient(circle at 80% 10%, rgba(85, 64, 172, 0.82), transparent 42%),
-    radial-gradient(circle at 18% 88%, rgba(135, 50, 143, 0.68), transparent 46%),
-    linear-gradient(135deg, #242226 0%, #342b66 48%, #4f2659 100%);
+  background: #fff;
   border: 0;
-  box-shadow:
-    0 -28px 90px rgba(0, 0, 0, 0.48),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: none;
   overflow: hidden;
   isolation: isolate;
 }
@@ -604,6 +699,7 @@
 }
 
 .project-sheet-handle {
+  display: none;
   position: absolute;
   left: 50%;
   top: 0;
@@ -636,7 +732,7 @@
 }
 
 .project-floating-card::after {
-  content: '';
+  content: none;
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -648,37 +744,6 @@
     inset 0 0 42px rgba(92, 107, 192, 0.08);
 }
 
-.project-grainient-bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  opacity: 0.94;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 24% 22%, rgba(135, 50, 143, 0.48), transparent 42%),
-    radial-gradient(circle at 68% 12%, rgba(85, 64, 172, 0.6), transparent 46%),
-    linear-gradient(158deg, #28212d 0%, #452089 46%, #211f26 100%);
-  filter: saturate(1.12) contrast(1.06);
-}
-
-.project-grainient-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.28;
-  background-image:
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.16) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 70% 60%, rgba(0, 0, 0, 0.28) 0 1px, transparent 1.6px);
-  background-size: 5px 5px, 7px 7px;
-  mix-blend-mode: overlay;
-}
-
-.project-grainient-canvas {
-  animation: projectGrainientIn 0.16s ease-out both;
-}
-
 .grainient-container {
   position: absolute;
   inset: 0;
@@ -687,18 +752,6 @@
   height: 100%;
   overflow: hidden;
   pointer-events: none;
-}
-
-.project-card-scrim {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 78% 12%, rgba(159, 168, 218, 0.14), transparent 36%),
-    radial-gradient(circle at 18% 88%, rgba(135, 50, 143, 0.18), transparent 42%),
-    linear-gradient(90deg, rgba(28, 25, 45, 0.46) 0%, rgba(33, 28, 68, 0.18) 48%, rgba(50, 28, 62, 0.36) 100%),
-    linear-gradient(180deg, rgba(24, 22, 38, 0.08), rgba(30, 23, 46, 0.3));
 }
 
 .project-floating-card > :not(.project-grainient-bg):not(.project-card-scrim) {
@@ -714,7 +767,7 @@
   overscroll-behavior: contain;
   padding: clamp(38px, 4.4vh, 54px) clamp(48px, 8vw, 160px) clamp(34px, 4.2vh, 52px);
   scrollbar-width: thin;
-  scrollbar-color: rgba(203, 213, 225, 0.36) rgba(255, 255, 255, 0.06);
+  scrollbar-color: rgba(15, 23, 42, 0.28) rgba(15, 23, 42, 0.06);
 }
 
 .project-sheet-scroll::-webkit-scrollbar {
@@ -722,26 +775,26 @@
 }
 
 .project-sheet-scroll::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(15, 23, 42, 0.06);
   border-radius: 999px;
 }
 
 .project-sheet-scroll::-webkit-scrollbar-thumb {
-  background: rgba(203, 213, 225, 0.34);
+  background: rgba(15, 23, 42, 0.28);
   border-radius: 999px;
 }
 
 .project-modal-close {
-  position: absolute;
-  top: 22px;
+  position: fixed;
+  top: max(22px, env(safe-area-inset-top));
   right: clamp(22px, 3vw, 48px);
-  z-index: 3;
-  width: 38px;
-  height: 38px;
+  z-index: 10;
+  width: 44px;
+  height: 44px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.92);
+  color: rgba(15, 23, 42, 0.86);
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
@@ -752,8 +805,8 @@
 
 .project-modal-close:hover {
   transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.16);
-  color: #fff;
+  background: rgba(15, 23, 42, 0.08);
+  color: #020617;
 }
 
 .project-modal-kicker,
@@ -761,7 +814,7 @@
   font-family: 'JetBrains Mono', monospace;
   text-transform: uppercase;
   letter-spacing: 0.22em;
-  color: rgba(159, 168, 218, 0.86);
+  color: rgba(99, 102, 241, 0.82);
   font-size: clamp(0.68rem, 0.72vw, 0.78rem);
 }
 
@@ -771,14 +824,14 @@
   font-size: clamp(2rem, 3.8vw, 4.4rem);
   line-height: 0.98;
   letter-spacing: -0.03em;
-  color: #fff;
+  color: #0f172a;
   max-width: 10em;
 }
 
 .project-modal-desc,
 .project-modal-outcome {
   margin-top: 22px;
-  color: rgba(255, 255, 255, 0.66);
+  color: rgba(15, 23, 42, 0.66);
   line-height: 1.75;
   font-size: clamp(0.98rem, 1.04vw, 1.16rem);
 }
@@ -795,9 +848,9 @@
   padding: 6px 11px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.72rem;
-  color: rgba(205, 212, 255, 0.9);
-  background: rgba(92, 107, 192, 0.16);
-  border: 1px solid rgba(92, 107, 192, 0.28);
+  color: rgba(79, 70, 229, 0.86);
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.16);
 }
 
 .project-modal-grid {
@@ -806,7 +859,7 @@
   gap: clamp(28px, 5vw, 82px);
   margin-top: 4px;
   padding-top: clamp(28px, 4vh, 42px);
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(15, 23, 42, 0.1);
 }
 
 .project-sheet-scroll {
@@ -842,15 +895,6 @@ body.project-sheet-open {
   }
 }
 
-@keyframes projectGrainientIn {
-  from {
-    opacity: 0.68;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 .project-modal-grid ul {
   margin-top: 18px;
   padding: 0;
@@ -861,7 +905,7 @@ body.project-sheet-open {
   position: relative;
   padding-left: 18px;
   margin-bottom: 14px;
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(15, 23, 42, 0.62);
   font-size: clamp(0.96rem, 1vw, 1.08rem);
   line-height: 1.55;
 }
@@ -874,12 +918,12 @@ body.project-sheet-open {
   width: 5px;
   height: 5px;
   border-radius: 999px;
-  background: #7c83d8;
+  background: #6366f1;
 }
 
 .project-modal-grid > div:last-child {
   padding-left: clamp(0px, 2vw, 32px);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(15, 23, 42, 0.1);
 }
 
 @media (max-width: 720px) {
@@ -889,9 +933,9 @@ body.project-sheet-open {
 
   .project-floating-card {
     width: 100vw;
-    height: 54dvh;
-    min-height: 54dvh;
-    max-height: 54dvh;
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
     border-radius: 0;
   }
 
@@ -909,25 +953,65 @@ body.project-sheet-open {
 .work-fullscreen-page {
   position: fixed;
   inset: 0;
-  z-index: 220;
+  z-index: 2147482500;
   display: block;
   overflow: hidden;
   background: #000;
   color: #fff;
+  isolation: isolate;
+}
+
+.work-fullscreen-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: #000;
+}
+
+.logo-gallery-page::before,
+.logo-gallery-page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.logo-gallery-page::before {
+  z-index: 0;
+  background:
+    radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.95) 0 1.2px, transparent 1.8px),
+    radial-gradient(circle at 68% 34%, rgba(220, 238, 255, 0.78) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 36% 78%, rgba(255, 255, 255, 0.54) 0 0.9px, transparent 1.4px),
+    radial-gradient(circle at 82% 72%, rgba(165, 213, 255, 0.46) 0 0.8px, transparent 1.4px),
+    radial-gradient(circle at center, rgba(15, 25, 45, 0.24), transparent 62%);
+  background-position: 0 0, 42px 18px, 18px 64px, 78px 42px, center;
+  background-size: 72px 72px, 116px 116px, 158px 158px, 226px 226px, 100% 100%;
+  opacity: 0.9;
+}
+
+.logo-gallery-page::after {
+  z-index: 1;
+  background:
+    linear-gradient(rgba(49, 184, 198, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(49, 184, 198, 0.035) 1px, transparent 1px),
+    linear-gradient(115deg, transparent 0 44%, rgba(49, 184, 198, 0.045) 44% 45%, transparent 45% 100%),
+    radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.1) 54%, rgba(0, 0, 0, 0.72) 100%);
+  background-size: 86px 86px, 86px 86px, 180px 180px, 100% 100%;
+  opacity: 0.52;
 }
 
 .work-fullscreen-close {
   position: fixed;
   top: 18px;
   right: 18px;
-  z-index: 260;
+  z-index: 2147482600;
   height: 44px;
   min-width: 104px;
   padding: 0 16px 0 13px;
-  border: 0;
+  border: 1px solid rgba(15, 23, 42, 0.12);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
-  color: #fff;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -939,7 +1023,7 @@ body.project-sheet-open {
   letter-spacing: 0.18em;
   line-height: 1;
   color: #0b0b0f;
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.34), 0 0 0 1px rgba(255, 255, 255, 0.22);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.14);
   backdrop-filter: blur(14px);
   transition: transform 0.28s ease, background 0.28s ease, box-shadow 0.28s ease;
 }
@@ -947,7 +1031,7 @@ body.project-sheet-open {
 .work-fullscreen-close:hover {
   transform: translateY(-2px);
   background: #ffffff;
-  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.42), 0 0 26px rgba(124, 58, 237, 0.28);
+  box-shadow: 0 24px 54px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(15, 23, 42, 0.12);
 }
 
 .work-fullscreen-close-icon {

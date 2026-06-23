@@ -67,10 +67,17 @@ export default function App() {
           scrollProgressRef={scrollProgressRef}
           mouseRef={mouseRef}
         />
-        <AboutSection />
-        <SkillsSection />
-        <ProjectsSection />
-        <ContactSection />
+        <main
+          className="relative overflow-hidden"
+          style={{
+            background: '#020204',
+          }}
+        >
+          <AboutSection />
+          <SkillsSection />
+          <ProjectsSection />
+          <ContactSection />
+        </main>
       </div>
 
       {/* Music Player - fixed bottom left */}

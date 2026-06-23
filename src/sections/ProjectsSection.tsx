@@ -1,12 +1,14 @@
 import { useCallback, useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Grainient from '../components/Grainient';
 import SplitText from '../components/SplitText';
 import TargetCursor from '../components/TargetCursor';
 import BorderGlow from '../components/BorderGlow';
+import SectionParticleEffect from '../components/SectionParticleEffect';
 
 gsap.registerPlugin(ScrollTrigger);
+
+type ParticleMode = 'idle' | 'active' | 'explode' | 'hidden';
 
 const projects = [
   {
@@ -64,12 +66,40 @@ export default function ProjectsSection() {
   const listRef = useRef<HTMLDivElement>(null!);
   const backdropRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const particleResetTimerRef = useRef<number | null>(null);
   const dragStateRef = useRef({ currentY: 0, dragging: false, pointerId: -1, startY: 0 });
   const closingRef = useRef(false);
   const [activeProject, setActiveProject] = useState<(typeof projects)[number] | null>(null);
+  const [particleMode, setParticleMode] = useState<ParticleMode>('idle');
 
   useEffect(() => {
+    const setMode = (mode: ParticleMode) => {
+      if (particleResetTimerRef.current) {
+        window.clearTimeout(particleResetTimerRef.current);
+        particleResetTimerRef.current = null;
+      }
+
+      setParticleMode(mode);
+
+      if (mode === 'explode') {
+        particleResetTimerRef.current = window.setTimeout(() => {
+          setParticleMode('hidden');
+          particleResetTimerRef.current = null;
+        }, 3400);
+      }
+    };
+
     const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: 'top 88%',
+        end: 'bottom 88%',
+        onEnter: () => setMode('active'),
+        onEnterBack: () => setMode('active'),
+        onLeave: () => setMode('explode'),
+        onLeaveBack: () => setMode('idle'),
+      });
+
       gsap.fromTo(
         headingRef.current,
         { y: 50, opacity: 0 },
@@ -107,7 +137,13 @@ export default function ProjectsSection() {
       }
     }, sectionRef);
 
-    return () => ctx.revert();
+    return () => {
+      if (particleResetTimerRef.current) {
+        window.clearTimeout(particleResetTimerRef.current);
+        particleResetTimerRef.current = null;
+      }
+      ctx.revert();
+    };
   }, []);
 
   const closeProjectSheet = useCallback(() => {
@@ -260,127 +296,143 @@ export default function ProjectsSection() {
       id="\u9879\u76ee"
       ref={sectionRef}
       className="relative w-full"
-      style={{ paddingTop: '20vh', paddingBottom: '20vh', zIndex: 10 }}
+      style={{ minHeight: '100vh', paddingTop: '12vh', paddingBottom: '12vh', zIndex: 10 }}
     >
       <TargetCursor scopeRef={sectionRef} targetSelector=".cursor-target" />
-      <div className="mx-auto px-6 md:px-12" style={{ maxWidth: '1100px' }}>
-        <div ref={headingRef} className="mb-16">
-          <SplitText
-            tag="p"
-            text="Projects"
-            className="uppercase tracking-[0.3em] mb-4"
-            delay={34}
-            duration={0.7}
-            splitType="chars"
-            threshold={0.2}
-            rootMargin="-80px"
-            textAlign="left"
-            style={{
-              fontSize: '0.75rem',
-              fontFamily: "'JetBrains Mono', monospace",
-              color: 'rgba(255, 255, 255, 0.4)',
-            }}
-          />
-          <SplitText
-            tag="h2"
-            text={"\u7cfb\u7edf\u5316\u7684\u54c1\u724c\u9879\u76ee"}
-            className="text-white font-bold"
-            delay={48}
-            duration={0.82}
-            ease="power3.out"
-            splitType="chars"
-            threshold={0.2}
-            rootMargin="-80px"
-            textAlign="left"
-            style={{
-              fontSize: 'clamp(1.8rem, 3.5vw, 3rem)',
-              fontFamily: "'Inter', sans-serif",
-              letterSpacing: '-0.02em',
-              lineHeight: 1.2,
-            }}
+      <div
+        className="grid items-center gap-12 px-6 md:grid-cols-[minmax(0,1fr)_minmax(520px,52vw)] md:gap-4 md:px-10 lg:px-12 xl:px-14"
+        style={{ width: '100%', maxWidth: 'none' }}
+      >
+        <div className="relative hidden min-h-[760px] overflow-visible md:block">
+          <SectionParticleEffect
+            mode={particleMode}
+            sourceImage="/particle-project-source.png"
+            className="section-particle-effect--projects"
+            pointSize={78}
+            explodeSpeed={0.023}
           />
         </div>
 
-        <div ref={listRef} className="space-y-4">
-          {projects.map((project, i) => (
-            <BorderGlow
-              key={project.year}
-              className="project-list-card cursor-target group transition-all duration-300"
-              edgeSensitivity={26}
-              glowColor="230 84 76"
-              backgroundColor="rgba(10, 10, 18, 0.52)"
-              borderRadius={14}
-              glowRadius={42}
-              glowIntensity={1.05}
-              coneSpread={24}
-              animated={i === 0}
-              fillOpacity={0}
-              colors={['#c084fc', '#f472b6', '#38bdf8']}
-              role="button"
-              tabIndex={0}
-              style={{ cursor: 'pointer' }}
-              onClick={() => setActiveProject(project)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setActiveProject(project);
-                }
+        <div style={{ maxWidth: '980px', justifySelf: 'end', width: '100%' }}>
+          <div ref={headingRef} className="mb-10 text-right">
+            <SplitText
+              tag="p"
+              text="Portfolio"
+              className="uppercase tracking-[0.3em] mb-4"
+              delay={34}
+              duration={0.7}
+              splitType="chars"
+              threshold={0.2}
+              rootMargin="-80px"
+              textAlign="right"
+              style={{
+                fontSize: '0.75rem',
+                fontFamily: "'JetBrains Mono', monospace",
+                color: 'rgba(255, 255, 255, 0.4)',
               }}
-            >
-              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 p-6 md:p-8">
-                <div className="flex-1">
-                  <div className="flex items-center gap-4 mb-3">
-                    <h3
-                      className="font-semibold text-white"
+            />
+            <SplitText
+              tag="h2"
+              text={"\u7cfb\u7edf\u5316\u7684\u54c1\u724c\u9879\u76ee"}
+              className="text-white font-bold"
+              delay={48}
+              duration={0.82}
+              ease="power3.out"
+              splitType="chars"
+              threshold={0.2}
+              rootMargin="-80px"
+              textAlign="right"
+              style={{
+                fontSize: 'clamp(1.8rem, 3.5vw, 3rem)',
+                fontFamily: "'Inter', sans-serif",
+                letterSpacing: '-0.02em',
+                lineHeight: 1.2,
+              }}
+            />
+          </div>
+
+          <div ref={listRef} className="space-y-4">
+            {projects.map((project, i) => (
+              <BorderGlow
+                key={project.year}
+                className="project-list-card cursor-target group transition-all duration-300"
+                edgeSensitivity={26}
+                glowColor="230 84 76"
+                backgroundColor="rgba(10, 10, 18, 0.52)"
+                borderRadius={14}
+                glowRadius={42}
+                glowIntensity={1.05}
+                coneSpread={24}
+                animated={i === 0}
+                fillOpacity={0}
+                colors={['#c084fc', '#f472b6', '#38bdf8']}
+                role="button"
+                tabIndex={0}
+                style={{ cursor: 'pointer' }}
+                onClick={() => setActiveProject(project)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setActiveProject(project);
+                  }
+                }}
+              >
+                <div className="flex flex-col md:items-end gap-4 p-6 text-right md:p-8">
+                  <div className="flex-1">
+                    <div className="mb-3 flex items-center justify-end gap-4">
+                      <h3
+                        className="font-semibold text-white"
+                        style={{
+                          fontSize: '1.25rem',
+                          fontFamily: "'Inter', sans-serif",
+                          letterSpacing: '-0.01em',
+                        }}
+                      >
+                        {project.title}
+                      </h3>
+                      <span
+                        className="text-xs"
+                        style={{
+                          fontFamily: "'JetBrains Mono', monospace",
+                          color: 'rgba(255, 255, 255, 0.3)',
+                        }}
+                      >
+                        {project.year}
+                      </span>
+                    </div>
+                    <p
                       style={{
-                        fontSize: '1.25rem',
+                        fontSize: '0.9rem',
+                        color: 'rgba(255, 255, 255, 0.55)',
                         fontFamily: "'Inter', sans-serif",
-                        letterSpacing: '-0.01em',
+                        lineHeight: 1.65,
+                        maxWidth: '600px',
+                        marginLeft: 'auto',
                       }}
                     >
-                      {project.title}
-                    </h3>
-                    <span
-                      className="text-xs"
-                      style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        color: 'rgba(255, 255, 255, 0.3)',
-                      }}
-                    >
-                      {project.year}
-                    </span>
+                      {project.desc}
+                    </p>
                   </div>
-                  <p
-                    style={{
-                      fontSize: '0.9rem',
-                      color: 'rgba(255, 255, 255, 0.55)',
-                      fontFamily: "'Inter', sans-serif",
-                      lineHeight: 1.65,
-                      maxWidth: '600px',
-                    }}
-                  >
-                    {project.desc}
-                  </p>
+                  <div className="flex flex-wrap justify-end gap-2">
+                    {project.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full px-3 py-1 text-xs"
+                        style={{
+                          fontFamily: "'JetBrains Mono', monospace",
+                          background: 'rgba(92, 107, 192, 0.12)',
+                          color: 'rgba(159, 168, 218, 0.85)',
+                          border: '1px solid rgba(92, 107, 192, 0.2)',
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2 md:justify-end">
-                  {project.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full px-3 py-1 text-xs"
-                      style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        background: 'rgba(92, 107, 192, 0.12)',
-                        color: 'rgba(159, 168, 218, 0.85)',
-                        border: '1px solid rgba(92, 107, 192, 0.2)',
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </BorderGlow>
-          ))}
+              </BorderGlow>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -404,35 +456,6 @@ export default function ProjectsSection() {
             >
               <span />
             </button>
-            <div className="project-grainient-bg">
-              <Grainient
-                className="project-grainient-canvas"
-                color1="#414141"
-                color2="#5540ac"
-                color3="#87328f"
-                timeSpeed={1.6}
-                colorBalance={0}
-                warpStrength={0.95}
-                warpFrequency={5}
-                warpSpeed={2}
-                warpAmplitude={50}
-                blendAngle={-16}
-                blendSoftness={0}
-                rotationAmount={710}
-                noiseScale={2.35}
-                grainAmount={0.1}
-                grainScale={0.2}
-                grainAnimated={false}
-                contrast={1.5}
-                gamma={1}
-                saturation={0.95}
-                centerX={0}
-                centerY={0}
-                zoom={1.05}
-                dpr={1}
-              />
-            </div>
-            <div className="project-card-scrim" />
             <button
               type="button"
               className="project-modal-close"

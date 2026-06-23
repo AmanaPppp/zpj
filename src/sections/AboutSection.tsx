@@ -1,17 +1,48 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SplitText from '../components/SplitText';
+import SectionParticleEffect from '../components/SectionParticleEffect';
 
 gsap.registerPlugin(ScrollTrigger);
+
+type ParticleMode = 'idle' | 'active' | 'explode' | 'hidden';
 
 export default function AboutSection() {
   const sectionRef = useRef<HTMLDivElement>(null!);
   const headingRef = useRef<HTMLDivElement>(null!);
   const cardRef = useRef<HTMLDivElement>(null!);
+  const particleResetTimerRef = useRef<number | null>(null);
+  const [particleMode, setParticleMode] = useState<ParticleMode>('idle');
 
   useEffect(() => {
+    const setMode = (mode: ParticleMode) => {
+      if (particleResetTimerRef.current) {
+        window.clearTimeout(particleResetTimerRef.current);
+        particleResetTimerRef.current = null;
+      }
+
+      setParticleMode(mode);
+
+      if (mode === 'explode') {
+        particleResetTimerRef.current = window.setTimeout(() => {
+          setParticleMode('hidden');
+          particleResetTimerRef.current = null;
+        }, 2200);
+      }
+    };
+
     const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: 'top 88%',
+        end: 'bottom 88%',
+        onEnter: () => setMode('active'),
+        onEnterBack: () => setMode('active'),
+        onLeave: () => setMode('explode'),
+        onLeaveBack: () => setMode('idle'),
+      });
+
       gsap.fromTo(
         headingRef.current,
         { y: 60, opacity: 0 },
@@ -46,7 +77,13 @@ export default function AboutSection() {
       );
     }, sectionRef);
 
-    return () => ctx.revert();
+    return () => {
+      if (particleResetTimerRef.current) {
+        window.clearTimeout(particleResetTimerRef.current);
+        particleResetTimerRef.current = null;
+      }
+      ctx.revert();
+    };
   }, []);
 
   return (
@@ -54,11 +91,15 @@ export default function AboutSection() {
       id="关于我"
       ref={sectionRef}
       className="relative w-full"
-      style={{ paddingTop: '20vh', paddingBottom: '20vh', scrollMarginTop: '96px', zIndex: 10 }}
+      style={{ minHeight: '100vh', paddingTop: '12vh', paddingBottom: '12vh', scrollMarginTop: '96px', zIndex: 10 }}
     >
-      <div className="mx-auto px-6 md:px-12" style={{ maxWidth: '1100px' }}>
+      <div
+        className="grid items-center gap-12 px-6 md:grid-cols-[minmax(520px,52vw)_minmax(0,1fr)] md:gap-4 md:px-10 lg:px-12 xl:px-14"
+        style={{ width: '100%', maxWidth: 'none' }}
+      >
+        <div style={{ maxWidth: '980px' }}>
         {/* Section label */}
-        <div ref={headingRef} className="mb-12">
+        <div ref={headingRef} className="mb-10">
           <SplitText
             tag="p"
             text="About me"
@@ -96,16 +137,17 @@ export default function AboutSection() {
         </div>
 
         {/* Content card */}
-        <div
-          ref={cardRef}
-          className="rounded-2xl p-8 md:p-12"
-          style={{
-            background: 'rgba(5, 5, 5, 0.45)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-          }}
-        >
-          <div className="grid md:grid-cols-2 gap-10">
+          <div
+            ref={cardRef}
+            className="rounded-2xl p-7 md:p-8"
+            style={{
+              background: 'rgba(5, 5, 5, 0.38)',
+              backdropFilter: 'blur(18px)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              maxWidth: '940px',
+            }}
+          >
+          <div className="grid gap-7 xl:grid-cols-[minmax(360px,1fr)_minmax(240px,0.58fr)]">
             <div>
               <p
                 className="leading-relaxed"
@@ -179,6 +221,11 @@ export default function AboutSection() {
               </div>
             </div>
           </div>
+        </div>
+        </div>
+
+        <div className="relative hidden min-h-[760px] overflow-visible md:block">
+          <SectionParticleEffect mode={particleMode} className="section-particle-effect--about" />
         </div>
       </div>
     </section>

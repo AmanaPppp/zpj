@@ -21,58 +21,60 @@ const smoothStep = (value: number) => {
 };
 
 export default function GlassKnot({ scrollProgress, mouseRef }: GlassKnotProps) {
-  const groupRef = useRef<THREE.Group>(null!);
+  const earthGroupRef = useRef<THREE.Group>(null!);
+  const earthSurfaceRef = useRef<THREE.Group | null>(null);
   const cloudsRef = useRef<THREE.Mesh | null>(null);
-  const nightLightsRef = useRef<THREE.Mesh | null>(null);
+  const cloudOffsetY = useRef(0);
   const rotationY = useRef(0);
 
   useEffect(() => {
-    if (!groupRef.current) return;
+    if (!earthGroupRef.current) return;
 
-    const earth = createRealisticEarth(groupRef.current);
+    const earth = createRealisticEarth(earthGroupRef.current);
+    earthSurfaceRef.current = earth.earthSurface;
     cloudsRef.current = earth.clouds;
-    nightLightsRef.current = earth.nightLights;
 
     return () => earth.dispose();
   }, []);
 
   useFrame((_state, delta) => {
-    if (!groupRef.current) return;
+    if (!earthGroupRef.current) return;
 
     const transitionProgress = smoothStep(scrollProgress.current / SECOND_SECTION_START);
     const interactionProgress = smoothStep((scrollProgress.current - SECOND_SECTION_START) / (1 - SECOND_SECTION_START));
     rotationY.current += delta * 0.09;
 
     const targetRotX = THREE.MathUtils.lerp(-0.34, 0, transitionProgress) + mouseRef.current.targetY * 0.11 * interactionProgress;
-    const targetRotY = rotationY.current + mouseRef.current.targetX * 0.08 * interactionProgress;
+    const targetRotY = mouseRef.current.targetX * 0.08 * interactionProgress;
     const targetRotZ = THREE.MathUtils.lerp(0.08, 0, transitionProgress) - mouseRef.current.targetX * 0.05 * interactionProgress;
     const targetScale = THREE.MathUtils.lerp(1.85, 0.86, transitionProgress);
     const targetY = THREE.MathUtils.lerp(-4.25, 0, transitionProgress);
 
-    groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, delta * 3));
-    groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, delta * 3);
-    groupRef.current.rotation.y = THREE.MathUtils.lerp(
-      groupRef.current.rotation.y,
+    earthGroupRef.current.scale.setScalar(THREE.MathUtils.lerp(earthGroupRef.current.scale.x, targetScale, delta * 3));
+    earthGroupRef.current.position.y = THREE.MathUtils.lerp(earthGroupRef.current.position.y, targetY, delta * 3);
+    earthGroupRef.current.rotation.y = THREE.MathUtils.lerp(
+      earthGroupRef.current.rotation.y,
       targetRotY,
       delta * 3
     );
-    groupRef.current.rotation.x = THREE.MathUtils.lerp(
-      groupRef.current.rotation.x,
+    earthGroupRef.current.rotation.x = THREE.MathUtils.lerp(
+      earthGroupRef.current.rotation.x,
       targetRotX,
       delta * 3
     );
-    groupRef.current.rotation.z = THREE.MathUtils.lerp(
-      groupRef.current.rotation.z,
+    earthGroupRef.current.rotation.z = THREE.MathUtils.lerp(
+      earthGroupRef.current.rotation.z,
       targetRotZ,
       delta * 3
     );
 
-    if (cloudsRef.current) {
-      cloudsRef.current.rotation.y += delta * 0.018;
+    if (earthSurfaceRef.current) {
+      earthSurfaceRef.current.rotation.y = rotationY.current;
     }
 
-    if (nightLightsRef.current) {
-      nightLightsRef.current.rotation.y = groupRef.current.rotation.y;
+    if (cloudsRef.current) {
+      cloudOffsetY.current += delta * 0.018;
+      cloudsRef.current.rotation.y = rotationY.current + cloudOffsetY.current;
     }
 
     mouseRef.current.x = THREE.MathUtils.lerp(
@@ -87,5 +89,5 @@ export default function GlassKnot({ scrollProgress, mouseRef }: GlassKnotProps) 
     );
   });
 
-  return <group ref={groupRef} position={[0, -4.25, 0]} scale={1.85} />;
+  return <group ref={earthGroupRef} name="earthGroup" position={[0, -4.25, 0]} scale={1.85} />;
 }

@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowLeft } from 'lucide-react';
 import InfiniteMenu, { type InfiniteMenuItem } from '../components/InfiniteMenu';
 import SplitText from '../components/SplitText';
 import StellarCardGallerySingle from '../components/ui/3d-image-gallery';
+import SectionParticleEffect from '../components/SectionParticleEffect';
 
 gsap.registerPlugin(ScrollTrigger);
+
+type ParticleMode = 'idle' | 'active' | 'explode' | 'hidden';
 
 const portfolioItems = [
   {
@@ -34,11 +38,39 @@ export default function SkillsSection() {
   const headingRef = useRef<HTMLDivElement>(null!);
   const menuRef = useRef<HTMLDivElement>(null!);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const particleResetTimerRef = useRef<number | null>(null);
   const closingRef = useRef(false);
   const [selectedWork, setSelectedWork] = useState<InfiniteMenuItem | null>(null);
+  const [particleMode, setParticleMode] = useState<ParticleMode>('idle');
 
   useEffect(() => {
+    const setMode = (mode: ParticleMode) => {
+      if (particleResetTimerRef.current) {
+        window.clearTimeout(particleResetTimerRef.current);
+        particleResetTimerRef.current = null;
+      }
+
+      setParticleMode(mode);
+
+      if (mode === 'explode') {
+        particleResetTimerRef.current = window.setTimeout(() => {
+          setParticleMode('hidden');
+          particleResetTimerRef.current = null;
+        }, 5200);
+      }
+    };
+
     const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: 'top 58%',
+        end: 'bottom 72%',
+        onEnter: () => setMode('active'),
+        onEnterBack: () => setMode('active'),
+        onLeave: () => setMode('explode'),
+        onLeaveBack: () => setMode('idle'),
+      });
+
       gsap.fromTo(
         headingRef.current,
         { y: 50, opacity: 0 },
@@ -73,7 +105,13 @@ export default function SkillsSection() {
       );
     }, sectionRef);
 
-    return () => ctx.revert();
+    return () => {
+      if (particleResetTimerRef.current) {
+        window.clearTimeout(particleResetTimerRef.current);
+        particleResetTimerRef.current = null;
+      }
+      ctx.revert();
+    };
   }, []);
 
   useEffect(() => {
@@ -157,10 +195,19 @@ export default function SkillsSection() {
     <section
       id="作品"
       ref={sectionRef}
-      className="relative w-full"
+      className="relative w-full overflow-hidden"
       style={{ paddingTop: '18vh', paddingBottom: '18vh', zIndex: 10 }}
     >
-      <div className="mx-auto px-6 md:px-12" style={{ maxWidth: '1200px' }}>
+      <SectionParticleEffect
+        mode={particleMode}
+        sourceImage="/particle-portfolio-backdrop-source.png"
+        className="section-particle-effect--portfolio-backdrop"
+        pointSize={97}
+        explodeSpeed={0.012}
+        morphSpeed={0.018}
+      />
+
+      <div className="relative mx-auto px-6 md:px-12" style={{ maxWidth: '1200px', zIndex: 2 }}>
         <div ref={headingRef} className="mb-8 text-center">
           <SplitText
             tag="p"
@@ -202,7 +249,7 @@ export default function SkillsSection() {
         </div>
       </div>
 
-      {selectedWork && (
+      {selectedWork && createPortal(
         <div ref={overlayRef} className="work-fullscreen-page">
           <button
             type="button"
@@ -214,7 +261,8 @@ export default function SkillsSection() {
           </button>
 
           <StellarCardGallerySingle />
-        </div>
+        </div>,
+        document.body,
       )}
     </section>
   );

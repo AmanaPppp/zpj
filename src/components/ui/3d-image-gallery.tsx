@@ -1,6 +1,6 @@
 import { Suspense, createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Environment, Html, OrbitControls, Sphere } from '@react-three/drei';
+import { Html, OrbitControls, Sphere } from '@react-three/drei';
 import { Download, Heart, X } from 'lucide-react';
 import * as THREE from 'three';
 
@@ -44,64 +44,6 @@ function CardProvider({ children }: { children: React.ReactNode }) {
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const value = useMemo(() => ({ selectedCard, setSelectedCard, cards }), [selectedCard]);
   return <CardContext.Provider value={value}>{children}</CardContext.Provider>;
-}
-
-function StarfieldBackground() {
-  const mountRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const mount = mountRef.current;
-    if (!mount) return undefined;
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 1);
-    mount.appendChild(renderer.domElement);
-
-    const starsGeometry = new THREE.BufferGeometry();
-    const starsCount = 10000;
-    const positions = new Float32Array(starsCount * 3);
-    for (let i = 0; i < starsCount; i += 1) {
-      positions[i * 3] = (Math.random() - 0.5) * 2000;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 2000;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 2000;
-    }
-    starsGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const starsMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.7, sizeAttenuation: true });
-    const stars = new THREE.Points(starsGeometry, starsMaterial);
-    scene.add(stars);
-    camera.position.z = 10;
-
-    let animationId = 0;
-    const animate = () => {
-      animationId = requestAnimationFrame(animate);
-      stars.rotation.y += 0.0001;
-      stars.rotation.x += 0.00005;
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(animationId);
-      mount.removeChild(renderer.domElement);
-      renderer.dispose();
-      starsGeometry.dispose();
-      starsMaterial.dispose();
-    };
-  }, []);
-
-  return <div ref={mountRef} className="fixed inset-0 z-0 bg-black" />;
 }
 
 function FloatingCard({
@@ -296,8 +238,7 @@ export default function StellarCardGallerySingle() {
 
   return (
     <CardProvider>
-      <div className="relative h-screen w-full overflow-hidden bg-black">
-        <StarfieldBackground />
+      <div className="logo-gallery-page relative h-screen w-full overflow-hidden bg-black">
 
         <Canvas
           camera={{ position: [0, 0, 15], fov: 60 }}
@@ -307,7 +248,6 @@ export default function StellarCardGallerySingle() {
           }}
         >
           <Suspense fallback={null}>
-            <Environment preset="night" />
             <ambientLight intensity={0.4} />
             <pointLight position={[10, 10, 10]} intensity={0.6} />
             <pointLight position={[-10, -10, -10]} intensity={0.3} />
