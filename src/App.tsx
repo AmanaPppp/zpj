@@ -68,10 +68,7 @@ export default function App() {
           mouseRef={mouseRef}
         />
         <main
-          className="relative overflow-hidden"
-          style={{
-            background: '#020204',
-          }}
+          className="subpage-cosmic-bg relative overflow-hidden"
         >
           <AboutSection />
           <SkillsSection />
