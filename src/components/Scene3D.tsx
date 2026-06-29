@@ -1,10 +1,12 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
+import gsap from 'gsap';
 import CameraController from './CameraController';
 import GlassKnot from './GlassKnot';
 import ParticlesField from './ParticlesField';
 import FloatingGeometries from './FloatingGeometries';
+import CinematicPostProcessing from './CinematicPostProcessing';
 
 interface Scene3DProps {
   scrollProgress: React.MutableRefObject<number>;
@@ -16,11 +18,41 @@ interface Scene3DProps {
   }>;
 }
 
+function CinematicSceneLights() {
+  const ambientRef = useRef<THREE.AmbientLight>(null!);
+  const keyLightRef = useRef<THREE.DirectionalLight>(null!);
+
+  useEffect(() => {
+    const handleReveal = () => {
+      const ambient = ambientRef.current;
+      const keyLight = keyLightRef.current;
+      if (!ambient || !keyLight) return;
+
+      keyLight.position.set(-10, 15, -5);
+
+      gsap.timeline({ defaults: { ease: 'power3.out' } })
+        .to(ambient, { intensity: 0.004, duration: 0.6 }, 0)
+        .to(keyLight, { intensity: 2.2, duration: 0.85 }, 0);
+    };
+
+    window.addEventListener('portfolio-enter', handleReveal);
+    return () => window.removeEventListener('portfolio-enter', handleReveal);
+  }, []);
+
+  return (
+    <>
+      <ambientLight ref={ambientRef} intensity={0.002} />
+      <directionalLight ref={keyLightRef} position={[-10, 15, -5]} intensity={0} color="#eef5ff" />
+    </>
+  );
+}
+
 export default function Scene3D({ scrollProgress, mouseRef }: Scene3DProps) {
   return (
     <Canvas
       camera={{ position: [0, 0, 5], fov: 55, near: 0.1, far: 300 }}
       dpr={[1, 2]}
+      frameloop="always"
       gl={{
         antialias: true,
         alpha: true,
@@ -40,16 +72,14 @@ export default function Scene3D({ scrollProgress, mouseRef }: Scene3DProps) {
     >
       <CameraController scrollProgress={scrollProgress} mouseRef={mouseRef} />
 
-      <ambientLight intensity={0.12} />
-      <directionalLight position={[8, 5, 6]} intensity={0.24} color="#dce8ff" />
-      <directionalLight position={[-6, -4, -8]} intensity={0.14} color="#526dff" />
-      <pointLight position={[0, -1, 0]} intensity={0.65} color="#5c6bc0" distance={20} decay={2} />
+      <CinematicSceneLights />
 
       <ParticlesField mouseRef={mouseRef} />
       <Suspense fallback={null}>
         <FloatingGeometries mouseRef={mouseRef} />
       </Suspense>
       <GlassKnot scrollProgress={scrollProgress} mouseRef={mouseRef} />
+      <CinematicPostProcessing />
     </Canvas>
   );
 }

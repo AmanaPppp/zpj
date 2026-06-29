@@ -132,7 +132,10 @@ export function createRealisticEarth(targetGroup: THREE.Group) {
   targetGroup.add(earthSurface);
 
   const loader = new OBJLoader();
-  loader.load('/models/earth-photorealistic/earth.obj', (object) => {
+  let pendingObject: THREE.Object3D | null = null;
+  let revealActive = false;
+
+  const applyLoadedObject = (object: THREE.Object3D) => {
     const modelMeshes: THREE.Mesh[] = [];
     object.traverse((child) => {
       if (child instanceof THREE.Mesh) {
@@ -162,6 +165,30 @@ export function createRealisticEarth(targetGroup: THREE.Group) {
     });
 
     earthSurface.add(object);
+  };
+
+  const handleRevealStart = () => {
+    revealActive = true;
+  };
+
+  const handleRevealComplete = () => {
+    revealActive = false;
+    if (!pendingObject) return;
+    const object = pendingObject;
+    pendingObject = null;
+    window.requestAnimationFrame(() => applyLoadedObject(object));
+  };
+
+  window.addEventListener('portfolio-enter', handleRevealStart);
+  window.addEventListener('earth-cinematic-reveal-complete', handleRevealComplete);
+
+  loader.load('/models/earth-photorealistic/earth.obj', (object) => {
+    if (revealActive) {
+      pendingObject = object;
+      return;
+    }
+
+    applyLoadedObject(object);
   });
 
   const cloudGeometry = new THREE.SphereGeometry(EARTH_RADIUS * 1.019, EARTH_SEGMENTS, EARTH_SEGMENTS);
@@ -184,13 +211,13 @@ export function createRealisticEarth(targetGroup: THREE.Group) {
   atmosphere.renderOrder = 2;
   targetGroup.add(atmosphere);
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.018);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.01);
   ambientLight.name = 'RealisticEarthWeakAmbient';
   targetGroup.add(ambientLight);
 
-  const sunLight = new THREE.DirectionalLight(0xffffff, 5.8);
+  const sunLight = new THREE.DirectionalLight(0xffffff, 9.6);
   sunLight.name = 'RealisticEarthSunLight';
-  sunLight.position.set(3.2, 2.2, 7.5);
+  sunLight.position.set(-12, 10, 5);
   targetGroup.add(sunLight);
 
   return {
@@ -202,6 +229,8 @@ export function createRealisticEarth(targetGroup: THREE.Group) {
     ambientLight,
     sunLight,
     dispose: () => {
+      window.removeEventListener('portfolio-enter', handleRevealStart);
+      window.removeEventListener('earth-cinematic-reveal-complete', handleRevealComplete);
       disposeObject(targetGroup);
       targetGroup.clear();
     },

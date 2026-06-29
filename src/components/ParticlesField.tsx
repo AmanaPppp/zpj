@@ -1,6 +1,7 @@
-import { useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { cinematicRevealState } from '../lib/cinematicRevealState';
 
 interface ParticlesFieldProps {
   mouseRef: React.MutableRefObject<{
@@ -15,8 +16,8 @@ export default function ParticlesField({ mouseRef }: ParticlesFieldProps) {
   const materialRef = useRef<THREE.ShaderMaterial>(null!);
 
   // Dense starfield like the reference video
-  const FAR_PARTICLE_COUNT = 32000;
-  const NEAR_PARTICLE_COUNT = 9000;
+  const FAR_PARTICLE_COUNT = 18000;
+  const NEAR_PARTICLE_COUNT = 5000;
   const PARTICLE_COUNT = FAR_PARTICLE_COUNT + NEAR_PARTICLE_COUNT;
 
   const { positions, sizes, brightness } = useMemo(() => {
@@ -67,11 +68,14 @@ export default function ParticlesField({ mouseRef }: ParticlesFieldProps) {
         uMouse: { value: new THREE.Vector2(0, 0) },
         uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
         uWarp: { value: 0 },
+        uRevealOpacity: { value: 0 },
+        uParallax: { value: 0 },
       },
       vertexShader: `
         uniform float uTime;
         uniform float uPixelRatio;
         uniform float uWarp;
+        uniform float uParallax;
         uniform vec2 uMouse;
         attribute float aSize;
         attribute float aBrightness;
@@ -118,6 +122,9 @@ export default function ParticlesField({ mouseRef }: ParticlesFieldProps) {
           vec2 warpDir = pos.xy / radial;
           pos.xy += warpDir * uWarp * (3.2 + aBrightness * 5.5);
           pos.z -= uWarp * (8.0 + aBrightness * 7.0);
+          pos.x -= uParallax * (2.0 + aBrightness * 8.0);
+          pos.y += sin(uParallax * 1.7 + aBrightness * 12.0) * (0.4 + aBrightness * 1.4);
+          pos.z += uParallax * (1.5 + aBrightness * 4.0);
 
           // Mouse parallax: stars move slightly opposite to mouse
           float parallax = 1.2 * aBrightness;
@@ -139,6 +146,7 @@ export default function ParticlesField({ mouseRef }: ParticlesFieldProps) {
       fragmentShader: `
         uniform float uTime;
         uniform float uWarp;
+        uniform float uRevealOpacity;
         varying float vBrightness;
         varying float vSize;
 
@@ -162,6 +170,7 @@ export default function ParticlesField({ mouseRef }: ParticlesFieldProps) {
 
           alpha *= vBrightness * 0.92;
           alpha *= 1.0 + uWarp * 0.65;
+          alpha *= uRevealOpacity;
 
           vec3 color = mix(vec3(0.96, 0.98, 1.0), vec3(0.78, 0.86, 1.0), uWarp * 0.35);
 
@@ -179,6 +188,31 @@ export default function ParticlesField({ mouseRef }: ParticlesFieldProps) {
     });
   }, []);
 
+  useEffect(() => {
+    const handleReveal = () => {
+      if (!materialRef.current) return;
+
+      materialRef.current.uniforms.uRevealOpacity.value = 0.14;
+      materialRef.current.uniforms.uWarp.value = 0.9;
+      materialRef.current.uniforms.uParallax.value = 0;
+    };
+
+    const handleRevealComplete = () => {
+      if (!materialRef.current) return;
+
+      materialRef.current.uniforms.uRevealOpacity.value = 0.08;
+      materialRef.current.uniforms.uWarp.value = 0;
+      materialRef.current.uniforms.uParallax.value = 1.9;
+    };
+
+    window.addEventListener('portfolio-enter', handleReveal);
+    window.addEventListener('earth-cinematic-reveal-complete', handleRevealComplete);
+    return () => {
+      window.removeEventListener('portfolio-enter', handleReveal);
+      window.removeEventListener('earth-cinematic-reveal-complete', handleRevealComplete);
+    };
+  }, []);
+
   useFrame((state) => {
     if (materialRef.current) {
       const time = state.clock.elapsedTime;
@@ -187,7 +221,12 @@ export default function ParticlesField({ mouseRef }: ParticlesFieldProps) {
         mouseRef.current.x * 0.3,
         mouseRef.current.y * 0.3
       );
-      materialRef.current.uniforms.uWarp.value = 0;
+      if (cinematicRevealState.active) {
+        const { easedProgress, velocity } = cinematicRevealState;
+        materialRef.current.uniforms.uRevealOpacity.value = 0.1 + Math.sin(easedProgress * Math.PI) * 0.16;
+        materialRef.current.uniforms.uWarp.value = velocity * 0.65;
+        materialRef.current.uniforms.uParallax.value = easedProgress * 2.2;
+      }
     }
   });
 

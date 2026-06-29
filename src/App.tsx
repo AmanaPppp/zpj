@@ -10,13 +10,13 @@ import ContactSection from './sections/ContactSection';
 import Scene3D from './components/Scene3D';
 import MusicPlayer from './components/MusicPlayer';
 import IntroGate from './components/IntroGate';
-import RGBSplitTransition from './components/RGBSplitTransition';
 import { useMouseParallax } from './hooks/useMouseParallax';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function App() {
   const scrollProgressRef = useRef(0);
+  const sceneShellRef = useRef<HTMLDivElement>(null);
   const mouseRef = useMouseParallax();
 
   useEffect(() => {
@@ -48,6 +48,8 @@ export default function App() {
     <div className="relative bg-[#050505] min-h-screen">
       {/* 3D Scene - always visible as fixed background */}
       <div
+        ref={sceneShellRef}
+        className="scene-shell"
         data-rgb-split-target="true"
         style={{
           position: 'fixed',
@@ -66,6 +68,7 @@ export default function App() {
         <Hero
           scrollProgressRef={scrollProgressRef}
           mouseRef={mouseRef}
+          sceneShellRef={sceneShellRef}
         />
         <main
           className="subpage-cosmic-bg relative overflow-hidden"
@@ -79,7 +82,6 @@ export default function App() {
 
       {/* Music Player - fixed bottom left */}
       <MusicPlayer />
-      <RGBSplitTransition />
       <IntroGate />
     </div>
   );

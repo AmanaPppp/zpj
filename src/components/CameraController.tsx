@@ -1,7 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import gsap from 'gsap';
 
 interface CameraControllerProps {
   scrollProgress: React.MutableRefObject<number>;
@@ -14,8 +13,10 @@ interface CameraControllerProps {
 }
 
 const SECOND_SECTION_START = 0.58;
-const HERO_CAMERA = new THREE.Vector3(0.04, 0.95, 5.35);
-const HERO_LOOK_AT = new THREE.Vector3(0.04, -2.25, 0);
+const START_CAMERA = new THREE.Vector3(-1.58, 1.02, 5.55);
+const START_LOOK_AT = new THREE.Vector3(-0.48, 1.06, 0);
+const HERO_CAMERA = new THREE.Vector3(0, 0.42, 9.9);
+const HERO_LOOK_AT = new THREE.Vector3(-0.44, 0.98, 0);
 const SECTION_CAMERA = new THREE.Vector3(0, 0.08, 5.45);
 const SECTION_LOOK_AT = new THREE.Vector3(0, 0, 0);
 
@@ -42,33 +43,35 @@ export default function CameraController({
 
   // Camera initial position
   useEffect(() => {
-    camera.position.set(HERO_CAMERA.x, HERO_CAMERA.y, 58);
-    camera.lookAt(HERO_LOOK_AT);
-    smoothedLookAt.current.copy(HERO_LOOK_AT);
+    camera.position.copy(START_CAMERA);
+    camera.lookAt(START_LOOK_AT);
+    smoothedLookAt.current.copy(START_LOOK_AT);
+
+    let heroTextTimer = 0;
 
     const handleEnter = () => {
-      gsap.to(camera.position, {
-        x: HERO_CAMERA.x,
-        y: HERO_CAMERA.y,
-        z: HERO_CAMERA.z,
-        duration: 1.65,
-        ease: 'power4.inOut',
-        onUpdate: () => {
-          camera.up.set(0, 1, 0);
-          camera.lookAt(HERO_LOOK_AT);
-        },
-        onComplete: () => {
-          introActive.current = false;
-          camera.position.copy(HERO_CAMERA);
-          camera.up.set(0, 1, 0);
-          smoothedLookAt.current.copy(HERO_LOOK_AT);
-          window.dispatchEvent(new CustomEvent('earth-hero-visible'));
-        },
-      });
+      window.clearTimeout(heroTextTimer);
+      heroTextTimer = window.setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('earth-hero-visible'));
+      }, 260);
+    };
+
+    const handleRevealComplete = () => {
+      introActive.current = false;
+      camera.position.copy(HERO_CAMERA);
+      camera.up.set(0, 1, 0);
+      smoothedLookAt.current.copy(HERO_LOOK_AT);
+      camera.lookAt(HERO_LOOK_AT);
     };
 
     window.addEventListener('portfolio-enter', handleEnter);
-    return () => window.removeEventListener('portfolio-enter', handleEnter);
+    window.addEventListener('earth-cinematic-reveal-complete', handleRevealComplete);
+
+    return () => {
+      window.clearTimeout(heroTextTimer);
+      window.removeEventListener('portfolio-enter', handleEnter);
+      window.removeEventListener('earth-cinematic-reveal-complete', handleRevealComplete);
+    };
   }, [camera]);
 
   useFrame((_state, delta) => {
@@ -110,7 +113,6 @@ export default function CameraController({
     const finalZ = basePosition.current.z;
 
     if (introActive.current) {
-      camera.lookAt(HERO_LOOK_AT);
       return;
     }
 

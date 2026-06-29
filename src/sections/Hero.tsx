@@ -7,6 +7,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 interface HeroProps {
   scrollProgressRef: React.MutableRefObject<number>;
+  sceneShellRef: React.RefObject<HTMLDivElement | null>;
   mouseRef: React.MutableRefObject<{
     x: number;
     y: number;
@@ -16,20 +17,19 @@ interface HeroProps {
 }
 
 const navItems = [
-  { label: '\u5173\u4e8e\u6211', targetId: '\u5173\u4e8e\u6211' },
-  { label: '\u4f5c\u54c1', targetId: '\u4f5c\u54c1' },
-  { label: '\u9879\u76ee', targetId: '\u9879\u76ee' },
+  { label: 'ABOUT', targetId: '\u5173\u4e8e\u6211' },
+  { label: 'WORKS', targetId: '\u4f5c\u54c1' },
+  { label: 'PROJECTS', targetId: '\u9879\u76ee' },
 ];
 
-const titleLetterOffsets = ['0em', '-0.018em', '-0.012em', '-0.022em', '-0.006em', '0.006em'];
-
-export default function Hero({ scrollProgressRef, mouseRef }: HeroProps) {
+export default function Hero({ scrollProgressRef, sceneShellRef, mouseRef }: HeroProps) {
   const containerRef = useRef<HTMLDivElement>(null!);
   const titleRef = useRef<HTMLDivElement>(null!);
   const subtitleRef = useRef<HTMLDivElement>(null!);
+  const transitionRef = useRef<HTMLDivElement>(null!);
   const textProximityRef = useRef<HTMLDivElement>(null!);
   const navRef = useRef<HTMLElement>(null!);
-  const titleText = 'AmanaP';
+  const titleText = 'AMANAP';
 
   const handleNavClick = (targetId: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
@@ -62,33 +62,56 @@ export default function Hero({ scrollProgressRef, mouseRef }: HeroProps) {
       });
 
       gsap.to(titleRef.current, {
-        y: -92,
+        y: -76,
         opacity: 0,
-        scale: 1.045,
-        filter: 'blur(13px)',
-        letterSpacing: '0.012em',
+        scale: 1.018,
+        filter: 'blur(7px)',
+        letterSpacing: '-0.044em',
         ease: 'none',
         scrollTrigger: {
           trigger: containerRef.current,
-          start: 'top top',
-          end: '34% top',
-          scrub: 0.5,
+          start: '8% top',
+          end: '42% top',
+          scrub: 0.8,
         },
       });
 
       gsap.to(subtitleRef.current, {
-        y: -70,
+        y: -52,
         opacity: 0,
-        scale: 0.96,
-        filter: 'blur(10px)',
+        scale: 0.98,
+        filter: 'blur(6px)',
         ease: 'none',
         scrollTrigger: {
           trigger: containerRef.current,
-          start: '4% top',
-          end: '30% top',
-          scrub: 0.5,
+          start: '10% top',
+          end: '40% top',
+          scrub: 0.8,
         },
       });
+
+      gsap.set(transitionRef.current, { autoAlpha: 0 });
+
+      const bridgeTimeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: '42% top',
+          end: 'bottom top',
+          scrub: 1.15,
+        },
+      });
+
+      bridgeTimeline
+        .to(transitionRef.current, {
+          autoAlpha: 1,
+          yPercent: -6,
+          ease: 'none',
+        }, 0)
+        .to(sceneShellRef.current, {
+          autoAlpha: 0.22,
+          scale: 0.985,
+          ease: 'none',
+        }, 0.08);
 
       ScrollTrigger.create({
         trigger: containerRef.current,
@@ -105,6 +128,14 @@ export default function Hero({ scrollProgressRef, mouseRef }: HeroProps) {
       autoAlpha: 0,
       pointerEvents: 'none',
     });
+
+    if (sceneShellRef.current) {
+      gsap.set(sceneShellRef.current, {
+        autoAlpha: 1,
+        scale: 1,
+        transformOrigin: '50% 50%',
+      });
+    }
 
     const showHeroText = () => {
       titleRef.current?.classList.remove('is-title-visible');
@@ -137,10 +168,11 @@ export default function Hero({ scrollProgressRef, mouseRef }: HeroProps) {
       ctx.revert();
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [scrollProgressRef, mouseRef]);
+  }, [scrollProgressRef, sceneShellRef, mouseRef]);
 
   return (
-    <section ref={containerRef} className="relative w-full" style={{ height: '100vh' }}>
+    <section ref={containerRef} className="relative w-full hero-transition-stage" style={{ height: '100vh' }}>
+      <div ref={transitionRef} className="hero-subpage-bridge" aria-hidden="true" />
       <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 10 }}>
         <nav
           ref={navRef}
@@ -153,25 +185,21 @@ export default function Hero({ scrollProgressRef, mouseRef }: HeroProps) {
           <div
             className="space-nav-shell mx-auto flex items-center justify-between rounded-2xl"
             style={{
-              maxWidth: '1080px',
-              padding: '11px 20px 11px 24px',
+              maxWidth: '100%',
+              padding: '0',
             }}
           >
             <a
               href="#"
-              className="font-bold tracking-tight"
+              className="font-bold tracking-tight cinematic-nav-brand"
               style={{
-                fontSize: 'clamp(0.95rem, 1.2vw, 1.08rem)',
-                fontFamily: "'Inter', sans-serif",
-                color: 'rgba(255, 255, 255, 0.94)',
                 textDecoration: 'none',
-                letterSpacing: '-0.015em',
               }}
             >
-              AmanaP
+              ODSTUDIO
             </a>
 
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden md:flex items-center gap-7 cinematic-nav-links">
               {navItems.map((item) => (
                 <a
                   key={item.targetId}
@@ -179,11 +207,7 @@ export default function Hero({ scrollProgressRef, mouseRef }: HeroProps) {
                   onClick={handleNavClick(item.targetId)}
                   className="relative transition-colors duration-300"
                   style={{
-                    fontSize: '0.78rem',
-                    fontFamily: "'Inter', sans-serif",
-                    color: 'rgba(232, 238, 255, 0.56)',
                     textDecoration: 'none',
-                    letterSpacing: '0.08em',
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.color = 'rgba(255, 255, 255, 0.94)';
@@ -197,49 +221,30 @@ export default function Hero({ scrollProgressRef, mouseRef }: HeroProps) {
               ))}
             </div>
 
-            <div className="space-nav-orbit flex items-center justify-center rounded-full">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="rgba(216, 226, 255, 0.76)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
-              </svg>
-            </div>
+            <div className="space-nav-orbit flex items-center justify-center rounded-full">NASA</div>
           </div>
         </nav>
 
-        <div
-          ref={textProximityRef}
-          className="absolute inset-0 flex flex-col items-center justify-center -translate-y-12 md:-translate-y-20"
-        >
-          <div ref={titleRef} className="text-center md:-translate-x-8">
+        <div ref={textProximityRef} className="cinematic-title-stage">
+          <div ref={titleRef} className="cinematic-title-lockup">
             <h1 className="space-hero-heading" aria-label={titleText}>
               <VariableProximity
                 label={titleText}
                 containerRef={textProximityRef}
-                fromFontVariationSettings="'wght' 700"
-                toFontVariationSettings="'wght' 900"
+                fromFontVariationSettings="'wght' 500"
+                toFontVariationSettings="'wght' 700"
                 radius={150}
                 falloff="gaussian"
                 letterClassName="space-hero-letter"
-                getLetterStyle={(index) => ({
-                  animationDelay: `${500 + index * 130}ms`,
-                  marginLeft: titleLetterOffsets[index],
-                })}
+                getLetterStyle={(index) => ({ animationDelay: `${120 + index * 18}ms` })}
               />
             </h1>
           </div>
 
-          <div ref={subtitleRef} className="space-hero-subtitle text-center md:-translate-x-8">
+          <div ref={subtitleRef} className="space-hero-subtitle">
             <p className="space-hero-kicker font-medium uppercase">
               <VariableProximity
-                label={'\u54c1\u724c\u8bbe\u8ba1\u4f5c\u54c1\u96c6'}
+                label={'SMART-EARTH-PROTECTION'}
                 containerRef={textProximityRef}
                 fromFontVariationSettings="'wght' 500"
                 toFontVariationSettings="'wght' 800"

@@ -118,13 +118,12 @@ export default function IntroGate() {
       idleTweens.forEach((tween) => tween.kill());
 
       gsap.killTweensOf([counter, rings, overlay]);
-      window.dispatchEvent(new CustomEvent('portfolio-enter'));
-
       gsap
         .timeline({
           defaults: { ease: 'power4.inOut' },
           onComplete: () => {
             overlay.remove();
+            window.dispatchEvent(new CustomEvent('portfolio-enter'));
           },
         })
         .set(rings, {
