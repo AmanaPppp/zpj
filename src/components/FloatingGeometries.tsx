@@ -100,7 +100,6 @@ function createAsteroidMaterial(id: number, textureLoader: THREE.TextureLoader) 
 export default function FloatingGeometries({ mouseRef }: FloatingGeometriesProps) {
   const groupRef = useRef<THREE.Group>(null!);
   const revealTweenRef = useRef<gsap.core.Tween | null>(null);
-  const heroRevealCompleteRef = useRef(false);
   const objects = useLoader(OBJLoader, ASTEROID_IDS.map((id) => `${MODEL_ROOT}/asteroid${id}/model.obj`));
 
   const asteroidModels = useMemo<AsteroidModel[]>(() => {
@@ -171,43 +170,24 @@ export default function FloatingGeometries({ mouseRef }: FloatingGeometriesProps
     group.visible = false;
     group.scale.setScalar(0);
 
-    const hideAsteroids = () => {
-      revealTweenRef.current?.kill();
-      group.visible = false;
-      group.scale.setScalar(0);
-      heroRevealCompleteRef.current = false;
-    };
-
-    const unlockAsteroids = () => {
-      heroRevealCompleteRef.current = true;
-    };
-
     const showAsteroids = () => {
       revealTweenRef.current?.kill();
-      group.visible = true;
       group.scale.setScalar(0);
+      group.visible = true;
 
       revealTweenRef.current = gsap.to(group.scale, {
         x: 1,
         y: 1,
         z: 1,
-        duration: 1.25,
+        duration: 1.45,
+        delay: 0.65,
         ease: 'power3.out',
       });
     };
 
-    const handleScroll = () => {
-      if (!heroRevealCompleteRef.current || window.scrollY < window.innerHeight * 0.85 || group.visible) return;
-      showAsteroids();
-    };
-
-    window.addEventListener('portfolio-enter', hideAsteroids);
-    window.addEventListener('earth-cinematic-reveal-complete', unlockAsteroids);
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('portfolio-enter', showAsteroids);
     return () => {
-      window.removeEventListener('portfolio-enter', hideAsteroids);
-      window.removeEventListener('earth-cinematic-reveal-complete', unlockAsteroids);
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('portfolio-enter', showAsteroids);
       revealTweenRef.current?.kill();
     };
   }, []);
