@@ -29,7 +29,7 @@ export default function Hero({ scrollProgressRef, sceneShellRef, mouseRef }: Her
   const transitionRef = useRef<HTMLDivElement>(null!);
   const textProximityRef = useRef<HTMLDivElement>(null!);
   const navRef = useRef<HTMLElement>(null!);
-  const titleText = 'AMANAP';
+  const titleText = 'AmanaP-Portfolio';
 
   const handleNavClick = (targetId: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
@@ -189,16 +189,6 @@ export default function Hero({ scrollProgressRef, sceneShellRef, mouseRef }: Her
               padding: '0',
             }}
           >
-            <a
-              href="#"
-              className="font-bold tracking-tight cinematic-nav-brand"
-              style={{
-                textDecoration: 'none',
-              }}
-            >
-              ODSTUDIO
-            </a>
-
             <div className="hidden md:flex items-center gap-7 cinematic-nav-links">
               {navItems.map((item) => (
                 <a
@@ -221,7 +211,7 @@ export default function Hero({ scrollProgressRef, sceneShellRef, mouseRef }: Her
               ))}
             </div>
 
-            <div className="space-nav-orbit flex items-center justify-center rounded-full">NASA</div>
+            <div className="space-nav-orbit flex items-center justify-center rounded-full">AMANAP</div>
           </div>
         </nav>
 
@@ -244,7 +234,7 @@ export default function Hero({ scrollProgressRef, sceneShellRef, mouseRef }: Her
           <div ref={subtitleRef} className="space-hero-subtitle">
             <p className="space-hero-kicker font-medium uppercase">
               <VariableProximity
-                label={'SMART-EARTH-PROTECTION'}
+                label="Brand Design Portfolio"
                 containerRef={textProximityRef}
                 fromFontVariationSettings="'wght' 500"
                 toFontVariationSettings="'wght' 800"
@@ -255,7 +245,7 @@ export default function Hero({ scrollProgressRef, sceneShellRef, mouseRef }: Her
             </p>
             <p className="space-hero-caption mt-2 uppercase">
               <VariableProximity
-                label="Brand Design Portfolio"
+                label="品牌设计作品集"
                 containerRef={textProximityRef}
                 fromFontVariationSettings="'wght' 400"
                 toFontVariationSettings="'wght' 700"

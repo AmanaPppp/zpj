@@ -1,5 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&family=Montserrat:wght@700;800;900&display=swap');
 
+@font-face {
+  font-family: 'ArtierEN';
+  src: url('/fonts/ArtierEN/ArtierEN-2.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -421,17 +429,6 @@
   text-transform: uppercase;
 }
 
-.space-nav-shell::before {
-  content: 'SMART-EARTH-PROTECTION';
-  position: fixed;
-  left: clamp(18px, 2vw, 30px);
-  top: clamp(18px, 2vw, 30px);
-  font-size: clamp(0.58rem, 0.72vw, 0.72rem);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.36);
-}
-
 .space-nav-shell::after {
   content: 'JOIN-THE-PROGRAM';
   position: absolute;
@@ -516,11 +513,11 @@
   gap: 0;
   width: 100%;
   min-height: 0;
-  font-family: 'Inter', 'Arial Narrow', sans-serif;
-  font-size: clamp(4.9rem, 11.8vw, 13.8rem);
-  font-weight: 500;
-  line-height: 0.78;
-  letter-spacing: -0.078em;
+  font-family: 'ArtierEN', 'Inter', 'Arial Narrow', sans-serif;
+  font-size: clamp(5rem, 11.2vw, 13.8rem);
+  font-weight: 400;
+  line-height: 0.72;
+  letter-spacing: 0.018em;
   color: rgba(245, 247, 250, 0.9);
   text-shadow:
     0 0 1px rgba(255, 255, 255, 0.8),
@@ -553,7 +550,7 @@
   filter: blur(10px);
   color: rgba(246, 247, 249, 0.92);
   font-family: inherit;
-  font-weight: 700;
+  font-weight: 400;
   letter-spacing: inherit;
   transition:
     color 0.3s ease,
@@ -677,7 +674,7 @@
 
 @media (max-width: 720px) {
   .space-hero-heading {
-    font-size: clamp(3.9rem, 18vw, 8rem);
+    font-size: clamp(3.1rem, 13.8vw, 6.4rem);
     min-height: 0;
     white-space: nowrap;
   }

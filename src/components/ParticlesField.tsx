@@ -16,8 +16,8 @@ export default function ParticlesField({ mouseRef }: ParticlesFieldProps) {
   const materialRef = useRef<THREE.ShaderMaterial>(null!);
 
   // Dense starfield like the reference video
-  const FAR_PARTICLE_COUNT = 18000;
-  const NEAR_PARTICLE_COUNT = 5000;
+  const FAR_PARTICLE_COUNT = 26500;
+  const NEAR_PARTICLE_COUNT = 7500;
   const PARTICLE_COUNT = FAR_PARTICLE_COUNT + NEAR_PARTICLE_COUNT;
 
   const { positions, sizes, brightness } = useMemo(() => {
