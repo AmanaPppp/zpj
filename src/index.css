@@ -498,7 +498,7 @@
 .cinematic-title-lockup {
   position: absolute;
   left: 50%;
-  bottom: 0;
+  bottom: clamp(13rem, 26vh, 18rem);
   width: 100vw;
   text-align: center;
   transform: translateX(-50%);
@@ -563,6 +563,11 @@
   color: #cbd5e1;
   transform: translateY(-2px) scale(1);
   text-shadow: 0 0 20px rgba(203, 213, 225, 0.5);
+}
+
+.space-hero-letter-encrypted {
+  color: rgba(203, 213, 225, 0.52);
+  text-shadow: 0 0 18px rgba(148, 163, 184, 0.22);
 }
 
 .is-title-visible .space-hero-letter {

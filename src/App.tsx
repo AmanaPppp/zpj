@@ -4,6 +4,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Hero from './sections/Hero';
 import AboutSection from './sections/AboutSection';
+import SkillsIntroSection from './sections/SkillsIntroSection';
 import SkillsSection from './sections/SkillsSection';
 import ProjectsSection from './sections/ProjectsSection';
 import ContactSection from './sections/ContactSection';
@@ -74,6 +75,7 @@ export default function App() {
           className="subpage-cosmic-bg relative overflow-hidden"
         >
           <AboutSection />
+          <SkillsIntroSection />
           <SkillsSection />
           <ProjectsSection />
           <ContactSection />

@@ -1,6 +1,7 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import DecryptedText from '../components/DecryptedText';
 import VariableProximity from '../components/VariableProximity';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -30,6 +31,7 @@ export default function Hero({ scrollProgressRef, sceneShellRef, mouseRef }: Her
   const textProximityRef = useRef<HTMLDivElement>(null!);
   const navRef = useRef<HTMLElement>(null!);
   const titleText = 'AmanaP-Portfolio';
+  const [titleVisible, setTitleVisible] = useState(false);
 
   const handleNavClick = (targetId: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
@@ -138,6 +140,7 @@ export default function Hero({ scrollProgressRef, sceneShellRef, mouseRef }: Her
     }
 
     const showHeroText = () => {
+      setTitleVisible(false);
       titleRef.current?.classList.remove('is-title-visible');
       subtitleRef.current?.classList.remove('is-subtitle-visible');
 
@@ -149,6 +152,7 @@ export default function Hero({ scrollProgressRef, sceneShellRef, mouseRef }: Her
         ease: 'power2.out',
         onStart: () => {
           window.requestAnimationFrame(() => {
+            setTitleVisible(true);
             titleRef.current?.classList.add('is-title-visible');
             subtitleRef.current?.classList.add('is-subtitle-visible');
           });
@@ -218,15 +222,15 @@ export default function Hero({ scrollProgressRef, sceneShellRef, mouseRef }: Her
         <div ref={textProximityRef} className="cinematic-title-stage">
           <div ref={titleRef} className="cinematic-title-lockup">
             <h1 className="space-hero-heading" aria-label={titleText}>
-              <VariableProximity
-                label={titleText}
-                containerRef={textProximityRef}
-                fromFontVariationSettings="'wght' 500"
-                toFontVariationSettings="'wght' 700"
-                radius={150}
-                falloff="gaussian"
-                letterClassName="space-hero-letter"
-                getLetterStyle={(index) => ({ animationDelay: `${120 + index * 18}ms` })}
+              <DecryptedText
+                text={titleText}
+                animateOn="active"
+                active={titleVisible}
+                speed={42}
+                sequential
+                revealDirection="center"
+                className="space-hero-letter"
+                encryptedClassName="space-hero-letter space-hero-letter-encrypted"
               />
             </h1>
           </div>
