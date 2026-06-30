@@ -7,9 +7,10 @@ gsap.registerPlugin(ScrollTrigger);
 const displayFont = "'Swis721 Blk BT', 'Swis721 Blk BT Black', 'Arial Black', 'Montserrat', sans-serif";
 const chineseFont = "'Source Han Sans CN', 'Source Han Sans SC', 'Noto Sans CJK SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif";
 const accent = '#7b1f3e';
+const skillIntroLift = 'clamp(110px, 16vh, 190px)';
 const designerWords = Array.from({ length: 8 }, (_, index) => `Designer-${index}`);
 
-function DesignerLoopFrame({ placement = 'upper' }: { placement?: 'upper' | 'lower' }) {
+function DesignerLoopFrame({ placement = 'upper' }: { placement?: 'upper' | 'lower' | 'beside-three' }) {
   const renderWords = (prefix: string) =>
     designerWords.map((key) => (
       <span className="designer-loop-word" key={`${prefix}-${key}`}>
@@ -24,7 +25,7 @@ function DesignerLoopFrame({ placement = 'upper' }: { placement?: 'upper' | 'low
           .designer-loop-frame {
             position: absolute;
             right: clamp(28px, 4vw, 72px);
-            top: clamp(132px, 17vh, 190px);
+            top: calc(clamp(132px, 17vh, 190px) - ${skillIntroLift});
             width: min(32vw, 642px);
             aspect-ratio: 1.34;
             z-index: 11;
@@ -39,8 +40,15 @@ function DesignerLoopFrame({ placement = 'upper' }: { placement?: 'upper' | 'low
           .designer-loop-frame-lower {
             right: auto;
             left: clamp(1020px, 52vw, 1180px);
-            top: clamp(650px, 63vh, 760px);
+            top: calc(clamp(650px, 63vh, 760px) - ${skillIntroLift});
             width: min(32vw, 642px);
+          }
+
+          .designer-loop-frame-beside-three {
+            right: auto;
+            left: clamp(120px, 18vw, 360px);
+            top: calc(clamp(1180px, 138vh, 1460px) - ${skillIntroLift});
+            width: min(34vw, 642px);
           }
 
           .designer-loop-core {
@@ -216,7 +224,7 @@ function SkillDetailTwo() {
       style={{
         position: 'absolute',
         left: 'calc(clamp(24px, 3vw, 56px) + 8px)',
-        top: 'clamp(535px, 66vh, 720px)',
+        top: `calc(clamp(535px, 66vh, 720px) - ${skillIntroLift})`,
         width: 'min(760px, 42vw)',
         height: '260px',
         zIndex: 11,
@@ -352,6 +360,170 @@ function SkillDetailTwo() {
   );
 }
 
+function SkillDetailThree() {
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        position: 'absolute',
+        right: 'clamp(24px, 2vw, 48px)',
+        top: `calc(clamp(535px, 66vh, 720px) + clamp(535px, 66vh, 720px) - 7vh - ${skillIntroLift})`,
+        width: 'min(860px, 58vw)',
+        height: '360px',
+        zIndex: 11,
+        color: '#fff',
+        fontFamily: displayFont,
+        fontWeight: 900,
+        letterSpacing: '-0.025em',
+        textTransform: 'uppercase',
+        pointerEvents: 'none',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          right: 0,
+          top: 0,
+          fontSize: 'clamp(74px, 5.4vw, 118px)',
+          lineHeight: 0.74,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        03
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          right: 0,
+          top: 'clamp(84px, 6.5vw, 122px)',
+          width: 'clamp(72px, 5.6vw, 116px)',
+          height: '5px',
+          background: accent,
+        }}
+      />
+
+      <div
+        style={{
+          position: 'absolute',
+          right: 0,
+          top: 'clamp(112px, 8.6vw, 164px)',
+          fontSize: 'clamp(48px, 4.3vw, 82px)',
+          lineHeight: 0.82,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        I'M&nbsp; A
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          right: 'clamp(210px, 19vw, 300px)',
+          top: 'clamp(128px, 9.8vw, 186px)',
+          fontFamily: chineseFont,
+          fontSize: 'clamp(24px, 2.05vw, 36px)',
+          fontWeight: 700,
+          lineHeight: 1,
+          color: 'rgba(255, 255, 255, 0.72)',
+          letterSpacing: '0',
+          textTransform: 'none',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        我就是那个......
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          right: 0,
+          top: 'clamp(190px, 14.1vw, 250px)',
+          fontSize: 'clamp(38px, 3.7vw, 64px)',
+          lineHeight: 0.9,
+          color: accent,
+          textTransform: 'none',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        IP Design
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          right: 'clamp(250px, 22vw, 350px)',
+          top: 'clamp(207px, 15.4vw, 269px)',
+          fontFamily: chineseFont,
+          fontSize: 'clamp(20px, 1.7vw, 30px)',
+          fontWeight: 700,
+          lineHeight: 1,
+          color: 'rgba(255, 255, 255, 0.72)',
+          letterSpacing: '0',
+          textTransform: 'none',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        VI设计
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          right: 0,
+          top: 'clamp(270px, 19.4vw, 342px)',
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 'clamp(18px, 1.4vw, 28px)',
+          textTransform: 'none',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <span
+          style={{
+            fontFamily: chineseFont,
+            fontSize: 'clamp(20px, 1.7vw, 30px)',
+            fontWeight: 700,
+            lineHeight: 1,
+            color: 'rgba(255, 255, 255, 0.72)',
+            letterSpacing: '0',
+          }}
+        >
+          品牌与企业形象
+        </span>
+        <span
+          style={{
+            fontSize: 'clamp(35px, 3.5vw, 60px)',
+            lineHeight: 0.9,
+            color: accent,
+          }}
+        >
+          Intellectual Property
+        </span>
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          display: 'none',
+          right: 'clamp(470px, 40vw, 610px)',
+          top: 'clamp(285px, 20.6vw, 359px)',
+          fontFamily: chineseFont,
+          fontSize: 'clamp(20px, 1.7vw, 30px)',
+          fontWeight: 700,
+          lineHeight: 1,
+          color: 'rgba(255, 255, 255, 0.72)',
+          letterSpacing: '0',
+          textTransform: 'none',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        品牌与企业形象
+      </div>
+    </div>
+  );
+}
+
 export default function SkillsIntroSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const lockupRef = useRef<HTMLDivElement>(null);
@@ -385,9 +557,9 @@ export default function SkillsIntroSection() {
       className="relative w-full"
       style={{
         minHeight: '58vh',
-        padding: '7vh clamp(24px, 3vw, 56px) 50vh',
+        padding: '7vh clamp(24px, 3vw, 56px) 125vh',
         zIndex: 10,
-        overflow: 'hidden',
+        overflow: 'visible',
       }}
     >
       <div
@@ -396,6 +568,7 @@ export default function SkillsIntroSection() {
           display: 'flex',
           alignItems: 'flex-start',
           gap: 'clamp(60px, 8vw, 150px)',
+          marginTop: `calc(0px - ${skillIntroLift})`,
           color: '#fff',
           fontFamily: displayFont,
           fontWeight: 900,
@@ -637,8 +810,10 @@ export default function SkillsIntroSection() {
       </div>
 
       <SkillDetailTwo />
+      <SkillDetailThree />
       <DesignerLoopFrame />
       <DesignerLoopFrame placement="lower" />
+      <DesignerLoopFrame placement="beside-three" />
     </section>
   );
 }

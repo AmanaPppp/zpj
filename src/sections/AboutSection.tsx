@@ -115,7 +115,7 @@ export default function AboutSection() {
                 fontWeight: 900,
                 letterSpacing: '0.02em',
                 lineHeight: 1,
-                color: 'rgba(255, 255, 255, 0.92)',
+                color: '#761e3c',
               }}
             />
             <SplitText
