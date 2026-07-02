@@ -7,6 +7,8 @@
     "dev": "vite --configLoader native",
     "build": "tsc -b && vite build --configLoader native",
     "lint": "eslint .",
+    "test:poster-layout": "node scripts/assert-poster-wall-layout.mjs",
+    "test:portal-reveal": "node scripts/assert-portal-reveal.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

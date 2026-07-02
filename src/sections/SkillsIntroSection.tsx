@@ -46,7 +46,7 @@ function DesignerLoopFrame({ placement = 'upper' }: { placement?: 'upper' | 'low
 
           .designer-loop-frame-beside-three {
             right: auto;
-            left: clamp(120px, 18vw, 360px);
+            left: clamp(160px, 21vw, 420px);
             top: calc(clamp(1180px, 138vh, 1460px) - ${skillIntroLift});
             width: min(34vw, 642px);
           }
@@ -366,7 +366,7 @@ function SkillDetailThree() {
       aria-hidden="true"
       style={{
         position: 'absolute',
-        right: 'clamp(24px, 2vw, 48px)',
+        right: 'clamp(28px, 4vw, 72px)',
         top: `calc(clamp(535px, 66vh, 720px) + clamp(535px, 66vh, 720px) - 7vh - ${skillIntroLift})`,
         width: 'min(860px, 58vw)',
         height: '360px',
