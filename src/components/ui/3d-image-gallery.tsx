@@ -238,7 +238,7 @@ export default function StellarCardGallerySingle() {
 
   return (
     <CardProvider>
-      <div className="logo-gallery-page relative h-screen w-full overflow-hidden bg-black">
+      <div className="logo-gallery-page relative h-screen w-full overflow-hidden bg-white">
 
         <Canvas
           camera={{ position: [0, 0, 15], fov: 60 }}
@@ -258,7 +258,7 @@ export default function StellarCardGallerySingle() {
 
         <CardModal />
 
-        <div className="pointer-events-none absolute left-4 top-4 z-20 text-white">
+        <div className="pointer-events-none absolute left-4 top-4 z-20 text-black">
           <h1 className="text-2xl font-bold">Logo Design</h1>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { useCallback, useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ArrowLeft } from 'lucide-react';
 import SplitText from '../components/SplitText';
 import TargetCursor from '../components/TargetCursor';
 import BorderGlow from '../components/BorderGlow';
@@ -455,6 +456,15 @@ export default function ProjectsSection() {
               onPointerUp={handleSheetPointerEnd}
             >
               <span />
+            </button>
+            <button
+              type="button"
+              className="project-modal-exit"
+              onClick={closeProjectSheet}
+              aria-label="Exit project details"
+            >
+              <ArrowLeft aria-hidden="true" />
+              <span>{'\u9000\u51fa'}</span>
             </button>
             <button
               type="button"

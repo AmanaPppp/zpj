@@ -63,9 +63,15 @@ function roundUpToMultiple(value: number, multiple: number) {
   return Math.ceil(value / multiple) * multiple;
 }
 
-export default function InfiniteFluidPosterWall() {
+type InfiniteFluidPosterWallProps = {
+  onReturn?: () => void;
+};
+
+export default function InfiniteFluidPosterWall({ onReturn }: InfiniteFluidPosterWallProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const logoVideoRef = useRef<HTMLVideoElement>(null);
+  const logoResetTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -184,7 +190,13 @@ export default function InfiniteFluidPosterWall() {
       activeCursor: 'grabbing',
       allowNativeTouchScrolling: false,
       minimumMovement: 1,
-      onPress() {
+      onPress(this: Draggable) {
+        const target = this.pointerEvent.target;
+        if (target instanceof Element && target.closest('.poster-wall-brand')) {
+          this.endDrag(this.pointerEvent);
+          return;
+        }
+
         root.classList.add('is-dragging');
         zoomCameraOut();
       },
@@ -201,10 +213,41 @@ export default function InfiniteFluidPosterWall() {
       resizeObserver.disconnect();
       draggable?.kill();
       gsap.killTweensOf([grid, depth]);
+      if (logoResetTimerRef.current !== null) {
+        window.clearTimeout(logoResetTimerRef.current);
+      }
     };
   }, []);
 
   const marqueeItems = Array.from({ length: 36 }, (_, index) => index);
+  const playLogoAnimation = () => {
+    const video = logoVideoRef.current;
+    if (!video || (!video.paused && !video.ended)) return;
+
+    const brand = video.parentElement;
+    if (logoResetTimerRef.current !== null) {
+      window.clearTimeout(logoResetTimerRef.current);
+      logoResetTimerRef.current = null;
+    }
+
+    video.currentTime = 0;
+    brand?.classList.add('is-playing');
+    video.play().catch(() => {
+      brand?.classList.remove('is-playing');
+    });
+  };
+
+  const resetLogoAnimation = () => {
+    const video = logoVideoRef.current;
+    if (!video) return;
+
+    video.parentElement?.classList.remove('is-playing');
+    logoResetTimerRef.current = window.setTimeout(() => {
+      video.pause();
+      video.currentTime = 0;
+      logoResetTimerRef.current = null;
+    }, 180);
+  };
 
   return (
     <div ref={rootRef} className="infinite-fluid-poster-wall" data-lenis-prevent>
@@ -225,6 +268,33 @@ export default function InfiniteFluidPosterWall() {
             </article>
           ))}
         </div>
+      </div>
+
+      <div
+        className="poster-wall-brand"
+        role={onReturn ? 'button' : undefined}
+        tabIndex={onReturn ? 0 : undefined}
+        aria-label={onReturn ? 'Return from poster wall' : 'Personal logo animation'}
+        onPointerEnter={playLogoAnimation}
+        onPointerDown={(event) => event.stopPropagation()}
+        onClick={onReturn}
+        onKeyDown={(event) => {
+          if (!onReturn || (event.key !== 'Enter' && event.key !== ' ')) return;
+          event.preventDefault();
+          onReturn();
+        }}
+      >
+        <img className="poster-wall-brand-static" src="/personal-logo-static.png" alt="" draggable={false} />
+        <video
+          ref={logoVideoRef}
+          className="poster-wall-brand-video"
+          src="/personal-logo-hover.webm"
+          poster="/personal-logo-static.png"
+          muted
+          playsInline
+          preload="auto"
+          onEnded={resetLogoAnimation}
+        />
       </div>
 
       {(['top', 'right', 'bottom', 'left'] as const).map((side) => (

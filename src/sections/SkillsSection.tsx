@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -7,7 +7,7 @@ import InfiniteFluidPosterWall from '../components/InfiniteFluidPosterWall';
 gsap.registerPlugin(ScrollTrigger);
 
 const accent = '#761e3c';
-const accentGradient = 'linear-gradient(to top, #761e3c 0%, #721b39 18%, #6a1935 34%, #5e162f 50%, #4e1227 66%, #390d1d 82%, #21070f 100%, #000000 135%)';
+const workFullscreenBackground = '#ffffff';
 
 function StartArrow({ variant }: { variant: 'left' | 'center' | 'right' }) {
   const config = {
@@ -80,7 +80,6 @@ export default function SkillsSection() {
   const buttonLabelRef = useRef<HTMLSpanElement>(null);
   const portalOverlayRef = useRef<HTMLDivElement>(null);
   const portalContentRef = useRef<HTMLDivElement>(null);
-  const returnButtonRef = useRef<HTMLButtonElement>(null);
   const portalTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const isPortalAnimatingRef = useRef(false);
   const scrollLockRef = useRef<{
@@ -269,15 +268,6 @@ export default function SkillsSection() {
         defaults: { ease: 'power3.inOut' },
         onComplete: () => {
           isPortalAnimatingRef.current = false;
-          const currentReturnButton = returnButtonRef.current;
-          if (currentReturnButton) {
-            gsap.to(currentReturnButton, {
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.36,
-              ease: 'power2.out',
-            });
-          }
         },
       })
       .to(label, {
@@ -339,7 +329,6 @@ export default function SkillsSection() {
     const label = buttonLabelRef.current;
     const portalOverlay = portalOverlayRef.current;
     const portalContent = portalContentRef.current;
-    const returnButton = returnButtonRef.current;
     const stage = stageRef.current;
     if (!button || !label || !portalOverlay || !portalContent || !stage || isPortalAnimatingRef.current) return;
 
@@ -392,12 +381,6 @@ export default function SkillsSection() {
           releasePortalScroll();
           isPortalAnimatingRef.current = false;
         },
-      })
-      .to(returnButton, {
-        autoAlpha: 0,
-        y: -8,
-        duration: 0.22,
-        ease: 'power2.out',
       })
       .to(
         portalOverlay,
@@ -469,8 +452,8 @@ export default function SkillsSection() {
             padding: 'clamp(6px, 1vw, 10px) clamp(27px, 4.1vw, 41px)',
             border: 0,
             borderRadius: '12px',
-            background: isStartHovered ? accentGradient : '#fff',
-            color: isStartHovered ? '#fff' : accent,
+            background: '#fff',
+            color: accent,
             fontFamily: "'Swis721 Blk BT', 'Swis721 Blk BT Black', 'Arial Black', 'Montserrat', sans-serif",
             fontSize: 'clamp(41px, 6vw, 70px)',
             fontWeight: 900,
@@ -504,41 +487,13 @@ export default function SkillsSection() {
                 pointerEvents: 'none',
                 visibility: 'hidden',
                 overflow: 'hidden',
-                background: accentGradient,
+                background: workFullscreenBackground,
               }}
             >
               <div ref={portalContentRef} className="work-portal-content">
-                <InfiniteFluidPosterWall />
+                <InfiniteFluidPosterWall onReturn={handleReturnClick} />
               </div>
             </div>
-            {isPortalOpen && (
-              <button
-                ref={returnButtonRef}
-                type="button"
-                onClick={handleReturnClick}
-                style={{
-                  position: 'fixed',
-                  left: 'clamp(18px, 3vw, 42px)',
-                  top: 'clamp(18px, 3vw, 42px)',
-                  zIndex: 2147483647,
-                  padding: '10px 18px',
-                  border: '1px solid rgba(255, 255, 255, 0.72)',
-                  borderRadius: '999px',
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  color: '#fff',
-                  fontSize: '16px',
-                  fontWeight: 700,
-                  lineHeight: 1,
-                  letterSpacing: '0',
-                  cursor: 'pointer',
-                  opacity: 0,
-                  visibility: 'hidden',
-                  transform: 'translateY(-8px)',
-                }}
-              >
-                返回
-              </button>
-            )}
           </>,
           portalRoot,
         )}
