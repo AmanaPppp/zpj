@@ -1,4 +1,5 @@
 import { useCallback, useRef, useEffect, useState } from 'react';
+import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowLeft } from 'lucide-react';
@@ -6,10 +7,18 @@ import SplitText from '../components/SplitText';
 import TargetCursor from '../components/TargetCursor';
 import BorderGlow from '../components/BorderGlow';
 import SectionParticleEffect from '../components/SectionParticleEffect';
+import { DottedSurface } from '@/components/ui/dotted-surface';
+import ProjectWebGLImage from '@/components/ProjectWebGLImage';
 
 gsap.registerPlugin(ScrollTrigger);
 
 type ParticleMode = 'idle' | 'active' | 'explode' | 'hidden';
+type DetailLenisEvent = { velocity?: number };
+type DetailLenisInstance = {
+  destroy: () => void;
+  on: (event: 'scroll', callback: (event: DetailLenisEvent) => void) => void;
+  raf: (time: number) => void;
+};
 
 const projects = [
   {
@@ -38,28 +47,23 @@ const projects = [
   },
 ];
 
-const projectDetails: Record<string, { detail: string; scope: string[]; outcome: string }> = {
-  '01': {
-    detail: '\u56f4\u7ed5\u54c1\u724c\u5b9a\u4f4d\u3001\u6807\u5fd7\u7cfb\u7edf\u3001\u8272\u5f69\u8bed\u8a00\u4e0e\u7248\u5f0f\u89c4\u8303\u5efa\u7acb\u5b8c\u6574\u89c6\u89c9\u8bc6\u522b\uff0c\u5e2e\u52a9\u54c1\u724c\u5728\u5546\u4e1a\u89e6\u70b9\u4e2d\u4fdd\u6301\u7a33\u5b9a\u3001\u6e05\u6670\u4e14\u53ef\u5ef6\u5c55\u7684\u8868\u8fbe\u3002',
-    scope: ['\u54c1\u724c\u5b9a\u4f4d\u68b3\u7406', 'Logo \u4e0e\u8bc6\u522b\u7cfb\u7edf', '\u8272\u5f69/\u5b57\u4f53/\u7248\u5f0f\u89c4\u8303', '\u6838\u5fc3\u5e94\u7528\u5ef6\u5c55'],
-    outcome: '\u5f62\u6210\u4e00\u5957\u80fd\u591f\u7528\u4e8e\u5b98\u7f51\u3001\u793e\u5a92\u3001\u63d0\u6848\u548c\u7ebf\u4e0b\u7269\u6599\u7684\u54c1\u724c\u89c6\u89c9\u7cfb\u7edf\u3002',
+const projectGalleryItems = [
+  {
+    title: '\u54c1\u724c\u4e3b\u89c6\u89c9',
+    subtitle: 'Visual Identity',
+    image: '/project-detail/brand-detail-01.png',
   },
-  '02': {
-    detail: '\u4ece\u4ea7\u54c1\u5305\u88c5\u5230\u7ebf\u4e0b\u89e6\u70b9\uff0c\u5efa\u7acb\u5177\u6709\u843d\u5730\u611f\u7684\u89c6\u89c9\u7269\u6599\u7cfb\u7edf\uff0c\u8ba9\u54c1\u724c\u5728\u771f\u5b9e\u6d88\u8d39\u573a\u666f\u4e2d\u4fdd\u6301\u7edf\u4e00\u8bc6\u522b\u3002',
-    scope: ['\u5305\u88c5\u7ed3\u6784\u89c6\u89c9', '\u7ebf\u4e0b\u6d77\u62a5\u4e0e\u6298\u9875', '\u6750\u8d28\u4e0e\u5de5\u827a\u5efa\u8bae', '\u751f\u4ea7\u4ea4\u4ed8\u89c4\u8303'],
-    outcome: '\u63d0\u5347\u4ea7\u54c1\u9648\u5217\u8fa8\u8bc6\u5ea6\uff0c\u5e76\u8ba9\u5305\u88c5\u4e0e\u54c1\u724c\u4e3b\u89c6\u89c9\u4fdd\u6301\u4e00\u81f4\u3002',
+  {
+    title: '\u5e94\u7528\u573a\u666f\u5ef6\u5c55',
+    subtitle: 'Brand Applications',
+    image: '/project-detail/brand-detail-02.jpg',
   },
-  '03': {
-    detail: '\u5c06\u8bbe\u8ba1\u8bed\u8a00\u62c6\u89e3\u4e3a\u53ef\u6267\u884c\u7684\u89c4\u5219\uff0c\u5305\u62ec\u6807\u5fd7\u7528\u6cd5\u3001\u8272\u5f69\u6bd4\u4f8b\u3001\u5b57\u4f53\u5c42\u7ea7\u3001\u56fe\u5f62\u8d44\u4ea7\u548c\u5e94\u7528\u793a\u4f8b\u3002',
-    scope: ['\u89c6\u89c9\u89c4\u8303\u624b\u518c', '\u7ec4\u4ef6\u5316\u8bbe\u8ba1\u8d44\u4ea7', '\u5e94\u7528\u6a21\u677f', '\u9519\u8bef\u793a\u4f8b\u4e0e\u8fb9\u754c\u8bf4\u660e'],
-    outcome: '\u8ba9\u56e2\u961f\u5728\u540e\u7eed\u4f20\u64ad\u548c\u8bbe\u8ba1\u6267\u884c\u4e2d\u62e5\u6709\u7edf\u4e00\u3001\u660e\u786e\u7684\u5224\u65ad\u6807\u51c6\u3002',
+  {
+    title: '\u7269\u6599\u4e0e\u89e6\u70b9',
+    subtitle: 'Touchpoint System',
+    image: '/project-detail/brand-detail-03.jpg',
   },
-  '04': {
-    detail: '\u4ee5\u89d2\u8272\u8bbe\u5b9a\u3001\u9020\u578b\u8bed\u8a00\u548c\u8868\u60c5\u4f53\u7cfb\u6784\u5efa\u54c1\u724c\u4eba\u683c\uff0c\u8ba9\u54c1\u724c\u53d9\u4e8b\u62e5\u6709\u66f4\u5177\u8bb0\u5fc6\u70b9\u7684\u89c6\u89c9\u8f7d\u4f53\u3002',
-    scope: ['\u89d2\u8272\u8bbe\u5b9a', '\u57fa\u7840\u9020\u578b\u4e0e\u6bd4\u4f8b', '\u8868\u60c5/\u52a8\u4f5c\u5ef6\u5c55', '\u573a\u666f\u5316\u5e94\u7528'],
-    outcome: '\u5efa\u7acb\u53ef\u6301\u7eed\u8fd0\u8425\u7684\u54c1\u724c IP \u8d44\u4ea7\uff0c\u7528\u4e8e\u793e\u5a92\u3001\u6d3b\u52a8\u548c\u54c1\u724c\u4f20\u64ad\u3002',
-  },
-};
+];
 
 export default function ProjectsSection() {
   const sectionRef = useRef<HTMLDivElement>(null!);
@@ -67,6 +71,9 @@ export default function ProjectsSection() {
   const listRef = useRef<HTMLDivElement>(null!);
   const backdropRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const detailScrollRef = useRef<HTMLDivElement>(null);
+  const detailContentRef = useRef<HTMLDivElement>(null);
+  const detailCursorRef = useRef<HTMLDivElement>(null);
   const particleResetTimerRef = useRef<number | null>(null);
   const dragStateRef = useRef({ currentY: 0, dragging: false, pointerId: -1, startY: 0 });
   const closingRef = useRef(false);
@@ -227,6 +234,92 @@ export default function ProjectsSection() {
     };
   }, [activeProject, closeProjectSheet]);
 
+  useEffect(() => {
+    if (!activeProject || !detailScrollRef.current || !detailContentRef.current) return;
+
+    const LenisConstructor = Lenis as unknown as new (options: Record<string, unknown>) => DetailLenisInstance;
+    const lenis = new LenisConstructor({
+      content: detailContentRef.current,
+      duration: 1.15,
+      easing: (value: number) => Math.min(1, 1.001 - Math.pow(2, -10 * value)),
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      touchMultiplier: 1.4,
+      wheelMultiplier: 0.9,
+      wrapper: detailScrollRef.current,
+    });
+
+    const cards = gsap.utils.toArray<HTMLElement>('.project-gallery-card', detailContentRef.current);
+    const skewTo = cards.map((card) =>
+      gsap.quickTo(card, 'skewY', {
+        duration: 0.42,
+        ease: 'power3.out',
+      }),
+    );
+
+    const handleScroll = ({ velocity = 0 }: DetailLenisEvent) => {
+      const skew = gsap.utils.clamp(-8, 8, -velocity * 0.28);
+      skewTo.forEach((setSkew) => setSkew(skew));
+      gsap.to(cards, {
+        skewY: 0,
+        duration: 0.68,
+        ease: 'power3.out',
+        overwrite: 'auto',
+      });
+    };
+
+    cards.forEach((card) => {
+      gsap.set(card, {
+        transformOrigin: '50% 50%',
+        willChange: 'transform',
+      });
+    });
+
+    lenis.on('scroll', handleScroll);
+
+    const updateLenis = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+
+    gsap.ticker.add(updateLenis);
+
+    return () => {
+      gsap.ticker.remove(updateLenis);
+      gsap.killTweensOf(cards);
+      lenis.destroy();
+    };
+  }, [activeProject]);
+
+  useEffect(() => {
+    if (!activeProject || !detailCursorRef.current || !modalRef.current) return;
+
+    const cursor = detailCursorRef.current;
+    const modal = modalRef.current;
+    const xTo = gsap.quickTo(cursor, 'x', { duration: 0.46, ease: 'power3.out' });
+    const yTo = gsap.quickTo(cursor, 'y', { duration: 0.46, ease: 'power3.out' });
+    const scaleTo = gsap.quickTo(cursor, 'scale', { duration: 0.28, ease: 'power3.out' });
+
+    const handleMouseMove = (event: MouseEvent) => {
+      xTo(event.clientX);
+      yTo(event.clientY);
+    };
+
+    const handleImageHover = (event: Event) => {
+      const isHovering = Boolean((event as CustomEvent<boolean>).detail);
+      cursor.classList.toggle('is-active', isHovering);
+      scaleTo(isHovering ? 1 : 0.34);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    modal.addEventListener('project-image-hover', handleImageHover);
+    gsap.set(cursor, { scale: 0.34, xPercent: -50, yPercent: -50 });
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      modal.removeEventListener('project-image-hover', handleImageHover);
+    };
+  }, [activeProject]);
+
   const handleSheetPointerDown = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
     if (!modalRef.current || closingRef.current || event.button !== 0) return;
 
@@ -366,7 +459,7 @@ export default function ProjectsSection() {
                 coneSpread={24}
                 animated={i === 0}
                 fillOpacity={0}
-                colors={['#c084fc', '#f472b6', '#38bdf8']}
+                colors={['#c084fc', '#f472b6', '#fb7185']}
                 role="button"
                 tabIndex={0}
                 style={{ cursor: 'pointer' }}
@@ -421,9 +514,9 @@ export default function ProjectsSection() {
                         className="rounded-full px-3 py-1 text-xs"
                         style={{
                           fontFamily: "'JetBrains Mono', monospace",
-                          background: 'rgba(92, 107, 192, 0.12)',
-                          color: 'rgba(159, 168, 218, 0.85)',
-                          border: '1px solid rgba(92, 107, 192, 0.2)',
+                          background: 'rgba(244, 114, 182, 0.12)',
+                          color: 'rgba(255, 211, 220, 0.86)',
+                          border: '1px solid rgba(244, 114, 182, 0.22)',
                         }}
                       >
                         {tag}
@@ -445,10 +538,11 @@ export default function ProjectsSection() {
             data-lenis-prevent
             onClick={(event) => event.stopPropagation()}
           >
+            <DottedSurface className="project-detail-dotted-surface" />
             <button
               type="button"
               className="project-sheet-handle"
-              aria-label="Close project details"
+              aria-label="Exit project details"
               onClick={handleSheetHandleClick}
               onPointerCancel={handleSheetPointerEnd}
               onPointerDown={handleSheetPointerDown}
@@ -466,40 +560,26 @@ export default function ProjectsSection() {
               <ArrowLeft aria-hidden="true" />
               <span>{'\u9000\u51fa'}</span>
             </button>
-            <button
-              type="button"
-              className="project-modal-close"
-              onClick={closeProjectSheet}
-              aria-label="Close project details"
-            >
-              X
-            </button>
 
-            <div className="project-sheet-scroll" data-lenis-prevent>
-              <p className="project-modal-kicker">PROJECT {activeProject.year}</p>
-              <h3>{activeProject.title}</h3>
-              <p className="project-modal-desc">{projectDetails[activeProject.year].detail}</p>
-
-              <div className="project-modal-tags">
-                {activeProject.tags.map((tag) => (
-                  <span key={tag}>{tag}</span>
-                ))}
-              </div>
-
-              <div className="project-modal-grid">
-                <div>
-                  <p className="project-modal-label">Scope</p>
-                  <ul>
-                    {projectDetails[activeProject.year].scope.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <p className="project-modal-label">Outcome</p>
-                  <p className="project-modal-outcome">{projectDetails[activeProject.year].outcome}</p>
+            <div ref={detailScrollRef} className="project-sheet-scroll" data-lenis-prevent>
+              <div ref={detailContentRef} className="project-sheet-content">
+                <div className="project-gallery" aria-label={`${activeProject.title} project images`}>
+                  {projectGalleryItems.map((item) => (
+                    <article className="project-gallery-card" key={item.image}>
+                      <div className="project-gallery-frame">
+                        <ProjectWebGLImage src={item.image} alt={item.title} />
+                      </div>
+                      <div className="project-gallery-caption">
+                        <h4>{item.title}</h4>
+                        <p>{item.subtitle}</p>
+                      </div>
+                    </article>
+                  ))}
                 </div>
               </div>
+            </div>
+            <div ref={detailCursorRef} className="project-detail-cursor" aria-hidden="true">
+              <img src="/project-detail/cursor-ama-mark.png" alt="" />
             </div>
           </div>
         </div>
