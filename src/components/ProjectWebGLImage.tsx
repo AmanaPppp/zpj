@@ -173,5 +173,9 @@ export default function ProjectWebGLImage({ alt, src }: ProjectWebGLImageProps) 
     };
   }, [src]);
 
-  return <div ref={rootRef} aria-label={alt} className="project-webgl-image" role="img" />;
+  return (
+    <div ref={rootRef} aria-label={alt} className="project-webgl-image" role="img">
+      <img src={src} alt="" aria-hidden="true" />
+    </div>
+  );
 }

@@ -9,6 +9,10 @@ import BorderGlow from '../components/BorderGlow';
 import SectionParticleEffect from '../components/SectionParticleEffect';
 import { DottedSurface } from '@/components/ui/dotted-surface';
 import ProjectWebGLImage from '@/components/ProjectWebGLImage';
+import brandDetail01 from '@/assets/project-detail/brand-detail-01.png';
+import brandDetail02 from '@/assets/project-detail/brand-detail-02.jpg';
+import brandDetail03 from '@/assets/project-detail/brand-detail-03.jpg';
+import cursorAmaMark from '@/assets/project-detail/cursor-ama-mark.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -51,17 +55,17 @@ const projectGalleryItems = [
   {
     title: '\u54c1\u724c\u4e3b\u89c6\u89c9',
     subtitle: 'Visual Identity',
-    image: '/project-detail/brand-detail-01.png',
+    image: brandDetail01,
   },
   {
     title: '\u5e94\u7528\u573a\u666f\u5ef6\u5c55',
     subtitle: 'Brand Applications',
-    image: '/project-detail/brand-detail-02.jpg',
+    image: brandDetail02,
   },
   {
     title: '\u7269\u6599\u4e0e\u89e6\u70b9',
     subtitle: 'Touchpoint System',
-    image: '/project-detail/brand-detail-03.jpg',
+    image: brandDetail03,
   },
 ];
 
@@ -561,7 +565,7 @@ export default function ProjectsSection() {
               <span>{'\u9000\u51fa'}</span>
             </button>
 
-            <div ref={detailScrollRef} className="project-sheet-scroll" data-lenis-prevent>
+            <div ref={detailScrollRef} className="project-sheet-scroll">
               <div ref={detailContentRef} className="project-sheet-content">
                 <div className="project-gallery" aria-label={`${activeProject.title} project images`}>
                   {projectGalleryItems.map((item) => (
@@ -579,7 +583,7 @@ export default function ProjectsSection() {
               </div>
             </div>
             <div ref={detailCursorRef} className="project-detail-cursor" aria-hidden="true">
-              <img src="/project-detail/cursor-ama-mark.png" alt="" />
+              <img src={cursorAmaMark} alt="" />
             </div>
           </div>
         </div>

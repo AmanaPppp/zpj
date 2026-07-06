@@ -1040,7 +1040,8 @@
   width: 100vw;
   height: 100dvh;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 174, 190, 0.36) rgba(255, 255, 255, 0.06);
@@ -1098,6 +1099,7 @@
 }
 
 .project-webgl-image,
+.project-webgl-image img,
 .project-webgl-image canvas {
   display: block;
   width: 100%;
@@ -1109,9 +1111,16 @@
   inset: 0;
 }
 
+.project-webgl-image img {
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+}
+
 .project-webgl-image canvas {
   position: absolute;
   inset: 0;
+  z-index: 1;
 }
 
 .project-gallery-image {
