@@ -862,11 +862,11 @@
 }
 
 .project-floating-card {
-  position: relative;
+  position: fixed;
+  left: 0;
+  top: 0;
   width: 100vw;
   height: 100dvh;
-  min-height: 100dvh;
-  max-height: 100dvh;
   border-radius: 0;
   padding: 0;
   background: #fff;
@@ -1109,6 +1109,7 @@
 .project-webgl-image {
   position: absolute;
   inset: 0;
+  cursor: pointer;
 }
 
 .project-webgl-image img {
@@ -1121,6 +1122,172 @@
   position: absolute;
   inset: 0;
   z-index: 1;
+}
+
+.project-webgl-image.is-fullscreen-transitioning {
+  visibility: hidden;
+}
+
+.project-image-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  width: 100vw;
+  height: 100dvh;
+  background: #fff;
+  overflow: hidden;
+  cursor: default;
+}
+
+.project-image-transition-scroll {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  height: 100dvh;
+  background: #fff;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(11, 11, 15, 0.28) rgba(11, 11, 15, 0.08);
+}
+
+.project-image-transition-hero {
+  position: relative;
+  z-index: 1;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background: #fff;
+}
+
+.project-image-transition canvas,
+.project-image-transition-fallback {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
+
+.project-image-transition canvas {
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 260ms ease;
+}
+
+.project-image-transition-fallback {
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+
+.project-image-transition.is-settled .project-image-transition-fallback {
+  z-index: 2;
+  opacity: 1;
+}
+
+.project-image-transition.is-settled canvas {
+  opacity: 0;
+}
+
+.project-image-transition-back {
+  position: fixed;
+  top: max(22px, env(safe-area-inset-top));
+  left: clamp(18px, 3vw, 42px);
+  z-index: 4;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(11, 11, 15, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  color: rgba(11, 11, 15, 0.82);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transition:
+    transform 220ms ease,
+    background-color 220ms ease,
+    color 220ms ease;
+}
+
+.project-image-transition-back:hover,
+.project-image-transition-back:focus-visible {
+  transform: translateY(-1px);
+  background: rgba(11, 11, 15, 0.92);
+  color: #fff;
+}
+
+.project-image-page-body {
+  position: relative;
+  z-index: 2;
+  min-height: 100dvh;
+  margin-top: 0;
+  background: #fff;
+}
+
+.project-image-page-inner {
+  width: 100%;
+  margin: 0;
+  padding: 0 0 clamp(120px, 18vh, 220px);
+}
+
+.project-image-page-heading {
+  max-width: 640px;
+  margin-bottom: clamp(42px, 7vw, 96px);
+}
+
+.project-image-page-heading p {
+  margin: 0 0 12px;
+  color: rgba(11, 11, 15, 0.56);
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(0.88rem, 1vw, 1.05rem);
+  font-weight: 700;
+}
+
+.project-image-page-heading h2 {
+  margin: 0;
+  color: #0b0b0f;
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 6.5rem);
+  font-weight: 800;
+  line-height: 0.96;
+}
+
+.project-image-page-gallery {
+  column-count: 3;
+  column-gap: clamp(8px, 0.8vw, 16px);
+  width: 100%;
+}
+
+.project-image-page-shot {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 clamp(8px, 0.8vw, 16px);
+  overflow: visible;
+  background: #fff;
+  border-radius: 0;
+  break-inside: avoid;
+}
+
+.project-image-page-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+body.project-image-transition-open {
+  overflow: hidden;
 }
 
 .project-gallery-image {
@@ -1199,8 +1366,6 @@ body.project-sheet-open {
   .project-floating-card {
     width: 100vw;
     height: 100dvh;
-    min-height: 100dvh;
-    max-height: 100dvh;
     border-radius: 0;
   }
 
@@ -1222,6 +1387,16 @@ body.project-sheet-open {
     margin-top: 0;
   }
 
+  .project-image-page-gallery {
+    column-count: 1;
+  }
+
+}
+
+@media (min-width: 721px) and (max-width: 1100px) {
+  .project-image-page-gallery {
+    column-count: 2;
+  }
 }
 
 .work-fullscreen-page {

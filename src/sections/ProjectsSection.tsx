@@ -12,6 +12,37 @@ import ProjectWebGLImage from '@/components/ProjectWebGLImage';
 import brandDetail01 from '@/assets/project-detail/brand-detail-01.png';
 import brandDetail02 from '@/assets/project-detail/brand-detail-02.jpg';
 import brandDetail03 from '@/assets/project-detail/brand-detail-03.jpg';
+import applicationImage03 from '@/assets/project-detail/brand-applications/resource-03.jpg';
+import applicationImage04 from '@/assets/project-detail/brand-applications/resource-04.jpg';
+import applicationImage05 from '@/assets/project-detail/brand-applications/resource-05.jpg';
+import applicationImage08 from '@/assets/project-detail/brand-applications/resource-08.jpg';
+import applicationImage09 from '@/assets/project-detail/brand-applications/resource-09.jpg';
+import applicationImage10 from '@/assets/project-detail/brand-applications/resource-10.jpg';
+import applicationImage11 from '@/assets/project-detail/brand-applications/resource-11.jpg';
+import applicationImage12 from '@/assets/project-detail/brand-applications/resource-12.jpg';
+import applicationImage13 from '@/assets/project-detail/brand-applications/resource-13.jpg';
+import applicationImage15 from '@/assets/project-detail/brand-applications/resource-15.jpg';
+import applicationImage16 from '@/assets/project-detail/brand-applications/resource-16.jpg';
+import applicationImage17 from '@/assets/project-detail/brand-applications/resource-17.jpg';
+import applicationImage18 from '@/assets/project-detail/brand-applications/resource-18.jpg';
+import applicationImage19 from '@/assets/project-detail/brand-applications/resource-19.jpg';
+import applicationImage20 from '@/assets/project-detail/brand-applications/resource-20.jpg';
+import applicationImage21 from '@/assets/project-detail/brand-applications/resource-21.jpg';
+import applicationImage22 from '@/assets/project-detail/brand-applications/resource-22.jpg';
+import applicationImage23 from '@/assets/project-detail/brand-applications/resource-23.jpg';
+import touchpointImage01 from '@/assets/project-detail/brand-touchpoints/touchpoint-01.jpg';
+import touchpointImage02 from '@/assets/project-detail/brand-touchpoints/touchpoint-02.jpg';
+import touchpointImage03 from '@/assets/project-detail/brand-touchpoints/touchpoint-03.jpg';
+import touchpointImage04 from '@/assets/project-detail/brand-touchpoints/touchpoint-04.jpg';
+import touchpointImage05 from '@/assets/project-detail/brand-touchpoints/touchpoint-05.jpg';
+import touchpointImage06 from '@/assets/project-detail/brand-touchpoints/touchpoint-06.jpg';
+import touchpointImage07 from '@/assets/project-detail/brand-touchpoints/touchpoint-07.jpg';
+import touchpointImage08 from '@/assets/project-detail/brand-touchpoints/touchpoint-08.jpg';
+import touchpointImage09 from '@/assets/project-detail/brand-touchpoints/touchpoint-09.jpg';
+import touchpointImage10 from '@/assets/project-detail/brand-touchpoints/touchpoint-10.jpg';
+import touchpointImage11 from '@/assets/project-detail/brand-touchpoints/touchpoint-11.jpg';
+import touchpointImage12 from '@/assets/project-detail/brand-touchpoints/touchpoint-12.jpg';
+import touchpointImage13 from '@/assets/project-detail/brand-touchpoints/touchpoint-13.jpg';
 import cursorAmaMark from '@/assets/project-detail/cursor-ama-mark.png';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -22,6 +53,12 @@ type DetailLenisInstance = {
   destroy: () => void;
   on: (event: 'scroll', callback: (event: DetailLenisEvent) => void) => void;
   raf: (time: number) => void;
+};
+type ProjectCardRect = {
+  height: number;
+  left: number;
+  top: number;
+  width: number;
 };
 
 const projects = [
@@ -53,16 +90,55 @@ const projects = [
 
 const projectGalleryItems = [
   {
+    detailId: 'brand-visual',
+    detailImages: [],
     title: '\u54c1\u724c\u4e3b\u89c6\u89c9',
     subtitle: 'Visual Identity',
     image: brandDetail01,
   },
   {
+    detailId: 'brand-applications',
+    detailImages: [
+      applicationImage03,
+      applicationImage04,
+      applicationImage05,
+      applicationImage08,
+      applicationImage09,
+      applicationImage10,
+      applicationImage11,
+      applicationImage12,
+      applicationImage13,
+      applicationImage15,
+      applicationImage16,
+      applicationImage17,
+      applicationImage18,
+      applicationImage19,
+      applicationImage20,
+      applicationImage21,
+      applicationImage22,
+      applicationImage23,
+    ],
     title: '\u5e94\u7528\u573a\u666f\u5ef6\u5c55',
     subtitle: 'Brand Applications',
     image: brandDetail02,
   },
   {
+    detailId: 'brand-touchpoints',
+    detailImages: [
+      touchpointImage01,
+      touchpointImage02,
+      touchpointImage03,
+      touchpointImage04,
+      touchpointImage05,
+      touchpointImage06,
+      touchpointImage07,
+      touchpointImage08,
+      touchpointImage09,
+      touchpointImage10,
+      touchpointImage11,
+      touchpointImage12,
+      touchpointImage13,
+    ],
     title: '\u7269\u6599\u4e0e\u89e6\u70b9',
     subtitle: 'Touchpoint System',
     image: brandDetail03,
@@ -80,6 +156,7 @@ export default function ProjectsSection() {
   const detailCursorRef = useRef<HTMLDivElement>(null);
   const particleResetTimerRef = useRef<number | null>(null);
   const dragStateRef = useRef({ currentY: 0, dragging: false, pointerId: -1, startY: 0 });
+  const activeCardRectRef = useRef<ProjectCardRect | null>(null);
   const closingRef = useRef(false);
   const [activeProject, setActiveProject] = useState<(typeof projects)[number] | null>(null);
   const [particleMode, setParticleMode] = useState<ParticleMode>('idle');
@@ -158,6 +235,17 @@ export default function ProjectsSection() {
     };
   }, []);
 
+  const openProjectSheet = useCallback((project: (typeof projects)[number], sourceElement: HTMLElement) => {
+    const rect = sourceElement.getBoundingClientRect();
+    activeCardRectRef.current = {
+      height: rect.height,
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+    };
+    setActiveProject(project);
+  }, []);
+
   const closeProjectSheet = useCallback(() => {
     if (closingRef.current) return;
 
@@ -170,11 +258,30 @@ export default function ProjectsSection() {
 
     closingRef.current = true;
     gsap.killTweensOf([modal, backdrop]);
+
+    const rect = activeCardRectRef.current;
+    const target = rect
+      ? {
+          borderRadius: 14,
+          height: rect.height,
+          left: rect.left,
+          top: rect.top,
+          width: rect.width,
+        }
+      : {
+          borderRadius: 14,
+          height: modal.offsetHeight,
+          left: 0,
+          top: modal.offsetHeight + 36,
+          width: modal.offsetWidth,
+        };
+
     gsap
       .timeline({
         defaults: { overwrite: 'auto' },
         onComplete: () => {
           dragStateRef.current = { currentY: 0, dragging: false, pointerId: -1, startY: 0 };
+          activeCardRectRef.current = null;
           closingRef.current = false;
           setActiveProject(null);
         },
@@ -192,10 +299,13 @@ export default function ProjectsSection() {
         modal,
         {
           autoAlpha: 0,
-          scaleY: 0.98,
-          y: () => modal.offsetHeight + 36,
-          duration: 0.42,
-          ease: 'power3.in',
+          borderRadius: target.borderRadius,
+          height: target.height,
+          left: target.left,
+          top: target.top,
+          width: target.width,
+          duration: 0.76,
+          ease: 'power4.inOut',
         },
         0,
       );
@@ -211,17 +321,26 @@ export default function ProjectsSection() {
 
     gsap.killTweensOf([modalRef.current, backdropRef.current]);
     gsap.set(backdropRef.current, { autoAlpha: 1 });
-    gsap.fromTo(
-      modalRef.current,
-      { autoAlpha: 0, scaleY: 0.985, y: () => modalRef.current?.offsetHeight || window.innerHeight * 0.8 },
-      {
-        autoAlpha: 1,
-        scaleY: 1,
-        y: 0,
-        duration: 0.5,
-        ease: 'power4.out',
-      },
-    );
+
+    const startRect = activeCardRectRef.current;
+    gsap.set(modalRef.current, {
+      borderRadius: startRect ? 14 : 0,
+      height: startRect?.height ?? window.innerHeight,
+      left: startRect?.left ?? 0,
+      top: startRect?.top ?? window.innerHeight,
+      width: startRect?.width ?? window.innerWidth,
+    });
+
+    gsap.to(modalRef.current, {
+      autoAlpha: 1,
+      borderRadius: 0,
+      height: window.innerHeight,
+      left: 0,
+      top: 0,
+      width: window.innerWidth,
+      duration: 0.86,
+      ease: 'power4.inOut',
+    });
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -467,11 +586,11 @@ export default function ProjectsSection() {
                 role="button"
                 tabIndex={0}
                 style={{ cursor: 'pointer' }}
-                onClick={() => setActiveProject(project)}
+                onClick={(event) => openProjectSheet(project, event.currentTarget)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    setActiveProject(project);
+                    openProjectSheet(project, e.currentTarget);
                   }
                 }}
               >
@@ -571,7 +690,14 @@ export default function ProjectsSection() {
                   {projectGalleryItems.map((item) => (
                     <article className="project-gallery-card" key={item.image}>
                       <div className="project-gallery-frame">
-                        <ProjectWebGLImage src={item.image} alt={item.title} />
+                        <ProjectWebGLImage
+                          src={item.image}
+                          alt={item.title}
+                          detailId={item.detailId}
+                          detailImages={item.detailImages}
+                          title={item.title}
+                          subtitle={item.subtitle}
+                        />
                       </div>
                       <div className="project-gallery-caption">
                         <h4>{item.title}</h4>

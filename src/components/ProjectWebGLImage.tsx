@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import * as THREE from 'three';
 
-const vertexShader = `
+const thumbnailVertexShader = `
   varying vec2 vUv;
 
   void main() {
@@ -11,7 +11,7 @@ const vertexShader = `
   }
 `;
 
-const fragmentShader = `
+const thumbnailFragmentShader = `
   precision highp float;
 
   uniform sampler2D uTexture;
@@ -67,13 +67,138 @@ const fragmentShader = `
   }
 `;
 
+const transitionVertexShader = `
+  precision highp float;
+
+  uniform float uProgress;
+  uniform float uDistortion;
+  uniform float uTime;
+
+  varying vec2 vUv;
+  varying float vWave;
+
+  void main() {
+    vUv = uv;
+    vec3 transformed = position;
+    float centeredY = uv.y - 0.5;
+    float waveA = sin((uv.x * 8.0) + (uProgress * 7.0) + (uTime * 1.2));
+    float waveB = sin((uv.y * 12.0) - (uProgress * 9.0) + (uTime * 0.8));
+    float edgeSoftness = smoothstep(0.5, 0.08, abs(centeredY));
+    float wave = (waveA * 0.42 + waveB * 0.28) * uDistortion * edgeSoftness;
+
+    transformed.y += wave * 0.18;
+    transformed.x += sin((uv.y * 10.0) + uTime) * uDistortion * 0.08;
+    vWave = wave;
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(transformed, 1.0);
+  }
+`;
+
+const transitionFragmentShader = `
+  precision highp float;
+
+  uniform sampler2D uTexture;
+  uniform float uProgress;
+  uniform float uDistortion;
+  uniform float uTime;
+  uniform vec2 uPlaneResolution;
+  uniform vec2 uTextureResolution;
+
+  varying vec2 vUv;
+  varying float vWave;
+
+  vec2 coverUv(vec2 uv, vec2 screen, vec2 image) {
+    float screenRatio = screen.x / screen.y;
+    float imageRatio = image.x / image.y;
+    vec2 scale = vec2(1.0);
+
+    if (screenRatio > imageRatio) {
+      scale.y = imageRatio / screenRatio;
+    } else {
+      scale.x = screenRatio / imageRatio;
+    }
+
+    return uv * scale + (1.0 - scale) * 0.5;
+  }
+
+  void main() {
+    vec2 uv = vUv;
+    float ribbon = sin((uv.y * 18.0) + (uProgress * 9.0) + (uTime * 1.1));
+    float liquid = sin((uv.x * 10.0) - (uProgress * 7.0) + (uTime * 0.9));
+    vec2 direction = normalize(vec2(liquid, ribbon) + 0.0001);
+    vec2 distortedUv = uv + direction * uDistortion * 0.055 + vec2(vWave * 0.045, 0.0);
+    vec2 textureUv = coverUv(distortedUv, uPlaneResolution, uTextureResolution);
+
+    vec2 chroma = direction * uDistortion * 0.018;
+    float r = texture2D(uTexture, clamp(textureUv + chroma, 0.001, 0.999)).r;
+    float g = texture2D(uTexture, clamp(textureUv, 0.001, 0.999)).g;
+    float b = texture2D(uTexture, clamp(textureUv - chroma, 0.001, 0.999)).b;
+    float a = texture2D(uTexture, clamp(textureUv, 0.001, 0.999)).a;
+
+    gl_FragColor = vec4(r, g, b, a);
+    #include <colorspace_fragment>
+  }
+`;
+
 type ProjectWebGLImageProps = {
   alt: string;
+  detailId: string;
+  detailImages: string[];
   src: string;
+  subtitle: string;
+  title: string;
 };
 
-export default function ProjectWebGLImage({ alt, src }: ProjectWebGLImageProps) {
+type TransitionState = {
+  active: boolean;
+  animationFrame: number;
+  cleanup: () => void;
+};
+
+const createTexture = (src: string, onLoad: (texture: THREE.Texture) => void) => {
+  const loader = new THREE.TextureLoader();
+  return loader.load(src, (texture) => {
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    onLoad(texture);
+  });
+};
+
+const getTextureSize = (texture: THREE.Texture) => {
+  const image = texture.image as { width?: number; height?: number };
+  return {
+    height: image.height || 1,
+    width: image.width || 1,
+  };
+};
+
+const setCameraToViewport = (camera: THREE.OrthographicCamera, width: number, height: number) => {
+  camera.left = -width / 2;
+  camera.right = width / 2;
+  camera.top = height / 2;
+  camera.bottom = -height / 2;
+  camera.near = -1000;
+  camera.far = 1000;
+  camera.position.z = 1;
+  camera.updateProjectionMatrix();
+};
+
+const getPlanePosition = (rect: DOMRect, viewportWidth: number, viewportHeight: number) => ({
+  x: rect.left + rect.width / 2 - viewportWidth / 2,
+  y: viewportHeight / 2 - rect.top - rect.height / 2,
+});
+
+export default function ProjectWebGLImage({
+  alt,
+  detailId,
+  detailImages,
+  src,
+  subtitle,
+  title,
+}: ProjectWebGLImageProps) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const transitionRef = useRef<TransitionState | null>(null);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -98,22 +223,19 @@ export default function ProjectWebGLImage({ alt, src }: ProjectWebGLImageProps) 
 
     const geometry = new THREE.PlaneGeometry(2, 2, 32, 32);
     const material = new THREE.ShaderMaterial({
-      fragmentShader,
+      fragmentShader: thumbnailFragmentShader,
       toneMapped: false,
       transparent: true,
       uniforms,
-      vertexShader,
+      vertexShader: thumbnailVertexShader,
     });
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
-    const loader = new THREE.TextureLoader();
-    loader.load(src, (texture) => {
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.minFilter = THREE.LinearFilter;
-      texture.magFilter = THREE.LinearFilter;
+    createTexture(src, (texture) => {
+      const size = getTextureSize(texture);
       uniforms.uTexture.value = texture;
-      uniforms.uTextureResolution.value.set(texture.image.width || 1, texture.image.height || 1);
+      uniforms.uTextureResolution.value.set(size.width, size.height);
     });
 
     const resize = () => {
@@ -146,6 +268,12 @@ export default function ProjectWebGLImage({ alt, src }: ProjectWebGLImageProps) 
       gsap.to(uniforms.uHover, { value: 0, duration: 0.5, ease: 'power3.out' });
     };
 
+    const handleClick = () => {
+      if (transitionRef.current?.active) return;
+      transitionRef.current = startFullscreenTransition(root, { detailId, detailImages, src, subtitle, title });
+    };
+
+    root.addEventListener('click', handleClick);
     root.addEventListener('pointerenter', handlePointerEnter);
     root.addEventListener('pointerleave', handlePointerLeave);
     root.addEventListener('pointermove', handlePointerMove);
@@ -159,8 +287,11 @@ export default function ProjectWebGLImage({ alt, src }: ProjectWebGLImageProps) 
     animate(0);
 
     return () => {
+      transitionRef.current?.cleanup();
+      transitionRef.current = null;
       cancelAnimationFrame(animationFrame);
       resizeObserver.disconnect();
+      root.removeEventListener('click', handleClick);
       root.removeEventListener('pointerenter', handlePointerEnter);
       root.removeEventListener('pointerleave', handlePointerLeave);
       root.removeEventListener('pointermove', handlePointerMove);
@@ -171,11 +302,342 @@ export default function ProjectWebGLImage({ alt, src }: ProjectWebGLImageProps) 
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [src]);
+  }, [detailId, detailImages, src, subtitle, title]);
 
   return (
-    <div ref={rootRef} aria-label={alt} className="project-webgl-image" role="img">
+    <div ref={rootRef} aria-label={alt} className="project-webgl-image" role="img" tabIndex={0}>
       <img src={src} alt="" aria-hidden="true" />
     </div>
   );
+}
+
+type ProjectTransitionPayload = {
+  detailId: string;
+  detailImages: string[];
+  src: string;
+  subtitle: string;
+  title: string;
+};
+
+function startFullscreenTransition(root: HTMLElement, payload: ProjectTransitionPayload): TransitionState {
+  const { detailId, detailImages, src, subtitle, title } = payload;
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const startRect = root.getBoundingClientRect();
+  const startPosition = getPlanePosition(startRect, viewportWidth, viewportHeight);
+  let cleaned = false;
+  let closing = false;
+  const overlay = document.createElement('div');
+  overlay.className = 'project-image-transition';
+  overlay.dataset.projectDetailId = detailId;
+
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button';
+  closeButton.className = 'project-image-transition-back';
+  closeButton.textContent = '\u8fd4\u56de';
+
+  const scrollPage = document.createElement('div');
+  scrollPage.className = 'project-image-transition-scroll';
+  scrollPage.dataset.projectDetailId = detailId;
+  scrollPage.tabIndex = -1;
+
+  const hero = document.createElement('section');
+  hero.className = 'project-image-transition-hero';
+
+  const fallbackImage = document.createElement('img');
+  fallbackImage.className = 'project-image-transition-fallback';
+  fallbackImage.src = src;
+  fallbackImage.alt = '';
+  fallbackImage.setAttribute('aria-hidden', 'true');
+
+  const pageBody = document.createElement('section');
+  pageBody.className = 'project-image-page-body';
+  pageBody.dataset.projectDetailId = detailId;
+
+  const pageInner = document.createElement('div');
+  pageInner.className = 'project-image-page-inner';
+
+  if (detailImages.length > 0) {
+    const gallery = document.createElement('div');
+    gallery.className = 'project-image-page-gallery';
+    gallery.dataset.projectDetailId = detailId;
+
+    detailImages.forEach((image, index) => {
+      const figure = document.createElement('figure');
+      figure.className = `project-image-page-shot project-image-page-shot-${index + 1}`;
+
+      const img = document.createElement('img');
+      img.src = image;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+
+      figure.appendChild(img);
+      gallery.appendChild(figure);
+    });
+
+    pageInner.appendChild(gallery);
+  } else {
+    const pageHeading = document.createElement('header');
+    pageHeading.className = 'project-image-page-heading';
+
+    const eyebrow = document.createElement('p');
+    eyebrow.textContent = subtitle;
+
+    const heading = document.createElement('h2');
+    heading.textContent = title;
+
+    pageHeading.append(eyebrow, heading);
+    pageInner.appendChild(pageHeading);
+  }
+
+  pageBody.appendChild(pageInner);
+  hero.appendChild(fallbackImage);
+  scrollPage.append(hero, pageBody);
+  overlay.append(closeButton, scrollPage);
+  document.body.appendChild(overlay);
+  scrollPage.focus({ preventScroll: true });
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.OrthographicCamera();
+  setCameraToViewport(camera, viewportWidth, viewportHeight);
+
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.setClearColor(0xffffff, 0);
+  renderer.setSize(viewportWidth, viewportHeight, false);
+  hero.appendChild(renderer.domElement);
+
+  const transition = { progress: 0, distortion: 0 };
+  const uniforms = {
+    uTexture: { value: new THREE.Texture() },
+    uProgress: { value: 0 },
+    uDistortion: { value: 0 },
+    uTime: { value: 0 },
+    uPlaneResolution: { value: new THREE.Vector2(startRect.width, startRect.height) },
+    uTextureResolution: { value: new THREE.Vector2(1, 1) },
+  };
+
+  const geometry = new THREE.PlaneGeometry(1, 1, 96, 96);
+  const material = new THREE.ShaderMaterial({
+    fragmentShader: transitionFragmentShader,
+    toneMapped: false,
+    transparent: true,
+    uniforms,
+    vertexShader: transitionVertexShader,
+  });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.set(startPosition.x, startPosition.y, 0);
+  mesh.scale.set(startRect.width, startRect.height, 1);
+  scene.add(mesh);
+
+  const loadedTexture = createTexture(src, (texture) => {
+    const size = getTextureSize(texture);
+    uniforms.uTexture.value = texture;
+    uniforms.uTextureResolution.value.set(size.width, size.height);
+  });
+
+  const renderState = {
+    x: startPosition.x,
+    y: startPosition.y,
+    width: startRect.width,
+    height: startRect.height,
+  };
+
+  root.classList.add('is-fullscreen-transitioning');
+  document.body.classList.add('project-image-transition-open');
+
+  const target = {
+    x: 0,
+    y: 0,
+    width: viewportWidth,
+    height: viewportHeight,
+  };
+
+  const timeline = gsap.timeline({
+    defaults: { ease: 'power4.inOut' },
+    onComplete: () => {
+      overlay.classList.add('is-settled');
+      gsap.to(transition, {
+        distortion: 0,
+        duration: 0.32,
+        ease: 'power3.out',
+        onUpdate: () => {
+          uniforms.uDistortion.value = transition.distortion;
+        },
+      });
+    },
+  });
+
+  timeline
+    .to(renderState, {
+      x: target.x,
+      y: target.y,
+      width: target.width,
+      height: target.height,
+      duration: 1.05,
+      onUpdate: () => {
+        mesh.position.set(renderState.x, renderState.y, 0);
+        mesh.scale.set(renderState.width, renderState.height, 1);
+        uniforms.uPlaneResolution.value.set(renderState.width, renderState.height);
+      },
+    })
+    .fromTo(
+      transition,
+      { progress: 0, distortion: 0 },
+      {
+        progress: 1,
+        distortion: 1,
+        duration: 0.58,
+        ease: 'power2.out',
+        yoyo: true,
+        repeat: 1,
+        onUpdate: () => {
+          uniforms.uProgress.value = transition.progress;
+          uniforms.uDistortion.value = transition.distortion;
+        },
+      },
+      0,
+    );
+
+  const state: TransitionState = {
+    active: true,
+    animationFrame: 0,
+    cleanup,
+  };
+
+  const animate = (time: number) => {
+    uniforms.uTime.value = time * 0.001;
+    renderer.render(scene, camera);
+    state.animationFrame = requestAnimationFrame(animate);
+  };
+  animate(0);
+
+  const close = () => {
+    if (closing || cleaned) return;
+    closing = true;
+    timeline.kill();
+    overlay.classList.remove('is-settled');
+    scrollPage.scrollTop = 0;
+    gsap.killTweensOf([renderState, transition]);
+    gsap.set(renderer.domElement, { opacity: 1 });
+    gsap.set(fallbackImage, { opacity: 0 });
+
+    const rect = root.getBoundingClientRect();
+    const position = getPlanePosition(rect, window.innerWidth, window.innerHeight);
+
+    const closeTimeline = gsap.timeline({
+      defaults: { ease: 'power4.inOut' },
+      onComplete: cleanup,
+    });
+
+    closeTimeline
+      .to(renderState, {
+        x: position.x,
+        y: position.y,
+        width: rect.width,
+        height: rect.height,
+        duration: 1.05,
+        onUpdate: () => {
+          mesh.position.set(renderState.x, renderState.y, 0);
+          mesh.scale.set(renderState.width, renderState.height, 1);
+          uniforms.uPlaneResolution.value.set(renderState.width, renderState.height);
+        },
+      })
+      .fromTo(
+        transition,
+        { progress: 1, distortion: 0 },
+        {
+          progress: 0,
+          distortion: 1,
+          duration: 0.58,
+          ease: 'power2.out',
+          yoyo: true,
+          repeat: 1,
+          onUpdate: () => {
+            uniforms.uProgress.value = transition.progress;
+            uniforms.uDistortion.value = transition.distortion;
+          },
+        },
+        0,
+      );
+  };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') close();
+  };
+
+  const handleOverlayClick = (event: MouseEvent) => {
+    if (event.target === overlay) close();
+  };
+
+  let lastTouchY = 0;
+  const handleWheel = (event: WheelEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    scrollPage.scrollTop += event.deltaY;
+  };
+
+  const handleTouchStart = (event: TouchEvent) => {
+    lastTouchY = event.touches[0]?.clientY ?? 0;
+  };
+
+  const handleTouchMove = (event: TouchEvent) => {
+    const currentY = event.touches[0]?.clientY ?? lastTouchY;
+    const deltaY = lastTouchY - currentY;
+    lastTouchY = currentY;
+    event.preventDefault();
+    event.stopPropagation();
+    scrollPage.scrollTop += deltaY;
+  };
+
+  const handlePageKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'ArrowDown') {
+      scrollPage.scrollTop += 90;
+    }
+    if (event.key === 'ArrowUp') {
+      scrollPage.scrollTop -= 90;
+    }
+    if (event.key === 'PageDown' || event.key === ' ') {
+      event.preventDefault();
+      scrollPage.scrollTop += window.innerHeight * 0.86;
+    }
+    if (event.key === 'PageUp') {
+      event.preventDefault();
+      scrollPage.scrollTop -= window.innerHeight * 0.86;
+    }
+  };
+
+  overlay.addEventListener('click', handleOverlayClick);
+  overlay.addEventListener('wheel', handleWheel, { passive: false });
+  overlay.addEventListener('touchstart', handleTouchStart, { passive: true });
+  overlay.addEventListener('touchmove', handleTouchMove, { passive: false });
+  closeButton.addEventListener('click', close);
+  window.addEventListener('keydown', handleKeyDown);
+  window.addEventListener('keydown', handlePageKeyDown);
+
+  function cleanup() {
+    if (cleaned) return;
+    cleaned = true;
+    state.active = false;
+    cancelAnimationFrame(state.animationFrame);
+    timeline.kill();
+    overlay.removeEventListener('click', handleOverlayClick);
+    overlay.removeEventListener('wheel', handleWheel);
+    overlay.removeEventListener('touchstart', handleTouchStart);
+    overlay.removeEventListener('touchmove', handleTouchMove);
+    closeButton.removeEventListener('click', close);
+    window.removeEventListener('keydown', handleKeyDown);
+    window.removeEventListener('keydown', handlePageKeyDown);
+    root.classList.remove('is-fullscreen-transitioning');
+    document.body.classList.remove('project-image-transition-open');
+    loadedTexture.dispose();
+    geometry.dispose();
+    material.dispose();
+    renderer.dispose();
+    overlay.remove();
+  }
+
+  return state;
 }
