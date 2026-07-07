@@ -191,6 +191,54 @@ const projectGalleryItems = [
   },
 ];
 
+const preloadedProjectDetailImages = new Map<string, Promise<void>>();
+
+export const projectDetailPreloadImages = Array.from(
+  new Set(projectGalleryItems.map((item) => item.image)),
+);
+
+const preloadProjectDetailImage = (src: string): Promise<void> => {
+  const existing = preloadedProjectDetailImages.get(src);
+  if (existing) return existing;
+
+  const preloadPromise = new Promise<void>((resolve) => {
+    if (typeof window === 'undefined') {
+      resolve();
+      return;
+    }
+
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = src;
+    document.head.appendChild(link);
+
+    const image = new Image();
+    image.decoding = 'async';
+    image.loading = 'eager';
+
+    const resolveAfterDecode = () => {
+      image.decode().then(resolve, resolve);
+    };
+
+    image.onload = resolveAfterDecode;
+    image.onerror = () => resolve();
+    image.src = src;
+
+    if (image.complete) {
+      resolveAfterDecode();
+    }
+  });
+
+  preloadedProjectDetailImages.set(src, preloadPromise);
+  return preloadPromise;
+};
+
+export function preloadProjectDetailImages(): Promise<unknown> {
+  if (typeof window === 'undefined') return Promise.resolve();
+  return Promise.all(projectDetailPreloadImages.map(preloadProjectDetailImage));
+}
+
 export default function ProjectsSection() {
   const sectionRef = useRef<HTMLDivElement>(null!);
   const headingRef = useRef<HTMLDivElement>(null!);
@@ -206,6 +254,7 @@ export default function ProjectsSection() {
   const closingRef = useRef(false);
   const [activeProject, setActiveProject] = useState<(typeof projects)[number] | null>(null);
   const [particleMode, setParticleMode] = useState<ParticleMode>('idle');
+  const [projectSheetReady, setProjectSheetReady] = useState(false);
 
   useEffect(() => {
     const setMode = (mode: ParticleMode) => {
@@ -289,6 +338,7 @@ export default function ProjectsSection() {
       top: rect.top,
       width: rect.width,
     };
+    setProjectSheetReady(false);
     setActiveProject(project);
   }, []);
 
@@ -303,23 +353,24 @@ export default function ProjectsSection() {
     }
 
     closingRef.current = true;
+    setProjectSheetReady(false);
     gsap.killTweensOf([modal, backdrop]);
 
     const rect = activeCardRectRef.current;
     const target = rect
       ? {
           borderRadius: 14,
-          height: rect.height,
-          left: rect.left,
-          top: rect.top,
-          width: rect.width,
+          scaleX: rect.width / Math.max(window.innerWidth, 1),
+          scaleY: rect.height / Math.max(window.innerHeight, 1),
+          x: rect.left,
+          y: rect.top,
         }
       : {
           borderRadius: 14,
-          height: modal.offsetHeight,
-          left: 0,
-          top: modal.offsetHeight + 36,
-          width: modal.offsetWidth,
+          scaleX: 1,
+          scaleY: 0.94,
+          x: 0,
+          y: 36,
         };
 
     gsap
@@ -346,10 +397,11 @@ export default function ProjectsSection() {
         {
           autoAlpha: 0,
           borderRadius: target.borderRadius,
-          height: target.height,
-          left: target.left,
-          top: target.top,
-          width: target.width,
+          scaleX: target.scaleX,
+          scaleY: target.scaleY,
+          transformOrigin: 'top left',
+          x: target.x,
+          y: target.y,
           duration: 0.76,
           ease: 'power4.inOut',
         },
@@ -370,22 +422,28 @@ export default function ProjectsSection() {
 
     const startRect = activeCardRectRef.current;
     gsap.set(modalRef.current, {
+      autoAlpha: 0,
       borderRadius: startRect ? 14 : 0,
-      height: startRect?.height ?? window.innerHeight,
-      left: startRect?.left ?? 0,
-      top: startRect?.top ?? window.innerHeight,
-      width: startRect?.width ?? window.innerWidth,
+      scaleX: startRect ? startRect.width / Math.max(window.innerWidth, 1) : 1,
+      scaleY: startRect ? startRect.height / Math.max(window.innerHeight, 1) : 1,
+      transformOrigin: 'top left',
+      x: startRect?.left ?? 0,
+      y: startRect?.top ?? window.innerHeight,
     });
 
     gsap.to(modalRef.current, {
       autoAlpha: 1,
       borderRadius: 0,
-      height: window.innerHeight,
-      left: 0,
-      top: 0,
-      width: window.innerWidth,
+      scaleX: 1,
+      scaleY: 1,
+      x: 0,
+      y: 0,
       duration: 0.86,
       ease: 'power4.inOut',
+      onComplete: () => {
+        gsap.set(modalRef.current, { transformOrigin: 'bottom center' });
+        setProjectSheetReady(true);
+      },
     });
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -398,13 +456,14 @@ export default function ProjectsSection() {
     return () => {
       document.documentElement.classList.remove('project-sheet-open');
       document.body.classList.remove('project-sheet-open');
+      setProjectSheetReady(false);
       window.removeEventListener('keydown', handleKeyDown);
       gsap.killTweensOf([modalRef.current, backdropRef.current]);
     };
   }, [activeProject, closeProjectSheet]);
 
   useEffect(() => {
-    if (!activeProject || !detailScrollRef.current || !detailContentRef.current) return;
+    if (!activeProject || !projectSheetReady || !detailScrollRef.current || !detailContentRef.current) return;
 
     const LenisConstructor = Lenis as unknown as new (options: Record<string, unknown>) => DetailLenisInstance;
     const lenis = new LenisConstructor({
@@ -457,7 +516,7 @@ export default function ProjectsSection() {
       gsap.killTweensOf(cards);
       lenis.destroy();
     };
-  }, [activeProject]);
+  }, [activeProject, projectSheetReady]);
 
   useEffect(() => {
     if (!activeProject || !detailCursorRef.current || !modalRef.current) return;
@@ -707,7 +766,9 @@ export default function ProjectsSection() {
             data-lenis-prevent
             onClick={(event) => event.stopPropagation()}
           >
-            <DottedSurface className="project-detail-dotted-surface" />
+            {projectSheetReady && (
+              <DottedSurface className="project-detail-dotted-surface" />
+            )}
             <button
               type="button"
               className="project-sheet-handle"
@@ -733,12 +794,13 @@ export default function ProjectsSection() {
             <div ref={detailScrollRef} className="project-sheet-scroll">
               <div ref={detailContentRef} className="project-sheet-content">
                 <div className="project-gallery" aria-label={`${activeProject.title} project images`}>
-                  {projectGalleryItems.map((item) => (
+                  {projectGalleryItems.map((item, index) => (
                     <article className="project-gallery-card" key={item.image}>
                       <div className="project-gallery-frame">
                         <ProjectWebGLImage
                           src={item.image}
                           alt={item.title}
+                          deferWebGLMs={projectSheetReady ? index * 140 : 1200}
                           detailId={item.detailId}
                           detailImages={item.detailImages}
                           title={item.title}

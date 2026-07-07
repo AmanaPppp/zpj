@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import gsap from 'gsap';
+import { preloadProjectDetailImages } from '../sections/ProjectsSection';
 
 const RINGS = [
   'AMANAP  BRAND DESIGN PORTFOLIO  ',
@@ -30,7 +31,45 @@ export default function IntroGate() {
     if (!overlay || !rings.length || !logo || !video) return;
 
     let entered = false;
+    let disposed = false;
+    let introAnimationDone = false;
+    let projectImagesReady = false;
     const idleTweens: gsap.core.Tween[] = [];
+    const startIdleTweens = () => {
+      if (idleTweens.length > 0) return;
+
+      idleTweens.push(
+        gsap.to(rings[0], {
+          rotate: '+=360',
+          duration: 18,
+          repeat: -1,
+          ease: 'none',
+        }),
+        gsap.to(rings[1], {
+          rotate: '-=360',
+          duration: 22,
+          repeat: -1,
+          ease: 'none',
+        }),
+        gsap.to(rings[2], {
+          rotate: '+=360',
+          duration: 26,
+          repeat: -1,
+          ease: 'none',
+        })
+      );
+    };
+    const markReadyWhenLoaded = () => {
+      if (disposed || entered || !introAnimationDone || !projectImagesReady) return;
+      logo.classList.add('is-ready');
+      startIdleTweens();
+    };
+
+    preloadProjectDetailImages().then(() => {
+      projectImagesReady = true;
+      markReadyWhenLoaded();
+    });
+
     const ctx = gsap.context(() => {
       gsap.set(rings, { transformOrigin: '50% 50%' });
       gsap.set(rings[0], { scale: 3.1, rotate: -12 });
@@ -44,27 +83,8 @@ export default function IntroGate() {
       const tl = gsap.timeline({
         defaults: { ease: 'power3.inOut' },
         onComplete: () => {
-          logo.classList.add('is-ready');
-          idleTweens.push(
-            gsap.to(rings[0], {
-              rotate: '+=360',
-              duration: 18,
-              repeat: -1,
-              ease: 'none',
-            }),
-            gsap.to(rings[1], {
-              rotate: '-=360',
-              duration: 22,
-              repeat: -1,
-              ease: 'none',
-            }),
-            gsap.to(rings[2], {
-              rotate: '+=360',
-              duration: 26,
-              repeat: -1,
-              ease: 'none',
-            })
-          );
+          introAnimationDone = true;
+          markReadyWhenLoaded();
         },
       });
 
@@ -203,6 +223,7 @@ export default function IntroGate() {
     video?.play().catch(() => undefined);
 
     return () => {
+      disposed = true;
       enterRef.current = () => undefined;
       idleTweens.forEach((tween) => tween.kill());
       ctx.revert();

@@ -1124,6 +1124,12 @@
   position: absolute;
   inset: 0;
   z-index: 1;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.project-webgl-image.is-webgl-ready canvas {
+  opacity: 1;
 }
 
 .project-webgl-image.is-fullscreen-transitioning {
@@ -1175,7 +1181,7 @@
 
 .project-image-transition canvas {
   pointer-events: none;
-  opacity: 1;
+  opacity: 0;
   transition: opacity 260ms ease;
 }
 
@@ -1184,8 +1190,16 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 260ms ease;
+}
+
+.project-image-transition.is-webgl-ready canvas {
+  opacity: 1;
+}
+
+.project-image-transition.is-webgl-ready .project-image-transition-fallback {
+  opacity: 0;
 }
 
 .project-image-transition.is-settled .project-image-transition-fallback {

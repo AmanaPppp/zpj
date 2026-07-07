@@ -142,6 +142,7 @@ const transitionFragmentShader = `
 
 type ProjectWebGLImageProps = {
   alt: string;
+  deferWebGLMs?: number;
   detailId: string;
   detailImages: string[];
   src: string;
@@ -155,14 +156,18 @@ type TransitionState = {
   cleanup: () => void;
 };
 
-const createTexture = (src: string, onLoad: (texture: THREE.Texture) => void) => {
+const createTexture = (
+  src: string,
+  onLoad: (texture: THREE.Texture) => void,
+  onError?: () => void,
+) => {
   const loader = new THREE.TextureLoader();
   return loader.load(src, (texture) => {
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
     onLoad(texture);
-  });
+  }, undefined, onError);
 };
 
 const getTextureSize = (texture: THREE.Texture) => {
@@ -171,6 +176,12 @@ const getTextureSize = (texture: THREE.Texture) => {
     height: image.height || 1,
     width: image.width || 1,
   };
+};
+
+const canUseTextureInRenderer = (renderer: THREE.WebGLRenderer, texture: THREE.Texture) => {
+  const size = getTextureSize(texture);
+  const maxTextureSize = renderer.capabilities.maxTextureSize;
+  return Math.max(size.width, size.height) <= maxTextureSize;
 };
 
 const setCameraToViewport = (camera: THREE.OrthographicCamera, width: number, height: number) => {
@@ -191,6 +202,7 @@ const getPlanePosition = (rect: DOMRect, viewportWidth: number, viewportHeight: 
 
 export default function ProjectWebGLImage({
   alt,
+  deferWebGLMs = 0,
   detailId,
   detailImages,
   src,
@@ -204,53 +216,104 @@ export default function ProjectWebGLImage({
     const root = rootRef.current;
     if (!root) return;
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.setClearColor(0xffffff, 0);
-    root.appendChild(renderer.domElement);
+    let animationFrame = 0;
+    let geometry: THREE.PlaneGeometry | null = null;
+    let material: THREE.ShaderMaterial | null = null;
+    let renderer: THREE.WebGLRenderer | null = null;
+    let resizeObserver: ResizeObserver | null = null;
+    let setupTimeout = 0;
+    let cleaned = false;
+    let uniforms: {
+      uTexture: { value: THREE.Texture };
+      uMouse: { value: THREE.Vector2 };
+      uHover: { value: number };
+      uTime: { value: number };
+      uResolution: { value: THREE.Vector2 };
+      uTextureResolution: { value: THREE.Vector2 };
+    } | null = null;
 
-    const uniforms = {
-      uTexture: { value: new THREE.Texture() },
-      uMouse: { value: new THREE.Vector2(0.5, 0.5) },
-      uHover: { value: 0 },
-      uTime: { value: 0 },
-      uResolution: { value: new THREE.Vector2(1, 1) },
-      uTextureResolution: { value: new THREE.Vector2(1, 1) },
+    const setupRenderer = () => {
+      if (cleaned || renderer) return;
+
+      root.classList.remove('is-webgl-ready', 'is-webgl-unavailable');
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.setClearColor(0xffffff, 0);
+      root.appendChild(renderer.domElement);
+
+      uniforms = {
+        uTexture: { value: new THREE.Texture() },
+        uMouse: { value: new THREE.Vector2(0.5, 0.5) },
+        uHover: { value: 0 },
+        uTime: { value: 0 },
+        uResolution: { value: new THREE.Vector2(1, 1) },
+        uTextureResolution: { value: new THREE.Vector2(1, 1) },
+      };
+
+      geometry = new THREE.PlaneGeometry(2, 2, 32, 32);
+      material = new THREE.ShaderMaterial({
+        fragmentShader: thumbnailFragmentShader,
+        toneMapped: false,
+        transparent: true,
+        uniforms,
+        vertexShader: thumbnailVertexShader,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      scene.add(mesh);
+
+      createTexture(src, (texture) => {
+        if (cleaned || !uniforms || !renderer) {
+          texture.dispose();
+          return;
+        }
+
+        if (!canUseTextureInRenderer(renderer, texture)) {
+          texture.dispose();
+          root.classList.add('is-webgl-unavailable');
+          return;
+        }
+
+        const size = getTextureSize(texture);
+        uniforms.uTexture.value.dispose();
+        uniforms.uTexture.value = texture;
+        uniforms.uTextureResolution.value.set(size.width, size.height);
+        root.classList.add('is-webgl-ready');
+        root.classList.remove('is-webgl-unavailable');
+      }, () => {
+        root.classList.add('is-webgl-unavailable');
+      });
+
+      const resize = () => {
+        if (!renderer || !uniforms) return;
+
+        const rect = root.getBoundingClientRect();
+        const width = Math.max(rect.width, 1);
+        const height = Math.max(rect.height, 1);
+        renderer.setSize(width, height, false);
+        uniforms.uResolution.value.set(width, height);
+      };
+
+      resizeObserver = new ResizeObserver(resize);
+      resizeObserver.observe(root);
+      resize();
+
+      const animate = (time: number) => {
+        if (!renderer || !uniforms) return;
+
+        uniforms.uTime.value = time * 0.001;
+        renderer.render(scene, camera);
+        animationFrame = requestAnimationFrame(animate);
+      };
+      animate(0);
     };
-
-    const geometry = new THREE.PlaneGeometry(2, 2, 32, 32);
-    const material = new THREE.ShaderMaterial({
-      fragmentShader: thumbnailFragmentShader,
-      toneMapped: false,
-      transparent: true,
-      uniforms,
-      vertexShader: thumbnailVertexShader,
-    });
-    const mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
-
-    createTexture(src, (texture) => {
-      const size = getTextureSize(texture);
-      uniforms.uTexture.value = texture;
-      uniforms.uTextureResolution.value.set(size.width, size.height);
-    });
-
-    const resize = () => {
-      const rect = root.getBoundingClientRect();
-      const width = Math.max(rect.width, 1);
-      const height = Math.max(rect.height, 1);
-      renderer.setSize(width, height, false);
-      uniforms.uResolution.value.set(width, height);
-    };
-
-    const resizeObserver = new ResizeObserver(resize);
-    resizeObserver.observe(root);
-    resize();
 
     const handlePointerMove = (event: PointerEvent) => {
+      if (!uniforms) return;
+
       const rect = root.getBoundingClientRect();
       uniforms.uMouse.value.set(
         (event.clientX - rect.left) / Math.max(rect.width, 1),
@@ -260,12 +323,16 @@ export default function ProjectWebGLImage({
 
     const handlePointerEnter = () => {
       root.dispatchEvent(new CustomEvent('project-image-hover', { bubbles: true, detail: true }));
-      gsap.to(uniforms.uHover, { value: 1, duration: 0.36, ease: 'power3.out' });
+      if (uniforms) {
+        gsap.to(uniforms.uHover, { value: 1, duration: 0.36, ease: 'power3.out' });
+      }
     };
 
     const handlePointerLeave = () => {
       root.dispatchEvent(new CustomEvent('project-image-hover', { bubbles: true, detail: false }));
-      gsap.to(uniforms.uHover, { value: 0, duration: 0.5, ease: 'power3.out' });
+      if (uniforms) {
+        gsap.to(uniforms.uHover, { value: 0, duration: 0.5, ease: 'power3.out' });
+      }
     };
 
     const handleClick = () => {
@@ -278,31 +345,40 @@ export default function ProjectWebGLImage({
     root.addEventListener('pointerleave', handlePointerLeave);
     root.addEventListener('pointermove', handlePointerMove);
 
-    let animationFrame = 0;
-    const animate = (time: number) => {
-      uniforms.uTime.value = time * 0.001;
-      renderer.render(scene, camera);
-      animationFrame = requestAnimationFrame(animate);
-    };
-    animate(0);
+    if (deferWebGLMs > 0) {
+      setupTimeout = window.setTimeout(() => {
+        setupRenderer();
+      }, deferWebGLMs);
+    } else {
+      setupRenderer();
+    }
 
     return () => {
+      cleaned = true;
       transitionRef.current?.cleanup();
       transitionRef.current = null;
-      cancelAnimationFrame(animationFrame);
-      resizeObserver.disconnect();
+      if (setupTimeout) {
+        window.clearTimeout(setupTimeout);
+      }
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+      resizeObserver?.disconnect();
+      root.classList.remove('is-webgl-ready', 'is-webgl-unavailable');
       root.removeEventListener('click', handleClick);
       root.removeEventListener('pointerenter', handlePointerEnter);
       root.removeEventListener('pointerleave', handlePointerLeave);
       root.removeEventListener('pointermove', handlePointerMove);
-      gsap.killTweensOf(uniforms.uHover);
-      uniforms.uTexture.value.dispose();
-      geometry.dispose();
-      material.dispose();
-      renderer.dispose();
-      renderer.domElement.remove();
+      if (uniforms) {
+        gsap.killTweensOf(uniforms.uHover);
+        uniforms.uTexture.value.dispose();
+      }
+      geometry?.dispose();
+      material?.dispose();
+      renderer?.dispose();
+      renderer?.domElement.remove();
     };
-  }, [detailId, detailImages, src, subtitle, title]);
+  }, [deferWebGLMs, detailId, detailImages, src, subtitle, title]);
 
   return (
     <div ref={rootRef} aria-label={alt} className="project-webgl-image" role="img" tabIndex={0}>
@@ -348,6 +424,8 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
   fallbackImage.className = 'project-image-transition-fallback';
   fallbackImage.src = src;
   fallbackImage.alt = '';
+  fallbackImage.loading = 'eager';
+  fallbackImage.decoding = 'async';
   fallbackImage.setAttribute('aria-hidden', 'true');
 
   const pageBody = document.createElement('section');
@@ -356,25 +434,48 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
 
   const pageInner = document.createElement('div');
   pageInner.className = 'project-image-page-inner';
+  let detailGalleryMountTimer = 0;
+  let mountDetailImages: (() => void) | null = null;
 
   if (detailImages.length > 0) {
     const gallery = document.createElement('div');
     gallery.className = 'project-image-page-gallery';
     gallery.dataset.projectDetailId = detailId;
 
-    detailImages.forEach((image, index) => {
-      const figure = document.createElement('figure');
-      figure.className = `project-image-page-shot project-image-page-shot-${index + 1}`;
+    const appendDetailImagesChunk = (startIndex: number) => {
+      if (cleaned) return;
 
-      const img = document.createElement('img');
-      img.src = image;
-      img.alt = '';
-      img.loading = 'lazy';
-      img.decoding = 'async';
+      const fragment = document.createDocumentFragment();
+      const endIndex = Math.min(startIndex + 2, detailImages.length);
 
-      figure.appendChild(img);
-      gallery.appendChild(figure);
-    });
+      for (let index = startIndex; index < endIndex; index += 1) {
+        const image = detailImages[index];
+        const figure = document.createElement('figure');
+        figure.className = `project-image-page-shot project-image-page-shot-${index + 1}`;
+
+        const img = document.createElement('img');
+        img.src = image;
+        img.alt = '';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.sizes = '(max-width: 720px) 100vw, (max-width: 1100px) 50vw, 33vw';
+        img.setAttribute('fetchpriority', 'low');
+
+        figure.appendChild(img);
+        fragment.appendChild(figure);
+      }
+
+      gallery.appendChild(fragment);
+
+      if (endIndex < detailImages.length) {
+        detailGalleryMountTimer = window.setTimeout(() => appendDetailImagesChunk(endIndex), 90);
+      }
+    };
+
+    mountDetailImages = () => {
+      if (gallery.childElementCount > 0 || detailGalleryMountTimer || cleaned) return;
+      detailGalleryMountTimer = window.setTimeout(() => appendDetailImagesChunk(0), 0);
+    };
 
     pageInner.appendChild(gallery);
   } else {
@@ -433,9 +534,25 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
   scene.add(mesh);
 
   const loadedTexture = createTexture(src, (texture) => {
+    if (cleaned) {
+      texture.dispose();
+      return;
+    }
+
+    if (!canUseTextureInRenderer(renderer, texture)) {
+      texture.dispose();
+      overlay.classList.add('is-webgl-unavailable');
+      return;
+    }
+
     const size = getTextureSize(texture);
+    uniforms.uTexture.value.dispose();
     uniforms.uTexture.value = texture;
     uniforms.uTextureResolution.value.set(size.width, size.height);
+    overlay.classList.add('is-webgl-ready');
+    overlay.classList.remove('is-webgl-unavailable');
+  }, () => {
+    overlay.classList.add('is-webgl-unavailable');
   });
 
   const renderState = {
@@ -459,6 +576,7 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
     defaults: { ease: 'power4.inOut' },
     onComplete: () => {
       overlay.classList.add('is-settled');
+      mountDetailImages?.();
       gsap.to(transition, {
         distortion: 0,
         duration: 0.32,
@@ -521,8 +639,9 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
     overlay.classList.remove('is-settled');
     scrollPage.scrollTop = 0;
     gsap.killTweensOf([renderState, transition]);
-    gsap.set(renderer.domElement, { opacity: 1 });
-    gsap.set(fallbackImage, { opacity: 0 });
+    const hasTransitionWebGL = overlay.classList.contains('is-webgl-ready');
+    gsap.set(renderer.domElement, { opacity: hasTransitionWebGL ? 1 : 0 });
+    gsap.set(fallbackImage, { opacity: hasTransitionWebGL ? 0 : 1 });
 
     const rect = root.getBoundingClientRect();
     const position = getPlanePosition(rect, window.innerWidth, window.innerHeight);
@@ -622,6 +741,9 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
     cleaned = true;
     state.active = false;
     cancelAnimationFrame(state.animationFrame);
+    if (detailGalleryMountTimer) {
+      window.clearTimeout(detailGalleryMountTimer);
+    }
     timeline.kill();
     overlay.removeEventListener('click', handleOverlayClick);
     overlay.removeEventListener('wheel', handleWheel);
