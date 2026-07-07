@@ -276,8 +276,9 @@
       rgba(244, 63, 94, 0) 100%),
     linear-gradient(180deg,
       rgba(10, 3, 5, 0) 0%,
-      rgba(74, 20, 34, 0.22) 54%,
-      rgba(216, 82, 132, 0.24) 100%);
+      rgba(74, 20, 34, 0.2) 26%,
+      rgba(140, 36, 72, 0.34) 58%,
+      rgba(216, 82, 132, 0.42) 100%);
   opacity: 1;
 }
 
@@ -299,6 +300,16 @@
 .subpage-cosmic-bg > section {
   position: relative;
   z-index: 1;
+}
+
+.floating-grid-section {
+  position: relative;
+  z-index: 1;
+  min-height: 130vh;
+  margin-top: clamp(180px, 24vh, 320px);
+  overflow: hidden;
+  background: transparent;
+  cursor: crosshair;
 }
 
 @keyframes subpageStarDrift {

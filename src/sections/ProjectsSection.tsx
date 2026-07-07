@@ -12,6 +12,25 @@ import ProjectWebGLImage from '@/components/ProjectWebGLImage';
 import brandDetail01 from '@/assets/project-detail/brand-detail-01.png';
 import brandDetail02 from '@/assets/project-detail/brand-detail-02.jpg';
 import brandDetail03 from '@/assets/project-detail/brand-detail-03.jpg';
+import pawsitivityBrandProposal from '@/assets/project-detail/pawsitivity/1.jpg';
+import pawsitivityDetail02 from '@/assets/project-detail/pawsitivity/2.jpg';
+import pawsitivityDetail03 from '@/assets/project-detail/pawsitivity/3.jpg';
+import pawsitivityDetail04 from '@/assets/project-detail/pawsitivity/4.jpg';
+import pawsitivityDetail05 from '@/assets/project-detail/pawsitivity/5.jpg';
+import pawsitivityDetail06 from '@/assets/project-detail/pawsitivity/6.jpg';
+import pawsitivityDetail07 from '@/assets/project-detail/pawsitivity/7.jpg';
+import pawsitivityDetail08 from '@/assets/project-detail/pawsitivity/8i.jpg';
+import pawsitivityDetail09 from '@/assets/project-detail/pawsitivity/9.png';
+import pawsitivityDetail10 from '@/assets/project-detail/pawsitivity/10.png';
+import pawsitivityDetail11 from '@/assets/project-detail/pawsitivity/11.png';
+import pawsitivityDetail12 from '@/assets/project-detail/pawsitivity/12.png';
+import pawsitivityDetail13 from '@/assets/project-detail/pawsitivity/13.png';
+import pawsitivityDetail14 from '@/assets/project-detail/pawsitivity/14.png';
+import pawsitivityDetail15 from '@/assets/project-detail/pawsitivity/15.png';
+import pawsitivityDetail16 from '@/assets/project-detail/pawsitivity/16.png';
+import pawsitivityDetail17 from '@/assets/project-detail/pawsitivity/17.png';
+import pawsitivityDetail18 from '@/assets/project-detail/pawsitivity/18.png';
+import pawsitivityDetailExtra02 from '@/assets/project-detail/pawsitivity/02.png';
 import applicationImage03 from '@/assets/project-detail/brand-applications/resource-03.jpg';
 import applicationImage04 from '@/assets/project-detail/brand-applications/resource-04.jpg';
 import applicationImage05 from '@/assets/project-detail/brand-applications/resource-05.jpg';
@@ -142,6 +161,33 @@ const projectGalleryItems = [
     title: '\u7269\u6599\u4e0e\u89e6\u70b9',
     subtitle: 'Touchpoint System',
     image: brandDetail03,
+  },
+  {
+    detailId: 'pawsitivity-brand-proposal',
+    detailImages: [
+      pawsitivityBrandProposal,
+      pawsitivityDetail02,
+      pawsitivityDetail03,
+      pawsitivityDetail04,
+      pawsitivityDetail05,
+      pawsitivityDetail06,
+      pawsitivityDetail07,
+      pawsitivityDetail08,
+      pawsitivityDetail09,
+      pawsitivityDetail10,
+      pawsitivityDetail11,
+      pawsitivityDetail12,
+      pawsitivityDetail13,
+      pawsitivityDetail14,
+      pawsitivityDetail15,
+      pawsitivityDetail16,
+      pawsitivityDetail17,
+      pawsitivityDetail18,
+      pawsitivityDetailExtra02,
+    ],
+    title: '\u73c0\u65af\u7f07\u54c1\u724c\u63d0\u6848',
+    subtitle: 'Pawsitivity Brand Proposal',
+    image: pawsitivityBrandProposal,
   },
 ];
 
