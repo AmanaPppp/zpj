@@ -185,6 +185,10 @@ export default function FloatingGeometries({ mouseRef }: FloatingGeometriesProps
       });
     };
 
+    if (document.documentElement.dataset.portfolioEntered === 'true') {
+      showAsteroids();
+    }
+
     window.addEventListener('portfolio-enter', showAsteroids);
     return () => {
       window.removeEventListener('portfolio-enter', showAsteroids);

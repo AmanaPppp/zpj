@@ -123,6 +123,7 @@ export default function IntroGate() {
           defaults: { ease: 'power4.inOut' },
           onComplete: () => {
             overlay.remove();
+            document.documentElement.dataset.portfolioEntered = 'true';
             window.dispatchEvent(new CustomEvent('portfolio-enter'));
           },
         })
