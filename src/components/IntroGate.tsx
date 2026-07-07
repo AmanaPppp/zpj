@@ -10,30 +10,41 @@ const RINGS = [
 export default function IntroGate() {
   const overlayRef = useRef<HTMLDivElement>(null);
   const ringsRef = useRef<Array<HTMLDivElement | null>>([]);
-  const counterRef = useRef<HTMLButtonElement>(null);
+  const logoRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const enterRef = useRef<() => void>(() => undefined);
+  const pointerIntentRef = useRef<{
+    id: number;
+    startedAt: number;
+    x: number;
+    y: number;
+  } | null>(null);
 
   const ringLetters = useMemo(() => RINGS.map((item) => item.repeat(2).split('')), []);
 
   useEffect(() => {
     const overlay = overlayRef.current;
     const rings = ringsRef.current.filter(Boolean) as HTMLDivElement[];
-    const counter = counterRef.current;
-    if (!overlay || !rings.length || !counter) return;
+    const logo = logoRef.current;
+    const video = videoRef.current;
+    if (!overlay || !rings.length || !logo || !video) return;
 
-    const countState = { value: 0 };
+    let entered = false;
     const idleTweens: gsap.core.Tween[] = [];
     const ctx = gsap.context(() => {
       gsap.set(rings, { transformOrigin: '50% 50%' });
       gsap.set(rings[0], { scale: 3.1, rotate: -12 });
       gsap.set(rings[1], { scale: 2.55, rotate: 18 });
       gsap.set(rings[2], { scale: 2.05, rotate: -28 });
-      gsap.set(counter, { pointerEvents: 'none' });
+      gsap.set(logo, { autoAlpha: 0, scale: 1.8, transformOrigin: '50% 50%' });
+      gsap.set(video, {
+        filter: 'brightness(0) invert(1) drop-shadow(0 0 0 rgba(255, 255, 255, 0))',
+      });
 
       const tl = gsap.timeline({
         defaults: { ease: 'power3.inOut' },
         onComplete: () => {
-          counter.textContent = 'ENTER';
-          counter.classList.add('is-ready');
+          logo.classList.add('is-ready');
           idleTweens.push(
             gsap.to(rings[0], {
               rotate: '+=360',
@@ -54,70 +65,61 @@ export default function IntroGate() {
               ease: 'none',
             })
           );
-          gsap.to(counter, {
-            letterSpacing: '0.18em',
-            scale: 1.04,
-            duration: 0.55,
-            ease: 'power2.out',
-            onComplete: () => {
-              counter.style.pointerEvents = 'auto';
-            },
-          });
         },
       });
 
-      tl.to(countState, {
-        value: 100,
-        duration: 2.45,
-        ease: 'power2.out',
-        onUpdate: () => {
-          counter.textContent = `${Math.round(countState.value)}%`;
-        },
-      }, 0);
+      tl.to(logo, {
+        autoAlpha: 1,
+        scale: 1,
+        duration: 1.18,
+        ease: 'expo.out',
+      }, 0.08);
 
       tl.to(rings[0], {
         rotate: 348,
-        duration: 2.45,
+        duration: 1.45,
         ease: 'none',
       }, 0);
 
       tl.to(rings[0], {
         scale: 1,
-        duration: 2.45,
+        duration: 1.45,
         ease: 'power3.inOut',
       }, 0);
 
       tl.to(rings[1], {
         rotate: -342,
-        duration: 2.45,
+        duration: 1.45,
         ease: 'none',
       }, 0);
 
       tl.to(rings[1], {
         scale: 0.78,
-        duration: 2.45,
+        duration: 1.45,
         ease: 'power3.inOut',
       }, 0);
 
       tl.to(rings[2], {
         rotate: 332,
-        duration: 2.45,
+        duration: 1.45,
         ease: 'none',
       }, 0);
 
       tl.to(rings[2], {
         scale: 0.58,
-        duration: 2.45,
+        duration: 1.45,
         ease: 'power3.inOut',
       }, 0);
     }, overlay);
 
     const enter = () => {
-      if (!counter.classList.contains('is-ready')) return;
-      counter.style.pointerEvents = 'none';
+      if (entered) return;
+      entered = true;
+      logo.style.pointerEvents = 'none';
+      video.pause();
       idleTweens.forEach((tween) => tween.kill());
 
-      gsap.killTweensOf([counter, rings, overlay]);
+      gsap.killTweensOf([logo, video, rings, overlay]);
       gsap
         .timeline({
           defaults: { ease: 'power4.inOut' },
@@ -131,10 +133,23 @@ export default function IntroGate() {
           transformOrigin: '50% 50%',
           willChange: 'transform, opacity, filter',
         })
+        .set(logo, {
+          transformOrigin: '50% 50%',
+          willChange: 'opacity, filter',
+        })
         .to(
-          counter,
+          logo,
           {
             autoAlpha: 0,
+            duration: 0.32,
+            ease: 'power2.out',
+          },
+          0
+        )
+        .to(
+          video,
+          {
+            filter: 'brightness(0) invert(1) drop-shadow(0 0 36px rgba(255, 255, 255, 0.24))',
             duration: 0.32,
             ease: 'power2.inOut',
           },
@@ -184,14 +199,48 @@ export default function IntroGate() {
         );
     };
 
-    counter.addEventListener('click', enter);
+    enterRef.current = enter;
+    video?.play().catch(() => undefined);
 
     return () => {
+      enterRef.current = () => undefined;
       idleTweens.forEach((tween) => tween.kill());
-      counter.removeEventListener('click', enter);
       ctx.revert();
     };
   }, []);
+
+  const handleLogoPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!event.nativeEvent.isTrusted || !event.isPrimary || event.button !== 0) {
+      pointerIntentRef.current = null;
+      return;
+    }
+
+    pointerIntentRef.current = {
+      id: event.pointerId,
+      startedAt: window.performance.now(),
+      x: event.clientX,
+      y: event.clientY,
+    };
+  };
+
+  const clearPointerIntent = () => {
+    pointerIntentRef.current = null;
+  };
+
+  const handleLogoPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    const intent = pointerIntentRef.current;
+    pointerIntentRef.current = null;
+
+    if (!intent || !event.nativeEvent.isTrusted || !event.isPrimary || event.button !== 0) return;
+    if (event.pointerId !== intent.id) return;
+    if (!event.currentTarget.classList.contains('is-ready')) return;
+
+    const elapsed = window.performance.now() - intent.startedAt;
+    const movement = Math.hypot(event.clientX - intent.x, event.clientY - intent.y);
+    if (elapsed < 24 || movement > 18) return;
+
+    enterRef.current();
+  };
 
   return (
     <div ref={overlayRef} id="intro-gate" aria-label="Portfolio entrance">
@@ -214,9 +263,29 @@ export default function IntroGate() {
           ))}
         </div>
       ))}
-      <button ref={counterRef} className="intro-gate-counter" type="button">
-        0%
-      </button>
+      <div
+        ref={logoRef}
+        className="intro-gate-logo"
+        role="button"
+        aria-label="Enter portfolio"
+        onPointerDown={handleLogoPointerDown}
+        onPointerUp={handleLogoPointerUp}
+        onPointerCancel={clearPointerIntent}
+        onPointerLeave={clearPointerIntent}
+      >
+        <video
+          ref={videoRef}
+          className="intro-gate-logo-video"
+          src="/personal-logo-hover.webm"
+          poster="/personal-logo-hover-poster.png"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+        />
+      </div>
     </div>
   );
 }

@@ -445,12 +445,13 @@ export default function InfiniteFluidPosterWall({ onReturn }: InfiniteFluidPoste
           onReturn();
         }}
       >
-        <img className="poster-wall-brand-static" src="/personal-logo-static.png" alt="" draggable={false} />
         <video
           ref={logoVideoRef}
           className="poster-wall-brand-video"
           src="/personal-logo-hover.webm"
-          poster="/personal-logo-static.png"
+          poster="/personal-logo-hover-poster.png"
+          autoPlay
+          loop
           muted
           playsInline
           preload="auto"
