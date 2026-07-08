@@ -220,9 +220,12 @@ export default function ProjectWebGLImage({
     let geometry: THREE.PlaneGeometry | null = null;
     let material: THREE.ShaderMaterial | null = null;
     let renderer: THREE.WebGLRenderer | null = null;
+    let scene: THREE.Scene | null = null;
+    let camera: THREE.OrthographicCamera | null = null;
     let resizeObserver: ResizeObserver | null = null;
     let setupTimeout = 0;
     let cleaned = false;
+    let thumbnailAnimationActive = false;
     let uniforms: {
       uTexture: { value: THREE.Texture };
       uMouse: { value: THREE.Vector2 };
@@ -232,13 +235,43 @@ export default function ProjectWebGLImage({
       uTextureResolution: { value: THREE.Vector2 };
     } | null = null;
 
+    const renderThumbnailFrame = (time: number) => {
+      if (!renderer || !uniforms || !scene || !camera) return;
+
+      uniforms.uTime.value = time * 0.001;
+      renderer.render(scene, camera);
+    };
+
+    const animateThumbnail = (time: number) => {
+      if (!thumbnailAnimationActive) return;
+
+      renderThumbnailFrame(time);
+      animationFrame = requestAnimationFrame(animateThumbnail);
+    };
+
+    const startThumbnailAnimation = () => {
+      if (thumbnailAnimationActive || cleaned || !renderer || !uniforms) return;
+
+      thumbnailAnimationActive = true;
+      animationFrame = requestAnimationFrame(animateThumbnail);
+    };
+
+    const stopThumbnailAnimation = () => {
+      thumbnailAnimationActive = false;
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = 0;
+      }
+      renderThumbnailFrame(performance.now());
+    };
+
     const setupRenderer = () => {
       if (cleaned || renderer) return;
 
       root.classList.remove('is-webgl-ready', 'is-webgl-unavailable');
 
-      const scene = new THREE.Scene();
-      const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+      scene = new THREE.Scene();
+      camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
       renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -263,7 +296,7 @@ export default function ProjectWebGLImage({
         vertexShader: thumbnailVertexShader,
       });
       const mesh = new THREE.Mesh(geometry, material);
-      scene.add(mesh);
+      scene?.add(mesh);
 
       createTexture(src, (texture) => {
         if (cleaned || !uniforms || !renderer) {
@@ -283,6 +316,7 @@ export default function ProjectWebGLImage({
         uniforms.uTextureResolution.value.set(size.width, size.height);
         root.classList.add('is-webgl-ready');
         root.classList.remove('is-webgl-unavailable');
+        renderThumbnailFrame(performance.now());
       }, () => {
         root.classList.add('is-webgl-unavailable');
       });
@@ -295,20 +329,12 @@ export default function ProjectWebGLImage({
         const height = Math.max(rect.height, 1);
         renderer.setSize(width, height, false);
         uniforms.uResolution.value.set(width, height);
+        renderThumbnailFrame(performance.now());
       };
 
       resizeObserver = new ResizeObserver(resize);
       resizeObserver.observe(root);
       resize();
-
-      const animate = (time: number) => {
-        if (!renderer || !uniforms) return;
-
-        uniforms.uTime.value = time * 0.001;
-        renderer.render(scene, camera);
-        animationFrame = requestAnimationFrame(animate);
-      };
-      animate(0);
     };
 
     const handlePointerMove = (event: PointerEvent) => {
@@ -324,14 +350,30 @@ export default function ProjectWebGLImage({
     const handlePointerEnter = () => {
       root.dispatchEvent(new CustomEvent('project-image-hover', { bubbles: true, detail: true }));
       if (uniforms) {
-        gsap.to(uniforms.uHover, { value: 1, duration: 0.36, ease: 'power3.out' });
+        startThumbnailAnimation();
+        gsap.to(uniforms.uHover, {
+          value: 1,
+          duration: 0.36,
+          ease: 'power3.out',
+          overwrite: 'auto',
+        });
       }
     };
 
     const handlePointerLeave = () => {
       root.dispatchEvent(new CustomEvent('project-image-hover', { bubbles: true, detail: false }));
       if (uniforms) {
-        gsap.to(uniforms.uHover, { value: 0, duration: 0.5, ease: 'power3.out' });
+        gsap.to(uniforms.uHover, {
+          value: 0,
+          duration: 0.5,
+          ease: 'power3.out',
+          overwrite: 'auto',
+          onComplete: () => {
+            if (uniforms && uniforms.uHover.value <= 0.001) {
+              stopThumbnailAnimation();
+            }
+          },
+        });
       }
     };
 
@@ -363,6 +405,7 @@ export default function ProjectWebGLImage({
       if (animationFrame) {
         cancelAnimationFrame(animationFrame);
       }
+      thumbnailAnimationActive = false;
       resizeObserver?.disconnect();
       root.classList.remove('is-webgl-ready', 'is-webgl-unavailable');
       root.removeEventListener('click', handleClick);

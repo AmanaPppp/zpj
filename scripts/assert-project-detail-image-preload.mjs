@@ -22,8 +22,8 @@ assert.doesNotMatch(
 
 assert.match(
   projectsSource,
-  /projectGalleryItems\.map\(\(item\)\s*=>\s*item\.image\)/,
-  'Preload list should include only gallery cover images',
+  /projectGalleryItems\.map\(\(item\)\s*=>\s*item\.previewImage\)/,
+  'Preload list should include only lightweight gallery preview images',
 );
 
 assert.match(

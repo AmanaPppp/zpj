@@ -9,59 +9,78 @@ import BorderGlow from '../components/BorderGlow';
 import SectionParticleEffect from '../components/SectionParticleEffect';
 import { DottedSurface } from '@/components/ui/dotted-surface';
 import ProjectWebGLImage from '@/components/ProjectWebGLImage';
-import brandDetail01 from '@/assets/project-detail/brand-detail-01.png';
-import brandDetail02 from '@/assets/project-detail/brand-detail-02.jpg';
-import brandDetail03 from '@/assets/project-detail/brand-detail-03.jpg';
-import pawsitivityBrandProposal from '@/assets/project-detail/pawsitivity/1.jpg';
-import pawsitivityDetail02 from '@/assets/project-detail/pawsitivity/2.jpg';
-import pawsitivityDetail03 from '@/assets/project-detail/pawsitivity/3.jpg';
-import pawsitivityDetail04 from '@/assets/project-detail/pawsitivity/4.jpg';
-import pawsitivityDetail05 from '@/assets/project-detail/pawsitivity/5.jpg';
-import pawsitivityDetail06 from '@/assets/project-detail/pawsitivity/6.jpg';
-import pawsitivityDetail07 from '@/assets/project-detail/pawsitivity/7.jpg';
-import pawsitivityDetail08 from '@/assets/project-detail/pawsitivity/8i.jpg';
-import pawsitivityDetail09 from '@/assets/project-detail/pawsitivity/9.png';
-import pawsitivityDetail10 from '@/assets/project-detail/pawsitivity/10.png';
-import pawsitivityDetail11 from '@/assets/project-detail/pawsitivity/11.png';
-import pawsitivityDetail12 from '@/assets/project-detail/pawsitivity/12.png';
-import pawsitivityDetail13 from '@/assets/project-detail/pawsitivity/13.png';
-import pawsitivityDetail14 from '@/assets/project-detail/pawsitivity/14.png';
-import pawsitivityDetail15 from '@/assets/project-detail/pawsitivity/15.png';
-import pawsitivityDetail16 from '@/assets/project-detail/pawsitivity/16.png';
-import pawsitivityDetail17 from '@/assets/project-detail/pawsitivity/17.png';
-import pawsitivityDetail18 from '@/assets/project-detail/pawsitivity/18.png';
-import pawsitivityDetailExtra02 from '@/assets/project-detail/pawsitivity/02.png';
-import applicationImage03 from '@/assets/project-detail/brand-applications/resource-03.jpg';
-import applicationImage04 from '@/assets/project-detail/brand-applications/resource-04.jpg';
-import applicationImage05 from '@/assets/project-detail/brand-applications/resource-05.jpg';
-import applicationImage08 from '@/assets/project-detail/brand-applications/resource-08.jpg';
-import applicationImage09 from '@/assets/project-detail/brand-applications/resource-09.jpg';
-import applicationImage10 from '@/assets/project-detail/brand-applications/resource-10.jpg';
-import applicationImage11 from '@/assets/project-detail/brand-applications/resource-11.jpg';
-import applicationImage12 from '@/assets/project-detail/brand-applications/resource-12.jpg';
-import applicationImage13 from '@/assets/project-detail/brand-applications/resource-13.jpg';
-import applicationImage15 from '@/assets/project-detail/brand-applications/resource-15.jpg';
-import applicationImage16 from '@/assets/project-detail/brand-applications/resource-16.jpg';
-import applicationImage17 from '@/assets/project-detail/brand-applications/resource-17.jpg';
-import applicationImage18 from '@/assets/project-detail/brand-applications/resource-18.jpg';
-import applicationImage19 from '@/assets/project-detail/brand-applications/resource-19.jpg';
-import applicationImage20 from '@/assets/project-detail/brand-applications/resource-20.jpg';
-import applicationImage21 from '@/assets/project-detail/brand-applications/resource-21.jpg';
-import applicationImage22 from '@/assets/project-detail/brand-applications/resource-22.jpg';
-import applicationImage23 from '@/assets/project-detail/brand-applications/resource-23.jpg';
-import touchpointImage01 from '@/assets/project-detail/brand-touchpoints/touchpoint-01.jpg';
-import touchpointImage02 from '@/assets/project-detail/brand-touchpoints/touchpoint-02.jpg';
-import touchpointImage03 from '@/assets/project-detail/brand-touchpoints/touchpoint-03.jpg';
-import touchpointImage04 from '@/assets/project-detail/brand-touchpoints/touchpoint-04.jpg';
-import touchpointImage05 from '@/assets/project-detail/brand-touchpoints/touchpoint-05.jpg';
-import touchpointImage06 from '@/assets/project-detail/brand-touchpoints/touchpoint-06.jpg';
-import touchpointImage07 from '@/assets/project-detail/brand-touchpoints/touchpoint-07.jpg';
-import touchpointImage08 from '@/assets/project-detail/brand-touchpoints/touchpoint-08.jpg';
-import touchpointImage09 from '@/assets/project-detail/brand-touchpoints/touchpoint-09.jpg';
-import touchpointImage10 from '@/assets/project-detail/brand-touchpoints/touchpoint-10.jpg';
-import touchpointImage11 from '@/assets/project-detail/brand-touchpoints/touchpoint-11.jpg';
-import touchpointImage12 from '@/assets/project-detail/brand-touchpoints/touchpoint-12.jpg';
-import touchpointImage13 from '@/assets/project-detail/brand-touchpoints/touchpoint-13.jpg';
+import brandDetail01 from '@/assets/project-detail-optimized/brand-detail-01.jpg';
+import brandDetail02 from '@/assets/project-detail-optimized/brand-detail-02.jpg';
+import brandDetail03 from '@/assets/project-detail-optimized/brand-detail-03.jpg';
+import brandDetail01Preview from '@/assets/project-detail/previews/brand-detail-01-preview.jpg';
+import brandDetail02Preview from '@/assets/project-detail/previews/brand-detail-02-preview.jpg';
+import brandDetail03Preview from '@/assets/project-detail/previews/brand-detail-03-preview.jpg';
+import brandVisual01 from '@/assets/project-detail-optimized/brand-visual/1.png';
+import brandVisual02 from '@/assets/project-detail-optimized/brand-visual/2.png';
+import brandVisual03 from '@/assets/project-detail-optimized/brand-visual/3.png';
+import brandVisual04 from '@/assets/project-detail-optimized/brand-visual/4.jpg';
+import brandVisual05 from '@/assets/project-detail-optimized/brand-visual/5.jpg';
+import brandVisual06 from '@/assets/project-detail-optimized/brand-visual/6.jpg';
+import brandVisual07 from '@/assets/project-detail-optimized/brand-visual/7.png';
+import brandVisual08 from '@/assets/project-detail-optimized/brand-visual/8.png';
+import brandVisual09 from '@/assets/project-detail-optimized/brand-visual/9.png';
+import brandVisual10 from '@/assets/project-detail-optimized/brand-visual/10.png';
+import brandVisual11 from '@/assets/project-detail-optimized/brand-visual/11.png';
+import brandVisual12 from '@/assets/project-detail-optimized/brand-visual/12.png';
+import brandVisual13 from '@/assets/project-detail-optimized/brand-visual/13.png';
+import brandVisual14 from '@/assets/project-detail-optimized/brand-visual/14.png';
+import brandVisual15 from '@/assets/project-detail-optimized/brand-visual/15.png';
+import pawsitivityBrandProposalPreview from '@/assets/project-detail/previews/pawsitivity-brand-proposal-preview.jpg';
+import pawsitivityBrandProposal from '@/assets/project-detail-optimized/pawsitivity/1.jpg';
+import pawsitivityDetail02 from '@/assets/project-detail-optimized/pawsitivity/2.jpg';
+import pawsitivityDetail03 from '@/assets/project-detail-optimized/pawsitivity/3.jpg';
+import pawsitivityDetail04 from '@/assets/project-detail-optimized/pawsitivity/4.jpg';
+import pawsitivityDetail05 from '@/assets/project-detail-optimized/pawsitivity/5.jpg';
+import pawsitivityDetail06 from '@/assets/project-detail-optimized/pawsitivity/6.jpg';
+import pawsitivityDetail07 from '@/assets/project-detail-optimized/pawsitivity/7.jpg';
+import pawsitivityDetail08 from '@/assets/project-detail-optimized/pawsitivity/8i.jpg';
+import pawsitivityDetail09 from '@/assets/project-detail-optimized/pawsitivity/9.jpg';
+import pawsitivityDetail10 from '@/assets/project-detail-optimized/pawsitivity/10.jpg';
+import pawsitivityDetail11 from '@/assets/project-detail-optimized/pawsitivity/11.jpg';
+import pawsitivityDetail12 from '@/assets/project-detail-optimized/pawsitivity/12.jpg';
+import pawsitivityDetail13 from '@/assets/project-detail-optimized/pawsitivity/13.jpg';
+import pawsitivityDetail14 from '@/assets/project-detail-optimized/pawsitivity/14.jpg';
+import pawsitivityDetail15 from '@/assets/project-detail-optimized/pawsitivity/15.jpg';
+import pawsitivityDetail16 from '@/assets/project-detail-optimized/pawsitivity/16.jpg';
+import pawsitivityDetail17 from '@/assets/project-detail-optimized/pawsitivity/17.jpg';
+import pawsitivityDetail18 from '@/assets/project-detail-optimized/pawsitivity/18.jpg';
+import pawsitivityDetailExtra02 from '@/assets/project-detail-optimized/pawsitivity/02.jpg';
+import applicationImage03 from '@/assets/project-detail-optimized/brand-applications/resource-03.jpg';
+import applicationImage04 from '@/assets/project-detail-optimized/brand-applications/resource-04.jpg';
+import applicationImage05 from '@/assets/project-detail-optimized/brand-applications/resource-05.jpg';
+import applicationImage08 from '@/assets/project-detail-optimized/brand-applications/resource-08.jpg';
+import applicationImage09 from '@/assets/project-detail-optimized/brand-applications/resource-09.jpg';
+import applicationImage10 from '@/assets/project-detail-optimized/brand-applications/resource-10.jpg';
+import applicationImage11 from '@/assets/project-detail-optimized/brand-applications/resource-11.jpg';
+import applicationImage12 from '@/assets/project-detail-optimized/brand-applications/resource-12.jpg';
+import applicationImage13 from '@/assets/project-detail-optimized/brand-applications/resource-13.jpg';
+import applicationImage15 from '@/assets/project-detail-optimized/brand-applications/resource-15.jpg';
+import applicationImage16 from '@/assets/project-detail-optimized/brand-applications/resource-16.jpg';
+import applicationImage17 from '@/assets/project-detail-optimized/brand-applications/resource-17.jpg';
+import applicationImage18 from '@/assets/project-detail-optimized/brand-applications/resource-18.jpg';
+import applicationImage19 from '@/assets/project-detail-optimized/brand-applications/resource-19.jpg';
+import applicationImage20 from '@/assets/project-detail-optimized/brand-applications/resource-20.jpg';
+import applicationImage21 from '@/assets/project-detail-optimized/brand-applications/resource-21.jpg';
+import applicationImage22 from '@/assets/project-detail-optimized/brand-applications/resource-22.jpg';
+import applicationImage23 from '@/assets/project-detail-optimized/brand-applications/resource-23.jpg';
+import touchpointImage01 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-01.jpg';
+import touchpointImage02 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-02.jpg';
+import touchpointImage03 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-03.jpg';
+import touchpointImage04 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-04.jpg';
+import touchpointImage05 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-05.jpg';
+import touchpointImage06 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-06.jpg';
+import touchpointImage07 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-07.jpg';
+import touchpointImage08 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-08.jpg';
+import touchpointImage09 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-09.jpg';
+import touchpointImage10 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-10.jpg';
+import touchpointImage11 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-11.jpg';
+import touchpointImage12 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-12.jpg';
+import touchpointImage13 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-13.jpg';
 import cursorAmaMark from '@/assets/project-detail/cursor-ama-mark.png';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -110,10 +129,27 @@ const projects = [
 const projectGalleryItems = [
   {
     detailId: 'brand-visual',
-    detailImages: [],
+    detailImages: [
+      brandVisual01,
+      brandVisual02,
+      brandVisual03,
+      brandVisual04,
+      brandVisual05,
+      brandVisual06,
+      brandVisual07,
+      brandVisual08,
+      brandVisual09,
+      brandVisual10,
+      brandVisual11,
+      brandVisual12,
+      brandVisual13,
+      brandVisual14,
+      brandVisual15,
+    ],
     title: '\u54c1\u724c\u4e3b\u89c6\u89c9',
     subtitle: 'Visual Identity',
     image: brandDetail01,
+    previewImage: brandDetail01Preview,
   },
   {
     detailId: 'brand-applications',
@@ -140,6 +176,7 @@ const projectGalleryItems = [
     title: '\u5e94\u7528\u573a\u666f\u5ef6\u5c55',
     subtitle: 'Brand Applications',
     image: brandDetail02,
+    previewImage: brandDetail02Preview,
   },
   {
     detailId: 'brand-touchpoints',
@@ -161,6 +198,7 @@ const projectGalleryItems = [
     title: '\u7269\u6599\u4e0e\u89e6\u70b9',
     subtitle: 'Touchpoint System',
     image: brandDetail03,
+    previewImage: brandDetail03Preview,
   },
   {
     detailId: 'pawsitivity-brand-proposal',
@@ -188,13 +226,14 @@ const projectGalleryItems = [
     title: '\u73c0\u65af\u7f07\u54c1\u724c\u63d0\u6848',
     subtitle: 'Pawsitivity Brand Proposal',
     image: pawsitivityBrandProposal,
+    previewImage: pawsitivityBrandProposalPreview,
   },
 ];
 
 const preloadedProjectDetailImages = new Map<string, Promise<void>>();
 
 export const projectDetailPreloadImages = Array.from(
-  new Set(projectGalleryItems.map((item) => item.image)),
+  new Set(projectGalleryItems.map((item) => item.previewImage)),
 );
 
 const preloadProjectDetailImage = (src: string): Promise<void> => {
@@ -798,7 +837,7 @@ export default function ProjectsSection() {
                     <article className="project-gallery-card" key={item.image}>
                       <div className="project-gallery-frame">
                         <ProjectWebGLImage
-                          src={item.image}
+                          src={item.previewImage}
                           alt={item.title}
                           deferWebGLMs={projectSheetReady ? index * 140 : 1200}
                           detailId={item.detailId}

@@ -14,8 +14,8 @@ assert.doesNotMatch(
 
 assert.match(
   projectsSource,
-  /projectGalleryItems\.map\(\(item\)\s*=>\s*item\.image\)/,
-  'Startup preload should be limited to project gallery cover images.',
+  /projectGalleryItems\.map\(\(item\)\s*=>\s*item\.previewImage\)/,
+  'Startup preload should be limited to lightweight project gallery preview images.',
 );
 
 assert.match(
