@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 
 interface FloatingGeometriesProps {
   mouseRef: React.MutableRefObject<{ x: number; y: number; targetX: number; targetY: number }>;
@@ -27,6 +27,7 @@ type AsteroidModel = {
 const ASTEROID_IDS = [1, 4, 8];
 const ASTEROID_TEXTURE_TYPES = ['base', 'normal', 'roughness', 'ao'] as const;
 const MODEL_ROOT = '/models/asteroids-pbr';
+const ASTEROID_MODEL_URLS = ASTEROID_IDS.map((id) => `${MODEL_ROOT}/asteroid${id}/model.drc`);
 const ASTEROID_TEXTURE_URLS = ASTEROID_IDS.flatMap((id) =>
   ASTEROID_TEXTURE_TYPES.map((type) => `${MODEL_ROOT}/asteroid${id}/textures/${type}.webp`),
 );
@@ -56,29 +57,6 @@ function normalizeGeometry(sourceGeometry: THREE.BufferGeometry) {
   geometry.computeVertexNormals();
 
   return geometry;
-}
-
-function mergeObjectGeometry(object: THREE.Object3D) {
-  let selectedGeometry: THREE.BufferGeometry | null = null;
-  let largestVolume = -Infinity;
-
-  object.traverse((child) => {
-    if (!(child instanceof THREE.Mesh) || !child.geometry) return;
-
-    child.geometry.computeBoundingBox();
-    const box = child.geometry.boundingBox;
-    if (!box) return;
-
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    const volume = size.x * size.y * size.z;
-    if (volume > largestVolume) {
-      largestVolume = volume;
-      selectedGeometry = child.geometry;
-    }
-  });
-
-  return selectedGeometry ? normalizeGeometry(selectedGeometry) : new THREE.IcosahedronGeometry(1, 5);
 }
 
 function getAsteroidTextureSet(textures: THREE.Texture[], index: number): AsteroidTextureSet {
@@ -118,20 +96,24 @@ export default function FloatingGeometries({ mouseRef, onReady }: FloatingGeomet
   const groupRef = useRef<THREE.Group>(null!);
   const revealTweenRef = useRef<gsap.core.Tween | null>(null);
   const readyNotifiedRef = useRef(false);
-  const objects = useLoader(OBJLoader, ASTEROID_IDS.map((id) => `${MODEL_ROOT}/asteroid${id}/model.obj`));
+  const geometries = useLoader(DRACOLoader, ASTEROID_MODEL_URLS, (loader) => {
+    loader.setDecoderPath('/draco/');
+    loader.setDecoderConfig({ type: 'wasm' });
+    loader.setWorkerLimit(2);
+  }) as THREE.BufferGeometry[];
   const textures = useLoader(THREE.TextureLoader, ASTEROID_TEXTURE_URLS) as THREE.Texture[];
 
   const asteroidModels = useMemo<AsteroidModel[]>(() => {
     const scaleBiases = [1.18, 1.48, 1.25, 1.7, 1.55];
 
-    return objects.map((object, index) => {
+    return geometries.map((geometry, index) => {
       return {
-        geometry: mergeObjectGeometry(object),
+        geometry: normalizeGeometry(geometry),
         material: createAsteroidMaterial(getAsteroidTextureSet(textures, index)),
         scaleBias: scaleBiases[index] ?? 1,
       };
     });
-  }, [objects, textures]);
+  }, [geometries, textures]);
 
   const asteroids = useMemo(() => {
     const items: FloatingAsteroid[] = [];

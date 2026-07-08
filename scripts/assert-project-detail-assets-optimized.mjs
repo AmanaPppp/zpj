@@ -3,14 +3,14 @@ import { dirname, extname, resolve } from 'node:path';
 import assert from 'node:assert/strict';
 
 const root = process.cwd();
-const imageExtensions = new Set(['.jpg', '.jpeg', '.png']);
+const imageExtensions = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const maxImageBytes = 1_700_000;
 const maxTotalBytes = 30_000_000;
 const projectsSourcePath = resolve(root, 'src/sections/ProjectsSection.tsx');
 const projectsSource = readFileSync(projectsSourcePath, 'utf8');
 
 const importedAssetPaths = Array.from(
-  projectsSource.matchAll(/from\s+['"](@\/assets\/[^'"]+\.(?:jpe?g|png))['"]/g),
+  projectsSource.matchAll(/from\s+['"](@\/assets\/[^'"]+\.(?:jpe?g|png|webp))['"]/g),
   (match) => match[1],
 );
 
