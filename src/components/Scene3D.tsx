@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef } from 'react';
+import { Component, Suspense, useEffect, useRef, type ErrorInfo, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
@@ -16,6 +16,30 @@ interface Scene3DProps {
     targetX: number;
     targetY: number;
   }>;
+}
+
+function notifyPortfolioSceneReady() {
+  document.documentElement.dataset.portfolioSceneReady = 'true';
+  window.dispatchEvent(new CustomEvent('portfolio-scene-ready'));
+}
+
+class SceneAssetErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Failed to load 3D scene assets.', error, errorInfo);
+    notifyPortfolioSceneReady();
+  }
+
+  render() {
+    if (this.state.hasError) return null;
+
+    return this.props.children;
+  }
 }
 
 function CinematicSceneLights() {
@@ -75,15 +99,14 @@ export default function Scene3D({ scrollProgress, mouseRef }: Scene3DProps) {
       <CinematicSceneLights />
 
       <ParticlesField mouseRef={mouseRef} />
-      <Suspense fallback={null}>
-        <FloatingGeometries
-          mouseRef={mouseRef}
-          onReady={() => {
-            document.documentElement.dataset.portfolioSceneReady = 'true';
-            window.dispatchEvent(new CustomEvent('portfolio-scene-ready'));
-          }}
-        />
-      </Suspense>
+      <SceneAssetErrorBoundary>
+        <Suspense fallback={null}>
+          <FloatingGeometries
+            mouseRef={mouseRef}
+            onReady={notifyPortfolioSceneReady}
+          />
+        </Suspense>
+      </SceneAssetErrorBoundary>
       <GlassKnot scrollProgress={scrollProgress} mouseRef={mouseRef} />
       <CinematicPostProcessing />
     </Canvas>

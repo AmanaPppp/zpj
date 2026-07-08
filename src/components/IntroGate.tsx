@@ -8,6 +8,8 @@ const RINGS = [
   'SELECTED WORKS  STRATEGY  DESIGN  ',
 ];
 
+const SCENE_READY_TIMEOUT_MS = 4500;
+
 export default function IntroGate() {
   const overlayRef = useRef<HTMLDivElement>(null);
   const ringsRef = useRef<Array<HTMLDivElement | null>>([]);
@@ -35,6 +37,7 @@ export default function IntroGate() {
     let introAnimationDone = false;
     let sceneReady = document.documentElement.dataset.portfolioSceneReady === 'true';
     let autoEnterTimer: number | null = null;
+    let sceneReadyFallbackTimer: number | null = null;
     const idleTweens: gsap.core.Tween[] = [];
     const startIdleTweens = () => {
       if (idleTweens.length > 0) return;
@@ -73,11 +76,18 @@ export default function IntroGate() {
 
     const handleSceneReady = () => {
       sceneReady = true;
+      if (sceneReadyFallbackTimer !== null) {
+        window.clearTimeout(sceneReadyFallbackTimer);
+        sceneReadyFallbackTimer = null;
+      }
       markReady();
     };
 
     preloadProjectDetailImages().catch(() => undefined);
     window.addEventListener('portfolio-scene-ready', handleSceneReady);
+    if (!sceneReady) {
+      sceneReadyFallbackTimer = window.setTimeout(handleSceneReady, SCENE_READY_TIMEOUT_MS);
+    }
 
     const ctx = gsap.context(() => {
       gsap.set(rings, { transformOrigin: '50% 50%' });
@@ -237,6 +247,9 @@ export default function IntroGate() {
       enterRef.current = () => undefined;
       if (autoEnterTimer !== null) {
         window.clearTimeout(autoEnterTimer);
+      }
+      if (sceneReadyFallbackTimer !== null) {
+        window.clearTimeout(sceneReadyFallbackTimer);
       }
       window.removeEventListener('portfolio-scene-ready', handleSceneReady);
       idleTweens.forEach((tween) => tween.kill());

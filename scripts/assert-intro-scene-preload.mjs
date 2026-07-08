@@ -18,8 +18,16 @@ if (/DeferredFloatingGeometries/.test(sceneSource)) {
   throw new Error('Scene3D should not defer asteroid loading until after the portfolio entrance.');
 }
 
-if (!/onReady=\{\(\)\s*=>\s*\{/s.test(sceneSource) || !/window\.dispatchEvent\(new CustomEvent\(['"]portfolio-scene-ready['"]\)\)/.test(sceneSource)) {
+if (!/function\s+notifyPortfolioSceneReady\(\)/.test(sceneSource) || !/window\.dispatchEvent\(new CustomEvent\(['"]portfolio-scene-ready['"]\)\)/.test(sceneSource)) {
+  throw new Error('Scene3D should expose a single scene-ready notifier.');
+}
+
+if (!/onReady=\{notifyPortfolioSceneReady\}/.test(sceneSource)) {
   throw new Error('Scene3D should notify the intro gate when asteroid scene assets are ready.');
+}
+
+if (!/SceneAssetErrorBoundary/.test(sceneSource) || !/componentDidCatch/.test(sceneSource)) {
+  throw new Error('Scene3D should release the intro gate if 3D scene assets fail to load.');
 }
 
 if (!/onReady\?:\s*\(\)\s*=>\s*void/.test(floatingSource)) {
@@ -40,6 +48,10 @@ if (!/portfolio-scene-ready/.test(introSource)) {
 
 if (!/sceneReady/.test(introSource)) {
   throw new Error('IntroGate should track scene readiness separately from animation readiness.');
+}
+
+if (!/SCENE_READY_TIMEOUT_MS/.test(introSource) || !/setTimeout\(handleSceneReady,\s*SCENE_READY_TIMEOUT_MS\)/.test(introSource)) {
+  throw new Error('IntroGate should have a timeout fallback so production asset failures cannot trap users on the loader.');
 }
 
 console.log('Intro scene preload checks passed.');
