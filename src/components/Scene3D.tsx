@@ -76,7 +76,13 @@ export default function Scene3D({ scrollProgress, mouseRef }: Scene3DProps) {
 
       <ParticlesField mouseRef={mouseRef} />
       <Suspense fallback={null}>
-        <FloatingGeometries mouseRef={mouseRef} />
+        <FloatingGeometries
+          mouseRef={mouseRef}
+          onReady={() => {
+            document.documentElement.dataset.portfolioSceneReady = 'true';
+            window.dispatchEvent(new CustomEvent('portfolio-scene-ready'));
+          }}
+        />
       </Suspense>
       <GlassKnot scrollProgress={scrollProgress} mouseRef={mouseRef} />
       <CinematicPostProcessing />

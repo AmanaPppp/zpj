@@ -33,6 +33,7 @@ export default function IntroGate() {
     let entered = false;
     let disposed = false;
     let introAnimationDone = false;
+    let sceneReady = document.documentElement.dataset.portfolioSceneReady === 'true';
     let autoEnterTimer: number | null = null;
     const idleTweens: gsap.core.Tween[] = [];
     const startIdleTweens = () => {
@@ -60,7 +61,7 @@ export default function IntroGate() {
       );
     };
     const markReady = () => {
-      if (disposed || entered || !introAnimationDone) return;
+      if (disposed || entered || !introAnimationDone || !sceneReady) return;
       logo.classList.add('is-ready');
       startIdleTweens();
 
@@ -71,7 +72,13 @@ export default function IntroGate() {
       }
     };
 
+    const handleSceneReady = () => {
+      sceneReady = true;
+      markReady();
+    };
+
     preloadProjectDetailImages().catch(() => undefined);
+    window.addEventListener('portfolio-scene-ready', handleSceneReady);
 
     const ctx = gsap.context(() => {
       gsap.set(rings, { transformOrigin: '50% 50%' });
@@ -231,6 +238,7 @@ export default function IntroGate() {
       if (autoEnterTimer !== null) {
         window.clearTimeout(autoEnterTimer);
       }
+      window.removeEventListener('portfolio-scene-ready', handleSceneReady);
       idleTweens.forEach((tween) => tween.kill());
       ctx.revert();
     };

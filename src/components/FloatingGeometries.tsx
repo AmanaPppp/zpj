@@ -6,6 +6,7 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
 interface FloatingGeometriesProps {
   mouseRef: React.MutableRefObject<{ x: number; y: number; targetX: number; targetY: number }>;
+  onReady?: () => void;
 }
 
 type FloatingAsteroid = {
@@ -24,7 +25,18 @@ type AsteroidModel = {
 };
 
 const ASTEROID_IDS = [1, 4, 8];
+const ASTEROID_TEXTURE_TYPES = ['base', 'normal', 'roughness', 'ao'] as const;
 const MODEL_ROOT = '/models/asteroids-pbr';
+const ASTEROID_TEXTURE_URLS = ASTEROID_IDS.flatMap((id) =>
+  ASTEROID_TEXTURE_TYPES.map((type) => `${MODEL_ROOT}/asteroid${id}/textures/${type}.webp`),
+);
+
+type AsteroidTextureSet = {
+  colorMap: THREE.Texture;
+  normalMap: THREE.Texture;
+  roughnessMap: THREE.Texture;
+  aoMap: THREE.Texture;
+};
 
 function normalizeGeometry(sourceGeometry: THREE.BufferGeometry) {
   const geometry = sourceGeometry.clone();
@@ -69,14 +81,19 @@ function mergeObjectGeometry(object: THREE.Object3D) {
   return selectedGeometry ? normalizeGeometry(selectedGeometry) : new THREE.IcosahedronGeometry(1, 5);
 }
 
-function createAsteroidMaterial(id: number, textureLoader: THREE.TextureLoader) {
-  const textureRoot = `${MODEL_ROOT}/asteroid${id}/textures`;
-  const colorMap = textureLoader.load(`${textureRoot}/base.webp`);
-  const normalMap = textureLoader.load(`${textureRoot}/normal.webp`);
-  const roughnessMap = textureLoader.load(`${textureRoot}/roughness.webp`);
-  const aoMap = textureLoader.load(`${textureRoot}/ao.webp`);
+function getAsteroidTextureSet(textures: THREE.Texture[], index: number): AsteroidTextureSet {
+  const offset = index * ASTEROID_TEXTURE_TYPES.length;
+  return {
+    colorMap: textures[offset],
+    normalMap: textures[offset + 1],
+    roughnessMap: textures[offset + 2],
+    aoMap: textures[offset + 3],
+  };
+}
 
+function createAsteroidMaterial({ colorMap, normalMap, roughnessMap, aoMap }: AsteroidTextureSet) {
   colorMap.colorSpace = THREE.SRGBColorSpace;
+
   [colorMap, normalMap, roughnessMap, aoMap].forEach((texture) => {
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
@@ -97,24 +114,24 @@ function createAsteroidMaterial(id: number, textureLoader: THREE.TextureLoader) 
   });
 }
 
-export default function FloatingGeometries({ mouseRef }: FloatingGeometriesProps) {
+export default function FloatingGeometries({ mouseRef, onReady }: FloatingGeometriesProps) {
   const groupRef = useRef<THREE.Group>(null!);
   const revealTweenRef = useRef<gsap.core.Tween | null>(null);
+  const readyNotifiedRef = useRef(false);
   const objects = useLoader(OBJLoader, ASTEROID_IDS.map((id) => `${MODEL_ROOT}/asteroid${id}/model.obj`));
+  const textures = useLoader(THREE.TextureLoader, ASTEROID_TEXTURE_URLS) as THREE.Texture[];
 
   const asteroidModels = useMemo<AsteroidModel[]>(() => {
-    const textureLoader = new THREE.TextureLoader();
     const scaleBiases = [1.18, 1.48, 1.25, 1.7, 1.55];
 
     return objects.map((object, index) => {
-      const id = ASTEROID_IDS[index];
       return {
         geometry: mergeObjectGeometry(object),
-        material: createAsteroidMaterial(id, textureLoader),
+        material: createAsteroidMaterial(getAsteroidTextureSet(textures, index)),
         scaleBias: scaleBiases[index] ?? 1,
       };
     });
-  }, [objects]);
+  }, [objects, textures]);
 
   const asteroids = useMemo(() => {
     const items: FloatingAsteroid[] = [];
@@ -162,6 +179,13 @@ export default function FloatingGeometries({ mouseRef }: FloatingGeometriesProps
 
     return items;
   }, [asteroidModels]);
+
+  useEffect(() => {
+    if (readyNotifiedRef.current || asteroidModels.length === 0) return;
+
+    readyNotifiedRef.current = true;
+    onReady?.();
+  }, [asteroidModels.length, onReady]);
 
   useEffect(() => {
     const group = groupRef.current;
