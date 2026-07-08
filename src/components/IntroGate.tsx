@@ -33,7 +33,7 @@ export default function IntroGate() {
     let entered = false;
     let disposed = false;
     let introAnimationDone = false;
-    let projectImagesReady = false;
+    let autoEnterTimer: number | null = null;
     const idleTweens: gsap.core.Tween[] = [];
     const startIdleTweens = () => {
       if (idleTweens.length > 0) return;
@@ -59,16 +59,19 @@ export default function IntroGate() {
         })
       );
     };
-    const markReadyWhenLoaded = () => {
-      if (disposed || entered || !introAnimationDone || !projectImagesReady) return;
+    const markReady = () => {
+      if (disposed || entered || !introAnimationDone) return;
       logo.classList.add('is-ready');
       startIdleTweens();
+
+      if (autoEnterTimer === null) {
+        autoEnterTimer = window.setTimeout(() => {
+          enterRef.current();
+        }, 900);
+      }
     };
 
-    preloadProjectDetailImages().then(() => {
-      projectImagesReady = true;
-      markReadyWhenLoaded();
-    });
+    preloadProjectDetailImages().catch(() => undefined);
 
     const ctx = gsap.context(() => {
       gsap.set(rings, { transformOrigin: '50% 50%' });
@@ -84,7 +87,7 @@ export default function IntroGate() {
         defaults: { ease: 'power3.inOut' },
         onComplete: () => {
           introAnimationDone = true;
-          markReadyWhenLoaded();
+          markReady();
         },
       });
 
@@ -225,6 +228,9 @@ export default function IntroGate() {
     return () => {
       disposed = true;
       enterRef.current = () => undefined;
+      if (autoEnterTimer !== null) {
+        window.clearTimeout(autoEnterTimer);
+      }
       idleTweens.forEach((tween) => tween.kill());
       ctx.revert();
     };

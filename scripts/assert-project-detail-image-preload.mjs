@@ -52,8 +52,20 @@ assert.match(
 
 assert.match(
   introSource,
+  /catch\(\(\)\s*=>\s*undefined\)/,
+  'IntroGate should treat project image preloading as background work so failed deploy assets cannot trap users on the entrance overlay',
+);
+
+assert.doesNotMatch(
+  introSource,
   /!introAnimationDone\s*\|\|\s*!projectImagesReady/,
-  'IntroGate should wait for both the entrance animation and lightweight project cover images before enabling entry',
+  'IntroGate must not wait for preloaded project images before enabling entry',
+);
+
+assert.match(
+  introSource,
+  /autoEnterTimer/,
+  'IntroGate should auto-enter after the entrance animation so the production homepage cannot look permanently stuck',
 );
 
 assert.match(
