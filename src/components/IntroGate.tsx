@@ -63,7 +63,6 @@ export default function IntroGate() {
     const markReady = () => {
       if (disposed || entered || !introAnimationDone || !sceneReady) return;
       logo.classList.add('is-ready');
-      startIdleTweens();
 
       if (autoEnterTimer === null) {
         autoEnterTimer = window.setTimeout(() => {
@@ -94,6 +93,7 @@ export default function IntroGate() {
         defaults: { ease: 'power3.inOut' },
         onComplete: () => {
           introAnimationDone = true;
+          startIdleTweens();
           markReady();
         },
       });
