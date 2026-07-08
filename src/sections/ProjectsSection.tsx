@@ -231,9 +231,14 @@ const projectGalleryItems = [
 ];
 
 const preloadedProjectDetailImages = new Map<string, Promise<void>>();
+const PROJECT_DETAIL_INITIAL_PRELOAD_COUNT = 3;
 
 export const projectDetailPreloadImages = Array.from(
   new Set(projectGalleryItems.map((item) => item.previewImage)),
+);
+
+const initialProjectDetailImages = Array.from(
+  new Set(projectGalleryItems.flatMap((item) => item.detailImages.slice(0, PROJECT_DETAIL_INITIAL_PRELOAD_COUNT))),
 );
 
 const preloadProjectDetailImage = (src: string): Promise<void> => {
@@ -276,6 +281,11 @@ const preloadProjectDetailImage = (src: string): Promise<void> => {
 export function preloadProjectDetailImages(): Promise<unknown> {
   if (typeof window === 'undefined') return Promise.resolve();
   return Promise.all(projectDetailPreloadImages.map(preloadProjectDetailImage));
+}
+
+export function preloadInitialProjectDetailImages(): Promise<unknown> {
+  if (typeof window === 'undefined') return Promise.resolve();
+  return Promise.all(initialProjectDetailImages.map(preloadProjectDetailImage));
 }
 
 export default function ProjectsSection() {
@@ -455,6 +465,7 @@ export default function ProjectsSection() {
 
     document.documentElement.classList.add('project-sheet-open');
     document.body.classList.add('project-sheet-open');
+    preloadInitialProjectDetailImages().catch(() => undefined);
 
     gsap.killTweensOf([modalRef.current, backdropRef.current]);
     gsap.set(backdropRef.current, { autoAlpha: 1 });

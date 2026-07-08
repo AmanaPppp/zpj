@@ -156,6 +156,22 @@ type TransitionState = {
   cleanup: () => void;
 };
 
+const DETAIL_IMAGE_EAGER_COUNT = 3;
+const preloadedDetailImages = new Set<string>();
+
+const preloadDetailImages = (detailImages: string[]) => {
+  if (typeof window === 'undefined') return;
+
+  for (const src of detailImages) {
+    if (preloadedDetailImages.has(src)) continue;
+    preloadedDetailImages.add(src);
+
+    const image = new Image();
+    image.decoding = 'async';
+    image.src = src;
+  }
+};
+
 const createTexture = (
   src: string,
   onLoad: (texture: THREE.Texture) => void,
@@ -349,6 +365,7 @@ export default function ProjectWebGLImage({
 
     const handlePointerEnter = () => {
       root.dispatchEvent(new CustomEvent('project-image-hover', { bubbles: true, detail: true }));
+      preloadDetailImages(detailImages);
       if (uniforms) {
         startThumbnailAnimation();
         gsap.to(uniforms.uHover, {
@@ -379,6 +396,7 @@ export default function ProjectWebGLImage({
 
     const handleClick = () => {
       if (transitionRef.current?.active) return;
+      preloadDetailImages(detailImages);
       transitionRef.current = startFullscreenTransition(root, { detailId, detailImages, src, subtitle, title });
     };
 
@@ -493,16 +511,17 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
 
       for (let index = startIndex; index < endIndex; index += 1) {
         const image = detailImages[index];
+        const isPriorityImage = index < DETAIL_IMAGE_EAGER_COUNT;
         const figure = document.createElement('figure');
         figure.className = `project-image-page-shot project-image-page-shot-${index + 1}`;
 
         const img = document.createElement('img');
         img.src = image;
         img.alt = '';
-        img.loading = 'lazy';
+        img.loading = isPriorityImage ? 'eager' : 'lazy';
         img.decoding = 'async';
         img.sizes = '(max-width: 720px) 100vw, (max-width: 1100px) 50vw, 33vw';
-        img.setAttribute('fetchpriority', 'low');
+        img.setAttribute('fetchpriority', isPriorityImage ? 'high' : 'low');
 
         figure.appendChild(img);
         fragment.appendChild(figure);

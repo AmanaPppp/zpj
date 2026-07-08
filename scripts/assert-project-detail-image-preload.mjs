@@ -70,8 +70,14 @@ assert.match(
 
 assert.match(
   webglImageSource,
-  /img\.loading\s*=\s*['"]lazy['"]/,
-  'Fullscreen project detail images should be lazy-loaded after the user clicks in',
+  /img\.loading\s*=\s*isPriorityImage\s*\?\s*['"]eager['"]\s*:\s*['"]lazy['"]/,
+  'Fullscreen project detail should eagerly load first images and lazy-load later images',
+);
+
+assert.match(
+  webglImageSource,
+  /img\.setAttribute\(['"]fetchpriority['"],\s*isPriorityImage\s*\?\s*['"]high['"]\s*:\s*['"]low['"]\)/,
+  'Fullscreen project detail should prioritize first images without making every image high priority',
 );
 
 assert.match(

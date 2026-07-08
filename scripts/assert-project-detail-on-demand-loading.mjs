@@ -19,15 +19,51 @@ assert.match(
 );
 
 assert.match(
-  webglImageSource,
-  /img\.loading\s*=\s*['"]lazy['"]/,
-  'Fullscreen detail gallery images should lazy-load instead of decoding all large images on click.',
+  projectsSource,
+  /export\s+function\s+preloadInitialProjectDetailImages\(\)\s*:\s*Promise<unknown>/,
+  'ProjectsSection should expose a sheet-time preloader for the first detail images.',
+);
+
+assert.match(
+  projectsSource,
+  /detailImages\.slice\(0,\s*PROJECT_DETAIL_INITIAL_PRELOAD_COUNT\)/,
+  'Sheet-time preload should warm only the first few detail images for each project.',
+);
+
+assert.match(
+  projectsSource,
+  /preloadInitialProjectDetailImages\(\)\.catch\(\(\)\s*=>\s*undefined\)/,
+  'Opening the project sheet should start warming first detail images in the background.',
 );
 
 assert.match(
   webglImageSource,
-  /img\.setAttribute\(['"]fetchpriority['"],\s*['"]low['"]\)/,
-  'Fullscreen detail gallery images should use low fetch priority so the click transition stays responsive.',
+  /const\s+DETAIL_IMAGE_EAGER_COUNT\s*=\s*3/,
+  'Fullscreen detail pages should eagerly load the first three images.',
+);
+
+assert.match(
+  webglImageSource,
+  /index\s*<\s*DETAIL_IMAGE_EAGER_COUNT/,
+  'Fullscreen detail gallery should decide image priority by index.',
+);
+
+assert.match(
+  webglImageSource,
+  /img\.loading\s*=\s*isPriorityImage\s*\?\s*['"]eager['"]\s*:\s*['"]lazy['"]/,
+  'Priority detail images should load eagerly while later images stay lazy.',
+);
+
+assert.match(
+  webglImageSource,
+  /img\.setAttribute\(['"]fetchpriority['"],\s*isPriorityImage\s*\?\s*['"]high['"]\s*:\s*['"]low['"]\)/,
+  'Priority detail images should use high fetch priority while later images stay low priority.',
+);
+
+assert.match(
+  webglImageSource,
+  /preloadDetailImages\(detailImages\)/,
+  'Clicking a project detail card should start warming its full detail image set immediately.',
 );
 
 assert.match(
