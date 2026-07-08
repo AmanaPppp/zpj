@@ -2,7 +2,7 @@
 import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import InfiniteFluidPosterWall from '../components/InfiniteFluidPosterWall';
+import InfiniteFluidPosterWall, { preloadPosterWallImages } from '../components/InfiniteFluidPosterWall';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -185,6 +185,10 @@ export default function SkillsSection() {
   }, []);
 
   useEffect(() => {
+    preloadPosterWallImages().catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
     return () => {
       portalTimelineRef.current?.kill();
       releasePortalScroll();
@@ -245,6 +249,7 @@ export default function SkillsSection() {
     setIsStartHovered(true);
     setIsPortalOpen(true);
     lockPortalScroll();
+    preloadPosterWallImages().catch(() => undefined);
 
     gsap.set(portalOverlay, {
       autoAlpha: 1,

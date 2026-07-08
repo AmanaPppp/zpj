@@ -13,43 +13,88 @@ type Poster = {
   date: string;
 };
 
+const OPTIMIZED_POSTER_ROOT = '/infinite-canvas-optimized';
+
+function createPoster(title: string, code: string, sourceFile: string, accent: string, date: string): Poster {
+  return {
+    title,
+    code,
+    image: `${OPTIMIZED_POSTER_ROOT}/${sourceFile.replace(/\.(?:png|jpe?g)$/i, '.webp')}`,
+    accent,
+    date,
+  };
+}
+
 const posters: Poster[] = [
-  { title: 'Visual 01', code: 'A01', image: '/infinite-canvas-uploaded/uploaded-01.png', accent: '#b7f700', date: '2026.01' },
-  { title: 'Visual 02', code: 'A02', image: '/infinite-canvas-uploaded/uploaded-02.png', accent: '#ffbfd1', date: '2026.02' },
-  { title: 'Visual 03', code: 'A03', image: '/infinite-canvas-uploaded/uploaded-03.jpg', accent: '#9ae6ff', date: '2026.03' },
-  { title: 'Visual 04', code: 'A04', image: '/infinite-canvas-uploaded/uploaded-04.jpg', accent: '#f2ff00', date: '2026.04' },
-  { title: 'Visual 05', code: 'A05', image: '/infinite-canvas-uploaded/uploaded-05.jpg', accent: '#c7b8ff', date: '2026.05' },
-  { title: 'Visual 06', code: 'A06', image: '/infinite-canvas-uploaded/uploaded-06.png', accent: '#00ff66', date: '2026.06' },
-  { title: 'Visual 07', code: 'A07', image: '/infinite-canvas-uploaded/uploaded-07.png', accent: '#ffe8a3', date: '2026.07' },
-  { title: 'Visual 08', code: 'A08', image: '/infinite-canvas-uploaded/uploaded-08.png', accent: '#7dffea', date: '2026.08' },
-  { title: 'Visual 09', code: 'A09', image: '/infinite-canvas-uploaded/uploaded-09.png', accent: '#ff8cc6', date: '2026.09' },
-  { title: 'Visual 10', code: 'A10', image: '/infinite-canvas-uploaded/uploaded-10.png', accent: '#ddff44', date: '2026.10' },
-  { title: 'Visual 11', code: 'B01', image: '/infinite-canvas-uploaded/uploaded-11.png', accent: '#ffffff', date: '2026.11' },
-  { title: 'Visual 12', code: 'B02', image: '/infinite-canvas-uploaded/uploaded-12.png', accent: '#acf6ff', date: '2026.12' },
-  { title: 'Visual 13', code: 'B03', image: '/infinite-canvas-uploaded/uploaded-13.png', accent: '#deff00', date: '2027.01' },
-  { title: 'Visual 14', code: 'B04', image: '/infinite-canvas-uploaded/uploaded-14.png', accent: '#ffc8d8', date: '2027.02' },
-  { title: 'Visual 15', code: 'B05', image: '/infinite-canvas-uploaded/uploaded-15.jpg', accent: '#d7c7ff', date: '2027.03' },
-  { title: 'Visual 16', code: 'B06', image: '/infinite-canvas-uploaded/uploaded-16.jpg', accent: '#00ff99', date: '2027.04' },
-  { title: 'Visual 17', code: 'B07', image: '/infinite-canvas-uploaded/uploaded-17.png', accent: '#fff0a6', date: '2027.05' },
-  { title: 'Visual 18', code: 'B08', image: '/infinite-canvas-uploaded/uploaded-18.png', accent: '#bffcff', date: '2027.06' },
-  { title: 'Visual 19', code: 'B09', image: '/infinite-canvas-uploaded/uploaded-19.png', accent: '#ff9abc', date: '2027.07' },
-  { title: 'Visual 20', code: 'B10', image: '/infinite-canvas-uploaded/uploaded-20.png', accent: '#dfff4a', date: '2027.08' },
-  { title: 'Visual 21', code: 'C01', image: '/infinite-canvas-uploaded/uploaded-21.png', accent: '#aafff0', date: '2027.09' },
-  { title: 'Visual 22', code: 'C02', image: '/infinite-canvas-uploaded/uploaded-22.png', accent: '#f5ff7a', date: '2027.10' },
-  { title: 'Visual 23', code: 'C03', image: '/infinite-canvas-uploaded/uploaded-23.png', accent: '#ffd1e6', date: '2027.11' },
-  { title: 'Visual 24', code: 'C04', image: '/infinite-canvas-uploaded/uploaded-24.png', accent: '#b9ff00', date: '2027.12' },
-  { title: 'Visual 25', code: 'C05', image: '/infinite-canvas-uploaded/uploaded-25.png', accent: '#99e7ff', date: '2028.01' },
-  { title: 'Visual 26', code: 'C06', image: '/infinite-canvas-uploaded/uploaded-26.png', accent: '#ffffff', date: '2028.02' },
-  { title: 'Visual 27', code: 'C07', image: '/infinite-canvas-uploaded/uploaded-27.png', accent: '#d8ff2f', date: '2028.03' },
-  { title: 'Visual 28', code: 'C08', image: '/infinite-canvas-uploaded/uploaded-28.png', accent: '#ffbdd8', date: '2028.04' },
-  { title: 'Visual 29', code: 'D01', image: '/infinite-canvas-uploaded/uploaded-29.png', accent: '#b7f700', date: '2028.05' },
-  { title: 'Visual 30', code: 'D02', image: '/infinite-canvas-uploaded/uploaded-30.png', accent: '#ffbfd1', date: '2028.06' },
-  { title: 'Visual 31', code: 'D03', image: '/infinite-canvas-uploaded/uploaded-31.png', accent: '#9ae6ff', date: '2028.07' },
-  { title: 'Visual 32', code: 'D04', image: '/infinite-canvas-uploaded/uploaded-32.png', accent: '#f2ff00', date: '2028.08' },
-  { title: 'Visual 33', code: 'D05', image: '/infinite-canvas-uploaded/uploaded-33.jpg', accent: '#c7b8ff', date: '2028.09' },
-  { title: 'Visual 34', code: 'D06', image: '/infinite-canvas-uploaded/uploaded-34.jpg', accent: '#00ff66', date: '2028.10' },
-  { title: 'Visual 35', code: 'D07', image: '/infinite-canvas-uploaded/uploaded-35.jpg', accent: '#ffe8a3', date: '2028.11' },
+  createPoster('Visual 01', 'A01', 'uploaded-01.png', '#b7f700', '2026.01'),
+  createPoster('Visual 02', 'A02', 'uploaded-02.png', '#ffbfd1', '2026.02'),
+  createPoster('Visual 03', 'A03', 'uploaded-03.jpg', '#9ae6ff', '2026.03'),
+  createPoster('Visual 04', 'A04', 'uploaded-04.jpg', '#f2ff00', '2026.04'),
+  createPoster('Visual 05', 'A05', 'uploaded-05.jpg', '#c7b8ff', '2026.05'),
+  createPoster('Visual 06', 'A06', 'uploaded-06.png', '#00ff66', '2026.06'),
+  createPoster('Visual 07', 'A07', 'uploaded-07.png', '#ffe8a3', '2026.07'),
+  createPoster('Visual 08', 'A08', 'uploaded-08.png', '#7dffea', '2026.08'),
+  createPoster('Visual 09', 'A09', 'uploaded-09.png', '#ff8cc6', '2026.09'),
+  createPoster('Visual 10', 'A10', 'uploaded-10.png', '#ddff44', '2026.10'),
+  createPoster('Visual 11', 'B01', 'uploaded-11.png', '#ffffff', '2026.11'),
+  createPoster('Visual 12', 'B02', 'uploaded-12.png', '#acf6ff', '2026.12'),
+  createPoster('Visual 13', 'B03', 'uploaded-13.png', '#deff00', '2027.01'),
+  createPoster('Visual 14', 'B04', 'uploaded-14.png', '#ffc8d8', '2027.02'),
+  createPoster('Visual 15', 'B05', 'uploaded-15.jpg', '#d7c7ff', '2027.03'),
+  createPoster('Visual 16', 'B06', 'uploaded-16.jpg', '#00ff99', '2027.04'),
+  createPoster('Visual 17', 'B07', 'uploaded-17.png', '#fff0a6', '2027.05'),
+  createPoster('Visual 18', 'B08', 'uploaded-18.png', '#bffcff', '2027.06'),
+  createPoster('Visual 19', 'B09', 'uploaded-19.png', '#ff9abc', '2027.07'),
+  createPoster('Visual 20', 'B10', 'uploaded-20.png', '#dfff4a', '2027.08'),
+  createPoster('Visual 21', 'C01', 'uploaded-21.png', '#aafff0', '2027.09'),
+  createPoster('Visual 22', 'C02', 'uploaded-22.png', '#f5ff7a', '2027.10'),
+  createPoster('Visual 23', 'C03', 'uploaded-23.png', '#ffd1e6', '2027.11'),
+  createPoster('Visual 24', 'C04', 'uploaded-24.png', '#b9ff00', '2027.12'),
+  createPoster('Visual 25', 'C05', 'uploaded-25.png', '#99e7ff', '2028.01'),
+  createPoster('Visual 26', 'C06', 'uploaded-26.png', '#ffffff', '2028.02'),
+  createPoster('Visual 27', 'C07', 'uploaded-27.png', '#d8ff2f', '2028.03'),
+  createPoster('Visual 28', 'C08', 'uploaded-28.png', '#ffbdd8', '2028.04'),
+  createPoster('Visual 29', 'D01', 'uploaded-29.png', '#b7f700', '2028.05'),
+  createPoster('Visual 30', 'D02', 'uploaded-30.png', '#ffbfd1', '2028.06'),
+  createPoster('Visual 31', 'D03', 'uploaded-31.png', '#9ae6ff', '2028.07'),
+  createPoster('Visual 32', 'D04', 'uploaded-32.png', '#f2ff00', '2028.08'),
+  createPoster('Visual 33', 'D05', 'uploaded-33.jpg', '#c7b8ff', '2028.09'),
+  createPoster('Visual 34', 'D06', 'uploaded-34.jpg', '#00ff66', '2028.10'),
+  createPoster('Visual 35', 'D07', 'uploaded-35.jpg', '#ffe8a3', '2028.11'),
 ];
+
+const posterWallImageUrls = posters.map((poster) => poster.image);
+const posterWallPreloadCache = new Map<string, Promise<void>>();
+
+function preloadPosterWallImage(src: string): Promise<void> {
+  const existing = posterWallPreloadCache.get(src);
+  if (existing) return existing;
+
+  const promise = new Promise<void>((resolve) => {
+    if (typeof window === 'undefined') {
+      resolve();
+      return;
+    }
+
+    const image = new Image();
+    image.decoding = 'async';
+    image.loading = 'eager';
+    image.onload = () => image.decode().then(resolve, resolve);
+    image.onerror = () => resolve();
+    image.src = src;
+
+    if (image.complete) {
+      image.decode().then(resolve, resolve);
+    }
+  });
+
+  posterWallPreloadCache.set(src, promise);
+  return promise;
+}
+
+export function preloadPosterWallImages(): Promise<unknown> {
+  return Promise.all(posterWallImageUrls.map(preloadPosterWallImage));
+}
 
 const posterTiles = Array.from({ length: 160 }, (_, index) => ({
   ...posters[index % posters.length],
@@ -82,6 +127,10 @@ export default function InfiniteFluidPosterWall({ onReturn }: InfiniteFluidPoste
   const logoResetTimerRef = useRef<number | null>(null);
   const restoreExpandedCardRef = useRef<(() => void) | null>(null);
   const [hasExpandedCard, setHasExpandedCard] = useState(false);
+
+  useEffect(() => {
+    preloadPosterWallImages().catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -423,7 +472,13 @@ export default function InfiniteFluidPosterWall({ onReturn }: InfiniteFluidPoste
               className="fluid-poster-card"
               style={{ '--poster-accent': poster.accent } as React.CSSProperties}
             >
-              <img src={poster.image} alt="" draggable={false} />
+              <img
+                src={poster.image}
+                alt=""
+                draggable={false}
+                loading="eager"
+                decoding="async"
+              />
               <div className="fluid-poster-shade" />
               <div className="fluid-poster-copy">
                 <span>{poster.code}</span>
