@@ -249,6 +249,7 @@ export default function ProjectWebGLImage({
     let camera: THREE.OrthographicCamera | null = null;
     let resizeObserver: ResizeObserver | null = null;
     let cleaned = false;
+    let thumbnailHoverActive = false;
     let thumbnailAnimationActive = false;
     let imageLoadHandler: (() => void) | null = null;
     let imageErrorHandler: (() => void) | null = null;
@@ -377,17 +378,10 @@ export default function ProjectWebGLImage({
       resize();
     };
 
-    const handlePointerMove = (event: PointerEvent) => {
-      if (!uniforms) return;
+    const activateThumbnailHover = () => {
+      if (thumbnailHoverActive) return;
 
-      const rect = root.getBoundingClientRect();
-      uniforms.uMouse.value.set(
-        (event.clientX - rect.left) / Math.max(rect.width, 1),
-        (event.clientY - rect.top) / Math.max(rect.height, 1),
-      );
-    };
-
-    const handlePointerEnter = () => {
+      thumbnailHoverActive = true;
       root.dispatchEvent(new CustomEvent('project-image-hover', { bubbles: true, detail: true }));
       preloadDetailImages(detailImages);
       if (uniforms) {
@@ -401,7 +395,23 @@ export default function ProjectWebGLImage({
       }
     };
 
+    const handlePointerMove = (event: PointerEvent) => {
+      if (!uniforms) return;
+
+      const rect = root.getBoundingClientRect();
+      uniforms.uMouse.value.set(
+        (event.clientX - rect.left) / Math.max(rect.width, 1),
+        (event.clientY - rect.top) / Math.max(rect.height, 1),
+      );
+      activateThumbnailHover();
+    };
+
+    const handlePointerEnter = () => {
+      activateThumbnailHover();
+    };
+
     const handlePointerLeave = () => {
+      thumbnailHoverActive = false;
       root.dispatchEvent(new CustomEvent('project-image-hover', { bubbles: true, detail: false }));
       if (uniforms) {
         gsap.to(uniforms.uHover, {
@@ -439,6 +449,7 @@ export default function ProjectWebGLImage({
         cancelAnimationFrame(animationFrame);
       }
       thumbnailAnimationActive = false;
+      thumbnailHoverActive = false;
       resizeObserver?.disconnect();
       root.classList.remove('is-webgl-ready', 'is-webgl-unavailable');
       root.removeEventListener('click', handleClick);

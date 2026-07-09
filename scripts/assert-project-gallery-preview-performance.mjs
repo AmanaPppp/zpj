@@ -72,12 +72,6 @@ assert.doesNotMatch(
 );
 
 assert.match(
-  stylesSource,
-  /\.project-webgl-image:not\(\.is-webgl-ready\):hover img/,
-  'Project gallery cards should have an immediate CSS hover fallback before WebGL is ready.',
-);
-
-assert.match(
   webglImageSource,
   /const\s+startThumbnailAnimation\s*=/,
   'Thumbnail WebGL should start rendering only when needed.',

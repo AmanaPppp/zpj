@@ -19,6 +19,11 @@ const checks = [
     pass: /root\.classList\.add\('is-webgl-unavailable'\)/.test(source),
   },
   {
+    label: 'wakes the liquid thumbnail distortion from pointer move',
+    pass: /const\s+activateThumbnailHover\s*=/.test(source)
+      && /const\s+handlePointerMove[\s\S]*?activateThumbnailHover\(\)/.test(source),
+  },
+  {
     label: 'keeps thumbnail canvas hidden until WebGL is ready',
     pass: /\.project-webgl-image canvas[\s\S]*?opacity:\s*0/.test(styles)
       && /\.project-webgl-image\.is-webgl-ready canvas[\s\S]*?opacity:\s*1/.test(styles),
