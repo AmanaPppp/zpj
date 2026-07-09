@@ -843,13 +843,12 @@ export default function ProjectsSection() {
             <div ref={detailScrollRef} className="project-sheet-scroll">
               <div ref={detailContentRef} className="project-sheet-content">
                 <div className="project-gallery" aria-label={`${activeProject.title} project images`}>
-                  {projectGalleryItems.map((item, index) => (
+                  {projectGalleryItems.map((item) => (
                     <article className="project-gallery-card" key={item.image}>
                       <div className="project-gallery-frame">
                         <ProjectWebGLImage
                           src={item.previewImage}
                           alt={item.title}
-                          deferWebGLMs={projectSheetReady ? index * 140 : 1200}
                           detailId={item.detailId}
                           detailImages={item.detailImages}
                           title={item.title}

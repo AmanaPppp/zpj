@@ -5,6 +5,9 @@ import assert from 'node:assert/strict';
 const root = process.cwd();
 const projectsSource = readFileSync(resolve(root, 'src/sections/ProjectsSection.tsx'), 'utf8');
 const webglImageSource = readFileSync(resolve(root, 'src/components/ProjectWebGLImage.tsx'), 'utf8');
+const setupRendererBody = webglImageSource.match(
+  /const setupRenderer = \(\) => \{([\s\S]*?)\n    \};\n\n    const handlePointerMove/,
+)?.[1] ?? '';
 
 const previewFiles = [
   'brand-detail-01-preview.jpg',
@@ -39,8 +42,32 @@ assert.match(
 
 assert.doesNotMatch(
   projectsSource,
+  /deferWebGLMs=\{projectSheetReady\s*\?\s*index\s*\*\s*140\s*:\s*1200\}/,
+  'Project gallery hover WebGL should not be delayed after the sheet opens.',
+);
+
+assert.doesNotMatch(
+  projectsSource,
   /src=\{item\.image\}/,
   'Project gallery thumbnails must not render original large cover images.',
+);
+
+assert.match(
+  webglImageSource,
+  /const\s+imageRef\s*=\s*useRef<HTMLImageElement>\(null\)/,
+  'Thumbnail WebGL should keep a ref to the already visible preview image.',
+);
+
+assert.match(
+  webglImageSource,
+  /createTextureFromImage\(image\)/,
+  'Thumbnail WebGL should reuse the visible preview image as its texture.',
+);
+
+assert.doesNotMatch(
+  setupRendererBody,
+  /createTexture\(/,
+  'Thumbnail WebGL should not start a second TextureLoader request for the same preview image.',
 );
 
 assert.match(

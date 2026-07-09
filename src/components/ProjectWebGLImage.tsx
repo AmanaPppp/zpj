@@ -142,7 +142,6 @@ const transitionFragmentShader = `
 
 type ProjectWebGLImageProps = {
   alt: string;
-  deferWebGLMs?: number;
   detailId: string;
   detailImages: string[];
   src: string;
@@ -187,6 +186,15 @@ const createTexture = (
   }, undefined, onError);
 };
 
+const createTextureFromImage = (image: HTMLImageElement) => {
+  const texture = new THREE.Texture(image);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.needsUpdate = true;
+  return texture;
+};
+
 const getTextureSize = (texture: THREE.Texture) => {
   const image = texture.image as { width?: number; height?: number };
   return {
@@ -219,7 +227,6 @@ const getPlanePosition = (rect: DOMRect, viewportWidth: number, viewportHeight: 
 
 export default function ProjectWebGLImage({
   alt,
-  deferWebGLMs = 0,
   detailId,
   detailImages,
   src,
@@ -227,6 +234,7 @@ export default function ProjectWebGLImage({
   title,
 }: ProjectWebGLImageProps) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
   const transitionRef = useRef<TransitionState | null>(null);
 
   useEffect(() => {
@@ -240,9 +248,10 @@ export default function ProjectWebGLImage({
     let scene: THREE.Scene | null = null;
     let camera: THREE.OrthographicCamera | null = null;
     let resizeObserver: ResizeObserver | null = null;
-    let setupTimeout = 0;
     let cleaned = false;
     let thumbnailAnimationActive = false;
+    let imageLoadHandler: (() => void) | null = null;
+    let imageErrorHandler: (() => void) | null = null;
     let uniforms: {
       uTexture: { value: THREE.Texture };
       uMouse: { value: THREE.Vector2 };
@@ -315,7 +324,7 @@ export default function ProjectWebGLImage({
       const mesh = new THREE.Mesh(geometry, material);
       scene?.add(mesh);
 
-      createTexture(src, (texture) => {
+      const applyThumbnailTexture = (texture: THREE.Texture) => {
         if (cleaned || !uniforms || !renderer) {
           texture.dispose();
           return;
@@ -334,9 +343,23 @@ export default function ProjectWebGLImage({
         root.classList.add('is-webgl-ready');
         root.classList.remove('is-webgl-unavailable');
         renderThumbnailFrame(performance.now());
-      }, () => {
+      };
+
+      const image = imageRef.current;
+      if (image?.complete && image.naturalWidth > 0) {
+        applyThumbnailTexture(createTextureFromImage(image));
+      } else if (image) {
+        imageLoadHandler = () => {
+          applyThumbnailTexture(createTextureFromImage(image));
+        };
+        imageErrorHandler = () => {
+          root.classList.add('is-webgl-unavailable');
+        };
+        image.addEventListener('load', imageLoadHandler, { once: true });
+        image.addEventListener('error', imageErrorHandler, { once: true });
+      } else {
         root.classList.add('is-webgl-unavailable');
-      });
+      }
 
       const resize = () => {
         if (!renderer || !uniforms) return;
@@ -406,21 +429,12 @@ export default function ProjectWebGLImage({
     root.addEventListener('pointerleave', handlePointerLeave);
     root.addEventListener('pointermove', handlePointerMove);
 
-    if (deferWebGLMs > 0) {
-      setupTimeout = window.setTimeout(() => {
-        setupRenderer();
-      }, deferWebGLMs);
-    } else {
-      setupRenderer();
-    }
+    setupRenderer();
 
     return () => {
       cleaned = true;
       transitionRef.current?.cleanup();
       transitionRef.current = null;
-      if (setupTimeout) {
-        window.clearTimeout(setupTimeout);
-      }
       if (animationFrame) {
         cancelAnimationFrame(animationFrame);
       }
@@ -431,6 +445,12 @@ export default function ProjectWebGLImage({
       root.removeEventListener('pointerenter', handlePointerEnter);
       root.removeEventListener('pointerleave', handlePointerLeave);
       root.removeEventListener('pointermove', handlePointerMove);
+      if (imageLoadHandler) {
+        imageRef.current?.removeEventListener('load', imageLoadHandler);
+      }
+      if (imageErrorHandler) {
+        imageRef.current?.removeEventListener('error', imageErrorHandler);
+      }
       if (uniforms) {
         gsap.killTweensOf(uniforms.uHover);
         uniforms.uTexture.value.dispose();
@@ -440,11 +460,11 @@ export default function ProjectWebGLImage({
       renderer?.dispose();
       renderer?.domElement.remove();
     };
-  }, [deferWebGLMs, detailId, detailImages, src, subtitle, title]);
+  }, [detailId, detailImages, src, subtitle, title]);
 
   return (
     <div ref={rootRef} aria-label={alt} className="project-webgl-image" role="img" tabIndex={0}>
-      <img src={src} alt="" aria-hidden="true" />
+      <img ref={imageRef} src={src} alt="" aria-hidden="true" />
     </div>
   );
 }
