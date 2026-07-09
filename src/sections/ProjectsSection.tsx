@@ -12,14 +12,11 @@ import ProjectWebGLImage from '@/components/ProjectWebGLImage';
 import brandDetail01 from '@/assets/project-detail-optimized/brand-detail-01-jpg.webp';
 import brandDetail02 from '@/assets/project-detail-optimized/brand-detail-02.webp';
 import brandDetail03 from '@/assets/project-detail-optimized/brand-detail-03.webp';
-import brandDetail01Preview from '@/assets/project-detail/previews/brand-detail-01-preview.jpg';
-import brandDetail02Preview from '@/assets/project-detail/previews/brand-detail-02-preview.jpg';
-import brandDetail03Preview from '@/assets/project-detail/previews/brand-detail-03-preview.jpg';
 import brandVisual01 from '@/assets/project-detail-optimized/brand-visual/1.webp';
 import brandVisual02 from '@/assets/project-detail-optimized/brand-visual/2.webp';
 import brandVisual03 from '@/assets/project-detail-optimized/brand-visual/3.webp';
 import brandVisual04 from '@/assets/project-detail-optimized/brand-visual/4.webp';
-import brandVisual05 from '@/assets/project-detail-optimized/brand-visual/5.webp';
+import brandVisual05 from '@/assets/project-detail-optimized/echo-brand-proposal-5.jpg';
 import brandVisual06 from '@/assets/project-detail-optimized/brand-visual/6.webp';
 import brandVisual07 from '@/assets/project-detail-optimized/brand-visual/7.webp';
 import brandVisual08 from '@/assets/project-detail-optimized/brand-visual/8.webp';
@@ -30,7 +27,6 @@ import brandVisual12 from '@/assets/project-detail-optimized/brand-visual/12.web
 import brandVisual13 from '@/assets/project-detail-optimized/brand-visual/13.webp';
 import brandVisual14 from '@/assets/project-detail-optimized/brand-visual/14.webp';
 import brandVisual15 from '@/assets/project-detail-optimized/brand-visual/15.webp';
-import pawsitivityBrandProposalPreview from '@/assets/project-detail/previews/pawsitivity-brand-proposal-preview.jpg';
 import pawsitivityBrandProposal from '@/assets/project-detail-optimized/pawsitivity/1.webp';
 import pawsitivityDetail02 from '@/assets/project-detail-optimized/pawsitivity/2.webp';
 import pawsitivityDetail03 from '@/assets/project-detail-optimized/pawsitivity/3.webp';
@@ -149,7 +145,6 @@ const projectGalleryItems = [
     title: '\u54c1\u724c\u4e3b\u89c6\u89c9',
     subtitle: 'Visual Identity',
     image: brandDetail01,
-    previewImage: brandDetail01Preview,
   },
   {
     detailId: 'brand-applications',
@@ -176,7 +171,6 @@ const projectGalleryItems = [
     title: '\u5e94\u7528\u573a\u666f\u5ef6\u5c55',
     subtitle: 'Brand Applications',
     image: brandDetail02,
-    previewImage: brandDetail02Preview,
   },
   {
     detailId: 'brand-touchpoints',
@@ -198,7 +192,6 @@ const projectGalleryItems = [
     title: '\u7269\u6599\u4e0e\u89e6\u70b9',
     subtitle: 'Touchpoint System',
     image: brandDetail03,
-    previewImage: brandDetail03Preview,
   },
   {
     detailId: 'pawsitivity-brand-proposal',
@@ -226,14 +219,13 @@ const projectGalleryItems = [
     title: '\u73c0\u65af\u7f07\u54c1\u724c\u63d0\u6848',
     subtitle: 'Pawsitivity Brand Proposal',
     image: pawsitivityBrandProposal,
-    previewImage: pawsitivityBrandProposalPreview,
   },
 ];
 
 const preloadedProjectDetailImages = new Map<string, Promise<void>>();
 
 export const projectDetailPreloadImages = Array.from(
-  new Set(projectGalleryItems.map((item) => item.previewImage)),
+  new Set(projectGalleryItems.map((item) => item.image)),
 );
 
 const allProjectDetailImages = Array.from(
@@ -847,7 +839,7 @@ export default function ProjectsSection() {
                     <article className="project-gallery-card" key={item.image}>
                       <div className="project-gallery-frame">
                         <ProjectWebGLImage
-                          src={item.previewImage}
+                          src={item.image}
                           alt={item.title}
                           detailId={item.detailId}
                           detailImages={item.detailImages}

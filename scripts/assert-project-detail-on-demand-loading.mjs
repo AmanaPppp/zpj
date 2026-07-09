@@ -14,8 +14,20 @@ assert.doesNotMatch(
 
 assert.match(
   projectsSource,
-  /projectGalleryItems\.map\(\(item\)\s*=>\s*item\.previewImage\)/,
-  'Startup preload should be limited to lightweight project gallery preview images.',
+  /projectGalleryItems\.map\(\(item\)\s*=>\s*item\.image\)/,
+  'Startup preload should use the same high-quality gallery hero images as the interactive cards.',
+);
+
+assert.doesNotMatch(
+  projectsSource,
+  /<ProjectWebGLImage[\s\S]*?src=\{item\.previewImage\}/,
+  'Interactive project cards must not use low-resolution preview images for the WebGL texture.',
+);
+
+assert.match(
+  projectsSource,
+  /<ProjectWebGLImage[\s\S]*?src=\{item\.image\}/,
+  'Interactive project cards should use the same high-quality image shown before pointer interaction.',
 );
 
 assert.match(

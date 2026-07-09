@@ -15,11 +15,18 @@ type Poster = {
 
 const OPTIMIZED_POSTER_ROOT = '/infinite-canvas-optimized';
 
-function createPoster(title: string, code: string, sourceFile: string, accent: string, date: string): Poster {
+function createPoster(
+  title: string,
+  code: string,
+  sourceFile: string,
+  accent: string,
+  date: string,
+  preserveExtension = false,
+): Poster {
   return {
     title,
     code,
-    image: `${OPTIMIZED_POSTER_ROOT}/${sourceFile.replace(/\.(?:png|jpe?g)$/i, '.webp')}`,
+    image: `${OPTIMIZED_POSTER_ROOT}/${preserveExtension ? sourceFile : sourceFile.replace(/\.(?:png|jpe?g)$/i, '.webp')}`,
     accent,
     date,
   };
@@ -61,6 +68,7 @@ const posters: Poster[] = [
   createPoster('Visual 33', 'D05', 'uploaded-33.jpg', '#c7b8ff', '2028.09'),
   createPoster('Visual 34', 'D06', 'uploaded-34.jpg', '#00ff66', '2028.10'),
   createPoster('Visual 35', 'D07', 'uploaded-35.jpg', '#ffe8a3', '2028.11'),
+  createPoster('Raven Peak', 'D08', 'raven-peak.jpg', '#ffffff', '2028.12', true),
 ];
 
 const posterWallImageUrls = posters.map((poster) => poster.image);
