@@ -382,6 +382,7 @@ export default function ProjectWebGLImage({
       if (thumbnailHoverActive) return;
 
       thumbnailHoverActive = true;
+      root.classList.add('is-liquid-active');
       root.dispatchEvent(new CustomEvent('project-image-hover', { bubbles: true, detail: true }));
       preloadDetailImages(detailImages);
       if (uniforms) {
@@ -395,23 +396,11 @@ export default function ProjectWebGLImage({
       }
     };
 
-    const handlePointerMove = (event: PointerEvent) => {
-      if (!uniforms) return;
+    const deactivateThumbnailHover = () => {
+      if (!thumbnailHoverActive) return;
 
-      const rect = root.getBoundingClientRect();
-      uniforms.uMouse.value.set(
-        (event.clientX - rect.left) / Math.max(rect.width, 1),
-        (event.clientY - rect.top) / Math.max(rect.height, 1),
-      );
-      activateThumbnailHover();
-    };
-
-    const handlePointerEnter = () => {
-      activateThumbnailHover();
-    };
-
-    const handlePointerLeave = () => {
       thumbnailHoverActive = false;
+      root.classList.remove('is-liquid-active');
       root.dispatchEvent(new CustomEvent('project-image-hover', { bubbles: true, detail: false }));
       if (uniforms) {
         gsap.to(uniforms.uHover, {
@@ -426,6 +415,35 @@ export default function ProjectWebGLImage({
           },
         });
       }
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (!uniforms) return;
+
+      const rect = root.getBoundingClientRect();
+      const isInsideThumbnail = event.clientX >= rect.left
+        && event.clientX <= rect.right
+        && event.clientY >= rect.top
+        && event.clientY <= rect.bottom;
+
+      if (!isInsideThumbnail) {
+        deactivateThumbnailHover();
+        return;
+      }
+
+      uniforms.uMouse.value.set(
+        (event.clientX - rect.left) / Math.max(rect.width, 1),
+        (event.clientY - rect.top) / Math.max(rect.height, 1),
+      );
+      activateThumbnailHover();
+    };
+
+    const handlePointerEnter = () => {
+      activateThumbnailHover();
+    };
+
+    const handlePointerLeave = () => {
+      deactivateThumbnailHover();
     };
 
     const handleClick = () => {
@@ -451,7 +469,7 @@ export default function ProjectWebGLImage({
       thumbnailAnimationActive = false;
       thumbnailHoverActive = false;
       resizeObserver?.disconnect();
-      root.classList.remove('is-webgl-ready', 'is-webgl-unavailable');
+      root.classList.remove('is-webgl-ready', 'is-webgl-unavailable', 'is-liquid-active');
       root.removeEventListener('click', handleClick);
       root.removeEventListener('pointerenter', handlePointerEnter);
       root.removeEventListener('pointerleave', handlePointerLeave);

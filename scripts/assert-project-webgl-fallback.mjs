@@ -24,9 +24,24 @@ const checks = [
       && /const\s+handlePointerMove[\s\S]*?activateThumbnailHover\(\)/.test(source),
   },
   {
-    label: 'keeps thumbnail canvas hidden until WebGL is ready',
+    label: 'marks the thumbnail canvas active only during liquid interaction',
+    pass: /root\.classList\.add\('is-liquid-active'\)/.test(source)
+      && /const\s+deactivateThumbnailHover\s*=/.test(source)
+      && /root\.classList\.remove\('is-liquid-active'\)/.test(source),
+  },
+  {
+    label: 'turns liquid interaction off if pointer coordinates leave the thumbnail bounds',
+    pass: /const\s+isInsideThumbnail\s*=/.test(source)
+      && /if\s*\(!isInsideThumbnail\)\s*\{[\s\S]*?deactivateThumbnailHover\(\)/.test(source),
+  },
+  {
+    label: 'keeps thumbnail canvas hidden until liquid interaction is active',
     pass: /\.project-webgl-image canvas[\s\S]*?opacity:\s*0/.test(styles)
-      && /\.project-webgl-image\.is-webgl-ready canvas[\s\S]*?opacity:\s*1/.test(styles),
+      && !/\.project-webgl-image\.is-webgl-ready canvas[\s\S]*?opacity:\s*1/.test(styles),
+  },
+  {
+    label: 'keeps WebGL canvas off the preview until liquid interaction is active',
+    pass: /\.project-webgl-image\.is-webgl-ready\.is-liquid-active canvas[\s\S]*?opacity:\s*1/.test(styles),
   },
   {
     label: 'keeps fullscreen fallback visible unless transition WebGL is ready',

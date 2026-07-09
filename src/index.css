@@ -1124,7 +1124,7 @@
   transition: opacity 180ms ease;
 }
 
-.project-webgl-image.is-webgl-ready canvas {
+.project-webgl-image.is-webgl-ready.is-liquid-active canvas {
   opacity: 1;
 }
 
