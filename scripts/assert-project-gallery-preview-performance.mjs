@@ -41,6 +41,12 @@ assert.match(
   'Project gallery thumbnails should render lightweight previews.',
 );
 
+assert.match(
+  projectsSource,
+  /transitionSrc=\{item\.image\}/,
+  'Project gallery thumbnails should receive the high-quality cover for progressive replacement and transitions.',
+);
+
 assert.doesNotMatch(
   projectsSource,
   /deferWebGLMs=\{projectSheetReady\s*\?\s*index\s*\*\s*140\s*:\s*1200\}/,
@@ -63,6 +69,24 @@ assert.match(
   webglImageSource,
   /createTextureFromImage\(image\)/,
   'Thumbnail WebGL should reuse the visible preview image as its texture.',
+);
+
+assert.match(
+  webglImageSource,
+  /highQualityThumbnailImage/,
+  'Thumbnail WebGL should progressively load the high-quality cover after the preview appears.',
+);
+
+assert.match(
+  webglImageSource,
+  /visibleImage\.src\s*=\s*transitionSrc/,
+  'The visible thumbnail image should switch from the lightweight preview to the high-quality cover.',
+);
+
+assert.match(
+  webglImageSource,
+  /createTextureFromImage\(highQualityThumbnailImage\)/,
+  'The liquid distortion texture should switch to the same high-quality cover shown underneath.',
 );
 
 assert.doesNotMatch(

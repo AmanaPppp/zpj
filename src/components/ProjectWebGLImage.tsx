@@ -148,6 +148,7 @@ type ProjectWebGLImageProps = {
   src: string;
   subtitle: string;
   title: string;
+  transitionSrc: string;
 };
 
 type TransitionState = {
@@ -160,10 +161,10 @@ const DETAIL_IMAGE_EAGER_COUNT = 4;
 const DETAIL_IMAGE_INITIAL_MOUNT_COUNT = 6;
 const preloadedDetailImages = new Set<string>();
 
-const preloadDetailImages = (detailImages: string[]) => {
+const preloadDetailImages = (detailImages: string[], limit = detailImages.length) => {
   if (typeof window === 'undefined') return;
 
-  for (const src of detailImages) {
+  for (const src of detailImages.slice(0, limit)) {
     if (preloadedDetailImages.has(src)) continue;
     preloadedDetailImages.add(src);
 
@@ -171,20 +172,6 @@ const preloadDetailImages = (detailImages: string[]) => {
     image.decoding = 'async';
     image.src = src;
   }
-};
-
-const createTexture = (
-  src: string,
-  onLoad: (texture: THREE.Texture) => void,
-  onError?: () => void,
-) => {
-  const loader = new THREE.TextureLoader();
-  return loader.load(src, (texture) => {
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    onLoad(texture);
-  }, undefined, onError);
 };
 
 const createTextureFromImage = (image: HTMLImageElement) => {
@@ -233,6 +220,7 @@ export default function ProjectWebGLImage({
   src,
   subtitle,
   title,
+  transitionSrc,
 }: ProjectWebGLImageProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -252,6 +240,7 @@ export default function ProjectWebGLImage({
     let cleaned = false;
     let thumbnailHoverActive = false;
     let thumbnailAnimationActive = false;
+    let highQualityThumbnailImage: HTMLImageElement | null = null;
     let imageLoadHandler: (() => void) | null = null;
     let imageErrorHandler: (() => void) | null = null;
     let uniforms: {
@@ -363,6 +352,19 @@ export default function ProjectWebGLImage({
         root.classList.add('is-webgl-unavailable');
       }
 
+      if (transitionSrc !== src && image) {
+        const visibleImage = image;
+        highQualityThumbnailImage = new Image();
+        highQualityThumbnailImage.decoding = 'async';
+        highQualityThumbnailImage.onload = () => {
+          if (cleaned || !highQualityThumbnailImage) return;
+
+          visibleImage.src = transitionSrc;
+          applyThumbnailTexture(createTextureFromImage(highQualityThumbnailImage));
+        };
+        highQualityThumbnailImage.src = transitionSrc;
+      }
+
       const resize = () => {
         if (!renderer || !uniforms) return;
 
@@ -385,7 +387,6 @@ export default function ProjectWebGLImage({
       thumbnailHoverActive = true;
       root.classList.add('is-liquid-active');
       root.dispatchEvent(new CustomEvent('project-image-hover', { bubbles: true, detail: true }));
-      preloadDetailImages(detailImages);
       if (uniforms) {
         startThumbnailAnimation();
         gsap.to(uniforms.uHover, {
@@ -449,8 +450,16 @@ export default function ProjectWebGLImage({
 
     const handleClick = () => {
       if (transitionRef.current?.active) return;
-      preloadDetailImages(detailImages);
-      transitionRef.current = startFullscreenTransition(root, { detailId, detailImages, src, subtitle, title });
+      preloadDetailImages(detailImages, DETAIL_IMAGE_EAGER_COUNT);
+      transitionRef.current = startFullscreenTransition(root, {
+        detailId,
+        detailImages,
+        src,
+        subtitle,
+        title,
+        transitionImage: imageRef.current,
+        transitionSrc,
+      });
     };
 
     root.addEventListener('click', handleClick);
@@ -481,6 +490,7 @@ export default function ProjectWebGLImage({
       if (imageErrorHandler) {
         imageRef.current?.removeEventListener('error', imageErrorHandler);
       }
+      highQualityThumbnailImage = null;
       if (uniforms) {
         gsap.killTweensOf(uniforms.uHover);
         uniforms.uTexture.value.dispose();
@@ -490,7 +500,7 @@ export default function ProjectWebGLImage({
       renderer?.dispose();
       renderer?.domElement.remove();
     };
-  }, [detailId, detailImages, src, subtitle, title]);
+  }, [detailId, detailImages, src, subtitle, title, transitionSrc]);
 
   return (
     <div ref={rootRef} aria-label={alt} className="project-webgl-image" role="img" tabIndex={0}>
@@ -505,10 +515,12 @@ type ProjectTransitionPayload = {
   src: string;
   subtitle: string;
   title: string;
+  transitionImage: HTMLImageElement | null;
+  transitionSrc: string;
 };
 
 function startFullscreenTransition(root: HTMLElement, payload: ProjectTransitionPayload): TransitionState {
-  const { detailId, detailImages, src, subtitle, title } = payload;
+  const { detailId, detailImages, src, subtitle, title, transitionImage, transitionSrc } = payload;
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
   const startRect = root.getBoundingClientRect();
@@ -648,7 +660,9 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
   mesh.scale.set(startRect.width, startRect.height, 1);
   scene.add(mesh);
 
-  const loadedTexture = createTexture(src, (texture) => {
+  let highResolutionImage: HTMLImageElement | null = null;
+
+  const applyTransitionTexture = (texture: THREE.Texture) => {
     if (cleaned) {
       texture.dispose();
       return;
@@ -661,14 +675,30 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
     }
 
     const size = getTextureSize(texture);
-    uniforms.uTexture.value.dispose();
+    const previousTexture = uniforms.uTexture.value;
     uniforms.uTexture.value = texture;
+    previousTexture.dispose();
     uniforms.uTextureResolution.value.set(size.width, size.height);
     overlay.classList.add('is-webgl-ready');
     overlay.classList.remove('is-webgl-unavailable');
-  }, () => {
+  };
+
+  if (transitionImage?.complete && transitionImage.naturalWidth > 0) {
+    applyTransitionTexture(createTextureFromImage(transitionImage));
+  } else {
     overlay.classList.add('is-webgl-unavailable');
-  });
+  }
+
+  if (transitionSrc !== src) {
+    highResolutionImage = new Image();
+    highResolutionImage.decoding = 'async';
+    highResolutionImage.onload = () => {
+      if (cleaned || !highResolutionImage) return;
+      fallbackImage.src = transitionSrc;
+      applyTransitionTexture(createTextureFromImage(highResolutionImage));
+    };
+    highResolutionImage.src = transitionSrc;
+  }
 
   const renderState = {
     x: startPosition.x,
@@ -868,7 +898,8 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
     window.removeEventListener('keydown', handlePageKeyDown);
     root.classList.remove('is-fullscreen-transitioning');
     document.body.classList.remove('project-image-transition-open');
-    loadedTexture.dispose();
+    highResolutionImage = null;
+    uniforms.uTexture.value.dispose();
     geometry.dispose();
     material.dispose();
     renderer.dispose();

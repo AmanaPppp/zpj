@@ -14,38 +14,32 @@ assert.doesNotMatch(
 
 assert.match(
   projectsSource,
-  /projectGalleryItems\.map\(\(item\)\s*=>\s*item\.image\)/,
-  'Startup preload should use the same high-quality gallery hero images as the interactive cards.',
+  /projectGalleryItems\.map\(\(item\)\s*=>\s*item\.previewImage\)/,
+  'Startup preload should use lightweight gallery preview images, not heavy detail covers.',
+);
+
+assert.match(
+  projectsSource,
+  /<ProjectWebGLImage[\s\S]*?src=\{item\.previewImage\}/,
+  'Interactive project cards should render lightweight preview images before pointer interaction.',
 );
 
 assert.doesNotMatch(
   projectsSource,
-  /<ProjectWebGLImage[\s\S]*?src=\{item\.previewImage\}/,
-  'Interactive project cards must not use low-resolution preview images for the WebGL texture.',
-);
-
-assert.match(
-  projectsSource,
-  /<ProjectWebGLImage[\s\S]*?src=\{item\.image\}/,
-  'Interactive project cards should use the same high-quality image shown before pointer interaction.',
-);
-
-assert.match(
-  projectsSource,
   /export\s+function\s+preloadAllProjectDetailImages\(\)\s*:\s*Promise<unknown>/,
-  'ProjectsSection should expose a sheet-time preloader for all project detail images.',
+  'ProjectsSection must not expose a sheet-time preloader for every nested detail image.',
 );
 
-assert.match(
+assert.doesNotMatch(
   projectsSource,
   /projectGalleryItems\.flatMap\(\(item\)\s*=>\s*item\.detailImages\)/,
-  'Sheet-time preload should warm every detail image once the project sheet is open.',
+  'Opening the sheet must not gather every nested detail image into one preload batch.',
 );
 
-assert.match(
+assert.doesNotMatch(
   projectsSource,
   /preloadAllProjectDetailImages\(\)\.catch\(\(\)\s*=>\s*undefined\)/,
-  'Opening the project sheet should start warming all detail images in the background.',
+  'Opening the project sheet must not start downloading every detail image in the background.',
 );
 
 assert.match(
@@ -80,8 +74,20 @@ assert.match(
 
 assert.match(
   webglImageSource,
-  /preloadDetailImages\(detailImages\)/,
-  'Clicking a project detail card should start warming its full detail image set immediately.',
+  /preloadDetailImages\(detailImages,\s*DETAIL_IMAGE_EAGER_COUNT\)/,
+  'Clicking a project detail card should warm only the first priority detail images before the transition.',
+);
+
+assert.doesNotMatch(
+  webglImageSource,
+  /const\s+activateThumbnailHover[\s\S]*?preloadDetailImages\(detailImages\)/,
+  'Hover liquid interaction must not start downloading every detail image.',
+);
+
+assert.match(
+  webglImageSource,
+  /createTextureFromImage\(transitionImage\)/,
+  'Fullscreen transition should reuse the already visible preview image instead of waiting for a new texture request.',
 );
 
 assert.match(

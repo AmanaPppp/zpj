@@ -1,4 +1,5 @@
-import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import assert from 'node:assert/strict';
 
@@ -35,6 +36,21 @@ assert.doesNotMatch(
   brandVisualMatch[1],
   /poster-wall-uploaded|infinite-canvas-uploaded/,
   'Brand visual detail must not reference infinite canvas upload directories.',
+);
+
+const brandVisual05Path = resolve(process.cwd(), 'src/assets/project-detail-optimized/brand-visual/5.webp');
+const brandVisual05Buffer = readFileSync(brandVisual05Path);
+const brandVisual05Hash = createHash('sha256').update(brandVisual05Buffer).digest('hex').toUpperCase();
+
+assert.equal(
+  brandVisual05Hash,
+  '05C49275114621FFADAC09C42140EFCDC1A27A8BF8AD86A3E3ED385909F1B267',
+  'Brand visual detail image 5 should match the uploaded replacement compressed as WebP.',
+);
+
+assert.ok(
+  statSync(brandVisual05Path).size < 450_000,
+  'Brand visual detail image 5 should stay compressed like the other optimized detail images.',
 );
 
 console.log('Brand visual detail image checks passed.');

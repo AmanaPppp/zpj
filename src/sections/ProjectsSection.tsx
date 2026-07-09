@@ -12,11 +12,14 @@ import ProjectWebGLImage from '@/components/ProjectWebGLImage';
 import brandDetail01 from '@/assets/project-detail-optimized/brand-detail-01-jpg.webp';
 import brandDetail02 from '@/assets/project-detail-optimized/brand-detail-02.webp';
 import brandDetail03 from '@/assets/project-detail-optimized/brand-detail-03.webp';
+import brandDetail01Preview from '@/assets/project-detail/previews/brand-detail-01-preview.jpg';
+import brandDetail02Preview from '@/assets/project-detail/previews/brand-detail-02-preview.jpg';
+import brandDetail03Preview from '@/assets/project-detail/previews/brand-detail-03-preview.jpg';
 import brandVisual01 from '@/assets/project-detail-optimized/brand-visual/1.webp';
 import brandVisual02 from '@/assets/project-detail-optimized/brand-visual/2.webp';
 import brandVisual03 from '@/assets/project-detail-optimized/brand-visual/3.webp';
 import brandVisual04 from '@/assets/project-detail-optimized/brand-visual/4.webp';
-import brandVisual05 from '@/assets/project-detail-optimized/echo-brand-proposal-5.jpg';
+import brandVisual05 from '@/assets/project-detail-optimized/brand-visual/5.webp';
 import brandVisual06 from '@/assets/project-detail-optimized/brand-visual/6.webp';
 import brandVisual07 from '@/assets/project-detail-optimized/brand-visual/7.webp';
 import brandVisual08 from '@/assets/project-detail-optimized/brand-visual/8.webp';
@@ -77,6 +80,7 @@ import touchpointImage10 from '@/assets/project-detail-optimized/brand-touchpoin
 import touchpointImage11 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-11.webp';
 import touchpointImage12 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-12.webp';
 import touchpointImage13 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-13.webp';
+import pawsitivityBrandProposalPreview from '@/assets/project-detail/previews/pawsitivity-brand-proposal-preview.jpg';
 import cursorAmaMark from '@/assets/project-detail/cursor-ama-mark.png';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -145,6 +149,7 @@ const projectGalleryItems = [
     title: '\u54c1\u724c\u4e3b\u89c6\u89c9',
     subtitle: 'Visual Identity',
     image: brandDetail01,
+    previewImage: brandDetail01Preview,
   },
   {
     detailId: 'brand-applications',
@@ -171,6 +176,7 @@ const projectGalleryItems = [
     title: '\u5e94\u7528\u573a\u666f\u5ef6\u5c55',
     subtitle: 'Brand Applications',
     image: brandDetail02,
+    previewImage: brandDetail02Preview,
   },
   {
     detailId: 'brand-touchpoints',
@@ -192,6 +198,7 @@ const projectGalleryItems = [
     title: '\u7269\u6599\u4e0e\u89e6\u70b9',
     subtitle: 'Touchpoint System',
     image: brandDetail03,
+    previewImage: brandDetail03Preview,
   },
   {
     detailId: 'pawsitivity-brand-proposal',
@@ -219,17 +226,14 @@ const projectGalleryItems = [
     title: '\u73c0\u65af\u7f07\u54c1\u724c\u63d0\u6848',
     subtitle: 'Pawsitivity Brand Proposal',
     image: pawsitivityBrandProposal,
+    previewImage: pawsitivityBrandProposalPreview,
   },
 ];
 
 const preloadedProjectDetailImages = new Map<string, Promise<void>>();
 
 export const projectDetailPreloadImages = Array.from(
-  new Set(projectGalleryItems.map((item) => item.image)),
-);
-
-const allProjectDetailImages = Array.from(
-  new Set(projectGalleryItems.flatMap((item) => item.detailImages)),
+  new Set(projectGalleryItems.map((item) => item.previewImage)),
 );
 
 const preloadProjectDetailImage = (src: string): Promise<void> => {
@@ -272,11 +276,6 @@ const preloadProjectDetailImage = (src: string): Promise<void> => {
 export function preloadProjectDetailImages(): Promise<unknown> {
   if (typeof window === 'undefined') return Promise.resolve();
   return Promise.all(projectDetailPreloadImages.map(preloadProjectDetailImage));
-}
-
-export function preloadAllProjectDetailImages(): Promise<unknown> {
-  if (typeof window === 'undefined') return Promise.resolve();
-  return Promise.all(allProjectDetailImages.map(preloadProjectDetailImage));
 }
 
 export default function ProjectsSection() {
@@ -456,7 +455,7 @@ export default function ProjectsSection() {
 
     document.documentElement.classList.add('project-sheet-open');
     document.body.classList.add('project-sheet-open');
-    preloadAllProjectDetailImages().catch(() => undefined);
+    preloadProjectDetailImages().catch(() => undefined);
 
     gsap.killTweensOf([modalRef.current, backdropRef.current]);
     gsap.set(backdropRef.current, { autoAlpha: 1 });
@@ -839,10 +838,11 @@ export default function ProjectsSection() {
                     <article className="project-gallery-card" key={item.image}>
                       <div className="project-gallery-frame">
                         <ProjectWebGLImage
-                          src={item.image}
+                          src={item.previewImage}
                           alt={item.title}
                           detailId={item.detailId}
                           detailImages={item.detailImages}
+                          transitionSrc={item.image}
                           title={item.title}
                           subtitle={item.subtitle}
                         />
