@@ -20,26 +20,32 @@ assert.match(
 
 assert.match(
   projectsSource,
-  /export\s+function\s+preloadInitialProjectDetailImages\(\)\s*:\s*Promise<unknown>/,
-  'ProjectsSection should expose a sheet-time preloader for the first detail images.',
+  /export\s+function\s+preloadAllProjectDetailImages\(\)\s*:\s*Promise<unknown>/,
+  'ProjectsSection should expose a sheet-time preloader for all project detail images.',
 );
 
 assert.match(
   projectsSource,
-  /detailImages\.slice\(0,\s*PROJECT_DETAIL_INITIAL_PRELOAD_COUNT\)/,
-  'Sheet-time preload should warm only the first few detail images for each project.',
+  /projectGalleryItems\.flatMap\(\(item\)\s*=>\s*item\.detailImages\)/,
+  'Sheet-time preload should warm every detail image once the project sheet is open.',
 );
 
 assert.match(
   projectsSource,
-  /preloadInitialProjectDetailImages\(\)\.catch\(\(\)\s*=>\s*undefined\)/,
-  'Opening the project sheet should start warming first detail images in the background.',
+  /preloadAllProjectDetailImages\(\)\.catch\(\(\)\s*=>\s*undefined\)/,
+  'Opening the project sheet should start warming all detail images in the background.',
 );
 
 assert.match(
   webglImageSource,
-  /const\s+DETAIL_IMAGE_EAGER_COUNT\s*=\s*3/,
-  'Fullscreen detail pages should eagerly load the first three images.',
+  /const\s+DETAIL_IMAGE_EAGER_COUNT\s*=\s*4/,
+  'Fullscreen detail pages should eagerly load the first four images.',
+);
+
+assert.match(
+  webglImageSource,
+  /const\s+DETAIL_IMAGE_INITIAL_MOUNT_COUNT\s*=\s*6/,
+  'Fullscreen detail should mount the first six image nodes immediately.',
 );
 
 assert.match(
@@ -64,6 +70,24 @@ assert.match(
   webglImageSource,
   /preloadDetailImages\(detailImages\)/,
   'Clicking a project detail card should start warming its full detail image set immediately.',
+);
+
+assert.match(
+  webglImageSource,
+  /const\s+chunkSize\s*=\s*startIndex\s*===\s*0\s*\?\s*DETAIL_IMAGE_INITIAL_MOUNT_COUNT\s*:\s*2/,
+  'Fullscreen detail should mount more initial image nodes immediately so cold-cache downloads start during the transition.',
+);
+
+assert.match(
+  webglImageSource,
+  /document\.body\.appendChild\(overlay\);\s*scrollPage\.focus\(\{ preventScroll: true \}\);\s*mountDetailImages\?\.\(\)/,
+  'Fullscreen detail should mount its first image nodes immediately so cold-cache downloads start during the transition.',
+);
+
+assert.doesNotMatch(
+  webglImageSource,
+  /onComplete:\s*\(\)\s*=>\s*\{\s*overlay\.classList\.add\('is-settled'\);\s*mountDetailImages\?\.\(\)/,
+  'Fullscreen detail must not wait for the transition animation to finish before mounting image nodes.',
 );
 
 assert.match(

@@ -156,7 +156,8 @@ type TransitionState = {
   cleanup: () => void;
 };
 
-const DETAIL_IMAGE_EAGER_COUNT = 3;
+const DETAIL_IMAGE_EAGER_COUNT = 4;
+const DETAIL_IMAGE_INITIAL_MOUNT_COUNT = 6;
 const preloadedDetailImages = new Set<string>();
 
 const preloadDetailImages = (detailImages: string[]) => {
@@ -507,7 +508,8 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
       if (cleaned) return;
 
       const fragment = document.createDocumentFragment();
-      const endIndex = Math.min(startIndex + 2, detailImages.length);
+      const chunkSize = startIndex === 0 ? DETAIL_IMAGE_INITIAL_MOUNT_COUNT : 2;
+      const endIndex = Math.min(startIndex + chunkSize, detailImages.length);
 
       for (let index = startIndex; index < endIndex; index += 1) {
         const image = detailImages[index];
@@ -560,6 +562,7 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
   overlay.append(closeButton, scrollPage);
   document.body.appendChild(overlay);
   scrollPage.focus({ preventScroll: true });
+  mountDetailImages?.();
 
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera();
@@ -638,7 +641,6 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
     defaults: { ease: 'power4.inOut' },
     onComplete: () => {
       overlay.classList.add('is-settled');
-      mountDetailImages?.();
       gsap.to(transition, {
         distortion: 0,
         duration: 0.32,
