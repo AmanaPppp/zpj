@@ -233,7 +233,7 @@ const projectGalleryItems = [
 const preloadedProjectDetailImages = new Map<string, Promise<void>>();
 
 export const projectDetailPreloadImages = Array.from(
-  new Set(projectGalleryItems.map((item) => item.previewImage)),
+  new Set(projectGalleryItems.map((item) => item.image)),
 );
 
 const preloadProjectDetailImage = (src: string): Promise<void> => {
@@ -838,7 +838,7 @@ export default function ProjectsSection() {
                     <article className="project-gallery-card" key={item.image}>
                       <div className="project-gallery-frame">
                         <ProjectWebGLImage
-                          src={item.previewImage}
+                          src={item.image}
                           alt={item.title}
                           detailId={item.detailId}
                           detailImages={item.detailImages}

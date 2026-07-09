@@ -31,20 +31,20 @@ assert.match(
 
 assert.match(
   projectsSource,
-  /new\s+Set\(projectGalleryItems\.map\(\(item\)\s*=>\s*item\.previewImage\)\)/,
-  'Startup preload should use lightweight previews, not original large cover images.',
+  /new\s+Set\(projectGalleryItems\.map\(\(item\)\s*=>\s*item\.image\)\)/,
+  'Startup preload should use the optimized high-quality cover images shown in the interactive cards.',
 );
 
 assert.match(
   projectsSource,
-  /src=\{item\.previewImage\}/,
-  'Project gallery thumbnails should render lightweight previews.',
+  /src=\{item\.image\}/,
+  'Project gallery thumbnails should render optimized high-quality cover images, not low-resolution previews.',
 );
 
 assert.match(
   projectsSource,
   /transitionSrc=\{item\.image\}/,
-  'Project gallery thumbnails should receive the high-quality cover for progressive replacement and transitions.',
+  'Project gallery transitions should use the same optimized high-quality cover shown in the card.',
 );
 
 assert.doesNotMatch(
@@ -53,40 +53,16 @@ assert.doesNotMatch(
   'Project gallery hover WebGL should not be delayed after the sheet opens.',
 );
 
-assert.doesNotMatch(
-  projectsSource,
-  /src=\{item\.image\}/,
-  'Project gallery thumbnails must not render original large cover images.',
-);
-
 assert.match(
   webglImageSource,
   /const\s+imageRef\s*=\s*useRef<HTMLImageElement>\(null\)/,
-  'Thumbnail WebGL should keep a ref to the already visible preview image.',
+  'Thumbnail WebGL should keep a ref to the already visible cover image.',
 );
 
 assert.match(
   webglImageSource,
   /createTextureFromImage\(image\)/,
-  'Thumbnail WebGL should reuse the visible preview image as its texture.',
-);
-
-assert.match(
-  webglImageSource,
-  /highQualityThumbnailImage/,
-  'Thumbnail WebGL should progressively load the high-quality cover after the preview appears.',
-);
-
-assert.match(
-  webglImageSource,
-  /visibleImage\.src\s*=\s*transitionSrc/,
-  'The visible thumbnail image should switch from the lightweight preview to the high-quality cover.',
-);
-
-assert.match(
-  webglImageSource,
-  /createTextureFromImage\(highQualityThumbnailImage\)/,
-  'The liquid distortion texture should switch to the same high-quality cover shown underneath.',
+  'Thumbnail WebGL should reuse the same visible cover image as its texture.',
 );
 
 assert.doesNotMatch(

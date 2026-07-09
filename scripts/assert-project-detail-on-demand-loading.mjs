@@ -14,14 +14,14 @@ assert.doesNotMatch(
 
 assert.match(
   projectsSource,
-  /projectGalleryItems\.map\(\(item\)\s*=>\s*item\.previewImage\)/,
-  'Startup preload should use lightweight gallery preview images, not heavy detail covers.',
+  /projectGalleryItems\.map\(\(item\)\s*=>\s*item\.image\)/,
+  'Startup preload should use only the four optimized gallery cover images, not nested detail images.',
 );
 
 assert.match(
   projectsSource,
-  /<ProjectWebGLImage[\s\S]*?src=\{item\.previewImage\}/,
-  'Interactive project cards should render lightweight preview images before pointer interaction.',
+  /<ProjectWebGLImage[\s\S]*?src=\{item\.image\}/,
+  'Interactive project cards should render the same optimized cover image used for pointer interaction.',
 );
 
 assert.doesNotMatch(
