@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 const root = process.cwd();
 const projectsSource = readFileSync(resolve(root, 'src/sections/ProjectsSection.tsx'), 'utf8');
 const webglImageSource = readFileSync(resolve(root, 'src/components/ProjectWebGLImage.tsx'), 'utf8');
+const stylesSource = readFileSync(resolve(root, 'src/index.css'), 'utf8');
 const setupRendererBody = webglImageSource.match(
   /const setupRenderer = \(\) => \{([\s\S]*?)\n    \};\n\n    const handlePointerMove/,
 )?.[1] ?? '';
@@ -68,6 +69,12 @@ assert.doesNotMatch(
   setupRendererBody,
   /createTexture\(/,
   'Thumbnail WebGL should not start a second TextureLoader request for the same preview image.',
+);
+
+assert.match(
+  stylesSource,
+  /\.project-webgl-image:not\(\.is-webgl-ready\):hover img/,
+  'Project gallery cards should have an immediate CSS hover fallback before WebGL is ready.',
 );
 
 assert.match(
