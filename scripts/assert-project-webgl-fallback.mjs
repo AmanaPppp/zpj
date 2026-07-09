@@ -35,6 +35,17 @@ const checks = [
       && /if\s*\(!isInsideThumbnail\)\s*\{[\s\S]*?deactivateThumbnailHover\(\)/.test(source),
   },
   {
+    label: 'uses natural image dimensions for thumbnail texture ratio',
+    pass: /naturalWidth\?:\s*number/.test(source)
+      && /image\.naturalWidth\s*\|\|\s*image\.width/.test(source)
+      && /image\.naturalHeight\s*\|\|\s*image\.height/.test(source),
+  },
+  {
+    label: 'keeps the clear img underneath by rendering liquid as a local transparent overlay',
+    pass: /float\s+overlayAlpha\s*=/.test(source)
+      && /gl_FragColor\s*=\s*vec4\(red\.r,\s*green\.g,\s*blue\.b,\s*max\(max\(red\.a,\s*green\.a\),\s*blue\.a\)\s*\*\s*overlayAlpha\)/.test(source),
+  },
+  {
     label: 'keeps thumbnail canvas hidden until liquid interaction is active',
     pass: /\.project-webgl-image canvas[\s\S]*?opacity:\s*0/.test(styles)
       && !/\.project-webgl-image\.is-webgl-ready canvas[\s\S]*?opacity:\s*1/.test(styles),

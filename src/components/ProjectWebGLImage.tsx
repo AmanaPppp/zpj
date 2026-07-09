@@ -53,6 +53,7 @@ const thumbnailFragmentShader = `
 
     float chroma = smoothstep(0.32, 0.02, dist) * uHover;
     vec2 shift = direction * chroma * 0.014;
+    float overlayAlpha = smoothstep(0.42, 0.08, dist) * uHover;
 
     vec2 redUv = coverUv(liquidUv + shift, uResolution, uTextureResolution);
     vec2 greenUv = coverUv(liquidUv, uResolution, uTextureResolution);
@@ -62,7 +63,7 @@ const thumbnailFragmentShader = `
     vec4 green = sampleImage(greenUv);
     vec4 blue = sampleImage(blueUv);
 
-    gl_FragColor = vec4(red.r, green.g, blue.b, max(max(red.a, green.a), blue.a));
+    gl_FragColor = vec4(red.r, green.g, blue.b, max(max(red.a, green.a), blue.a) * overlayAlpha);
     #include <colorspace_fragment>
   }
 `;
@@ -196,10 +197,10 @@ const createTextureFromImage = (image: HTMLImageElement) => {
 };
 
 const getTextureSize = (texture: THREE.Texture) => {
-  const image = texture.image as { width?: number; height?: number };
+  const image = texture.image as { naturalWidth?: number; naturalHeight?: number; width?: number; height?: number };
   return {
-    height: image.height || 1,
-    width: image.width || 1,
+    height: image.naturalHeight || image.height || 1,
+    width: image.naturalWidth || image.width || 1,
   };
 };
 
