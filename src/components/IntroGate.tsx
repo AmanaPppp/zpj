@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import gsap from 'gsap';
-import { preloadProjectDetailImages } from '../sections/ProjectsSection';
+import { preloadProjectDetailImages } from '../sections/ProjectDetailGallery';
 
 const RINGS = [
   'AMANAP  BRAND DESIGN PORTFOLIO  ',

@@ -1,8 +1,10 @@
 import { useRef, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import DecryptedText from '../components/DecryptedText';
 import VariableProximity from '../components/VariableProximity';
+import type { HeroArea } from '../components/HeroNavigationOverlay';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,15 +17,23 @@ interface HeroProps {
     targetX: number;
     targetY: number;
   }>;
+  activeHeroArea: HeroArea;
+  onHeroAreaChange: (area: HeroArea) => void;
 }
 
 const navItems = [
-  { label: 'ABOUT', targetId: '\u5173\u4e8e\u6211' },
-  { label: 'WORKS', targetId: '\u4f5c\u54c1' },
-  { label: 'PROJECTS', targetId: '\u9879\u76ee' },
-];
+  { label: '\u4e3b\u9875', area: 'home' },
+  { label: '\u5408\u96c6', area: 'collection' },
+  { label: '\u4e2a\u4eba\u8bbe\u8ba1', area: 'personal' },
+] satisfies Array<{ label: string; area: HeroArea }>;
 
-export default function Hero({ scrollProgressRef, sceneShellRef, mouseRef }: HeroProps) {
+export default function Hero({
+  scrollProgressRef,
+  sceneShellRef,
+  mouseRef,
+  activeHeroArea,
+  onHeroAreaChange,
+}: HeroProps) {
   const containerRef = useRef<HTMLDivElement>(null!);
   const titleRef = useRef<HTMLDivElement>(null!);
   const subtitleRef = useRef<HTMLDivElement>(null!);
@@ -32,16 +42,27 @@ export default function Hero({ scrollProgressRef, sceneShellRef, mouseRef }: Her
   const navRef = useRef<HTMLElement>(null!);
   const titleText = 'AmanaP-Portfolio';
   const [titleVisible, setTitleVisible] = useState(false);
+  const [navExpanded, setNavExpanded] = useState(false);
 
-  const handleNavClick = (targetId: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-
-    const target = document.getElementById(targetId);
-    if (!target) return;
-
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    window.history.pushState(null, '', `#${encodeURIComponent(targetId)}`);
+  const handleAreaClick = (area: HeroArea) => {
+    setNavExpanded(true);
+    onHeroAreaChange(area);
   };
+
+  useEffect(() => {
+    if (!navExpanded) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (navRef.current?.contains(event.target as Node)) return;
+      setNavExpanded(false);
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [navExpanded]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -51,18 +72,6 @@ export default function Hero({ scrollProgressRef, sceneShellRef, mouseRef }: Her
     window.addEventListener('mousemove', handleMouseMove);
 
     const ctx = gsap.context(() => {
-      gsap.to(navRef.current, {
-        y: -20,
-        opacity: 0,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: 'top top',
-          end: '30% top',
-          scrub: 0.5,
-        },
-      });
-
       gsap.to(titleRef.current, {
         y: -76,
         opacity: 0,
@@ -174,51 +183,52 @@ export default function Hero({ scrollProgressRef, sceneShellRef, mouseRef }: Her
     };
   }, [scrollProgressRef, sceneShellRef, mouseRef]);
 
-  return (
-    <section ref={containerRef} className="relative w-full hero-transition-stage" style={{ height: '100vh' }}>
-      <div ref={transitionRef} className="hero-subpage-bridge" aria-hidden="true" />
-      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 10 }}>
-        <nav
-          ref={navRef}
-          className="fixed top-0 left-0 right-0 pointer-events-auto"
-          style={{
-            zIndex: 20,
-            padding: 'clamp(12px, 2vh, 20px) clamp(20px, 4vw, 48px)',
-          }}
-        >
-          <div
-            className="space-nav-shell mx-auto flex items-center justify-between rounded-2xl"
-            style={{
-              maxWidth: '100%',
-              padding: '0',
-            }}
+  const navMarkup = (
+    <>
+      <nav
+        ref={navRef}
+        className={`hero-expanded-nav pointer-events-auto ${activeHeroArea === 'home' ? 'is-home' : ''}`}
+        aria-label="Portfolio navigation"
+      >
+        <div className={`hero-expanded-nav-shell ${navExpanded ? 'is-expanded' : ''}`}>
+          <button
+            type="button"
+            className="hero-expanded-nav-trigger"
+            onClick={() => setNavExpanded(true)}
+            aria-expanded={navExpanded}
+            aria-hidden={navExpanded}
+            tabIndex={navExpanded ? -1 : 0}
           >
-            <div className="hidden md:flex items-center gap-7 cinematic-nav-links">
-              {navItems.map((item) => (
-                <a
-                  key={item.targetId}
-                  href={`#${item.targetId}`}
-                  onClick={handleNavClick(item.targetId)}
-                  className="relative transition-colors duration-300"
-                  style={{
-                    textDecoration: 'none',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.94)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = 'rgba(232, 238, 255, 0.56)';
-                  }}
-                >
-                  {item.label}
-                </a>
-              ))}
-            </div>
-
-            <div className="space-nav-orbit flex items-center justify-center rounded-full">AMANAP</div>
+            <span className="hero-expanded-nav-icon">
+              <img src="/ama-nav-logo.png" alt="" />
+            </span>
+            <span>{'\u5bfc\u822a'}</span>
+          </button>
+          <div className="hero-expanded-nav-items" aria-hidden={!navExpanded}>
+            {navItems.map((item) => (
+              <button
+                key={item.area}
+                type="button"
+                className={activeHeroArea === item.area ? 'is-active' : ''}
+                onClick={() => handleAreaClick(item.area)}
+                tabIndex={navExpanded ? 0 : -1}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
-        </nav>
+        </div>
+      </nav>
+      <div className="space-nav-orbit flex items-center justify-center rounded-full">AMANAP</div>
+    </>
+  );
 
+  return (
+    <>
+      {typeof document !== 'undefined' ? createPortal(navMarkup, document.body) : navMarkup}
+      <section ref={containerRef} className="relative w-full hero-transition-stage" style={{ height: '100vh' }}>
+        <div ref={transitionRef} className="hero-subpage-bridge" aria-hidden="true" />
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 10 }}>
         <div ref={textProximityRef} className="cinematic-title-stage">
           <div ref={titleRef} className="cinematic-title-lockup">
             <h1 className="space-hero-heading" aria-label={titleText}>
@@ -261,6 +271,7 @@ export default function Hero({ scrollProgressRef, sceneShellRef, mouseRef }: Her
           </div>
         </div>
       </div>
-    </section>
+      </section>
+    </>
   );
 }

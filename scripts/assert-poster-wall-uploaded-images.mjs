@@ -3,10 +3,19 @@ import { resolve } from 'node:path';
 import assert from 'node:assert/strict';
 
 const source = readFileSync(resolve(process.cwd(), 'src/components/InfiniteFluidPosterWall.tsx'), 'utf8');
-const sourceFiles = Array.from(source.matchAll(/createPoster\([^,]+,\s*[^,]+,\s*['"]([^'"]+)['"]/g), (match) => match[1]);
-const imageMatches = sourceFiles.map((file) => file.replace(/\.(?:png|jpe?g)$/i, '.webp'));
+const posters = Array.from(
+  source.matchAll(/createPoster\([^,]+,\s*[^,]+,\s*['"]([^'"]+)['"][^)]*\)/g),
+  (match) => ({
+    sourceFile: match[1],
+    preserveExtension: /,\s*true\s*\)$/.test(match[0]),
+  }),
+);
+const uploadedPosters = posters.filter((poster) => /^uploaded-\d+\.(?:png|jpe?g)$/i.test(poster.sourceFile));
+const imageMatches = uploadedPosters.map((poster) => (
+  poster.preserveExtension ? poster.sourceFile : poster.sourceFile.replace(/\.(?:png|jpe?g)$/i, '.webp')
+));
 
-assert.equal(imageMatches.length, 35, 'Poster wall should use all 35 uploaded images.');
+assert.equal(uploadedPosters.length, 37, 'Poster wall should use all 37 uploaded images.');
 assert.ok(
   imageMatches.every((image) => image.endsWith('.webp')),
   'Poster wall primary images should use optimized WebP assets.',
@@ -25,7 +34,7 @@ for (const image of imageMatches) {
   assert.ok(statSync(optimizedPath).size < 650_000, `${image} should stay below 650KB.`);
 }
 
-for (const sourceFile of sourceFiles) {
+for (const { sourceFile } of uploadedPosters) {
   const sourcePath = resolve(process.cwd(), 'source-images/infinite-canvas-uploaded', sourceFile);
   assert.ok(existsSync(sourcePath), `${sourceFile} should be preserved under source-images.`);
 }

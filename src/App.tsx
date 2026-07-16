@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Lenis from './lib/lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -12,13 +12,19 @@ import Scene3D from './components/Scene3D';
 import MusicPlayer from './components/MusicPlayer';
 import IntroGate from './components/IntroGate';
 import { useMouseParallax } from './hooks/useMouseParallax';
+import HeroNavigationOverlay, { type HeroArea } from './components/HeroNavigationOverlay';
+import PageTransitionOverlay, {
+  type PageTransitionOverlayHandle,
+} from './components/PageTransitionOverlay';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function App() {
   const scrollProgressRef = useRef(0);
   const sceneShellRef = useRef<HTMLDivElement>(null);
+  const pageTransitionRef = useRef<PageTransitionOverlayHandle>(null);
   const mouseRef = useMouseParallax();
+  const [activeHeroArea, setActiveHeroArea] = useState<HeroArea>('home');
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -48,8 +54,27 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const isOverlayOpen = activeHeroArea !== 'home';
+    document.documentElement.classList.toggle('hero-area-open', isOverlayOpen);
+    document.body.classList.toggle('hero-area-open', isOverlayOpen);
+
+    return () => {
+      document.documentElement.classList.remove('hero-area-open');
+      document.body.classList.remove('hero-area-open');
+    };
+  }, [activeHeroArea]);
+
+  const handleHeroAreaChange = useCallback((area: HeroArea) => {
+    if (area === activeHeroArea) return;
+
+    pageTransitionRef.current?.play(() => {
+      setActiveHeroArea(area);
+    }) ?? setActiveHeroArea(area);
+  }, [activeHeroArea]);
+
   return (
-    <div className="relative bg-[#050505] min-h-screen">
+    <div className="fixed inset-0 overflow-hidden bg-[#050505]">
       {/* 3D Scene - always visible as fixed background */}
       <div
         ref={sceneShellRef}
@@ -73,6 +98,8 @@ export default function App() {
           scrollProgressRef={scrollProgressRef}
           mouseRef={mouseRef}
           sceneShellRef={sceneShellRef}
+          activeHeroArea={activeHeroArea}
+          onHeroAreaChange={handleHeroAreaChange}
         />
         <main
           className="subpage-cosmic-bg relative overflow-hidden"
@@ -85,9 +112,12 @@ export default function App() {
         </main>
       </div>
 
+      <HeroNavigationOverlay activeArea={activeHeroArea} />
+
       {/* Music Player - fixed bottom left */}
       <MusicPlayer />
       <IntroGate />
+      <PageTransitionOverlay ref={pageTransitionRef} />
     </div>
   );
 }

@@ -69,6 +69,8 @@ const posters: Poster[] = [
   createPoster('Visual 34', 'D06', 'uploaded-34.jpg', '#00ff66', '2028.10'),
   createPoster('Visual 35', 'D07', 'uploaded-35.jpg', '#ffe8a3', '2028.11'),
   createPoster('Raven Peak', 'D08', 'raven-peak.jpg', '#ffffff', '2028.12', true),
+  createPoster('Visual 36', 'D09', 'uploaded-36.png', '#ffbfd1', '2029.01'),
+  createPoster('Visual 37', 'D10', 'uploaded-37.png', '#9ae6ff', '2029.02'),
 ];
 
 const posterWallImageUrls = posters.map((poster) => poster.image);
