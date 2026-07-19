@@ -15,7 +15,7 @@ const imageMatches = uploadedPosters.map((poster) => (
   poster.preserveExtension ? poster.sourceFile : poster.sourceFile.replace(/\.(?:png|jpe?g)$/i, '.webp')
 ));
 
-assert.equal(uploadedPosters.length, 37, 'Poster wall should use all 37 uploaded images.');
+assert.equal(uploadedPosters.length, 43, 'Poster wall should use all 43 uploaded images.');
 assert.ok(
   imageMatches.every((image) => image.endsWith('.webp')),
   'Poster wall primary images should use optimized WebP assets.',
