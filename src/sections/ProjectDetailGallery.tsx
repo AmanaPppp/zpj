@@ -38,6 +38,7 @@ import pawsitivityDetail15 from '@/assets/project-detail-optimized/pawsitivity/1
 import pawsitivityDetail16 from '@/assets/project-detail-optimized/pawsitivity/16-jpg.webp';
 import pawsitivityDetail17 from '@/assets/project-detail-optimized/pawsitivity/17-jpg.webp';
 import pawsitivityDetail18 from '@/assets/project-detail-optimized/pawsitivity/18-jpg.webp';
+import pawsitivityDetail19 from '@/assets/project-detail-optimized/pawsitivity/19.webp';
 import pawsitivityDetailExtra02 from '@/assets/project-detail-optimized/pawsitivity/02.jpg';
 import applicationImage03 from '@/assets/project-detail-optimized/brand-applications/resource-03.webp';
 import applicationImage04 from '@/assets/project-detail-optimized/brand-applications/resource-04.webp';
@@ -57,6 +58,7 @@ import applicationImage20 from '@/assets/project-detail-optimized/brand-applicat
 import applicationImage21 from '@/assets/project-detail-optimized/brand-applications/resource-21.webp';
 import applicationImage22 from '@/assets/project-detail-optimized/brand-applications/resource-22.webp';
 import applicationImage23 from '@/assets/project-detail-optimized/brand-applications/resource-23.webp';
+import applicationImage24 from '@/assets/project-detail-optimized/brand-applications/resource-24.webp';
 import touchpointImage01 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-01.webp';
 import touchpointImage02 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-02.webp';
 import touchpointImage03 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-03.webp';
@@ -118,6 +120,7 @@ export const projectGalleryItems = [
       applicationImage21,
       applicationImage22,
       applicationImage23,
+      applicationImage24,
     ],
     title: '\u5e94\u7528\u573a\u666f\u5ef6\u5c55',
     subtitle: 'Brand Applications',
@@ -167,6 +170,7 @@ export const projectGalleryItems = [
       pawsitivityDetail16,
       pawsitivityDetail17,
       pawsitivityDetail18,
+      pawsitivityDetail19,
       pawsitivityDetailExtra02,
     ],
     title: '\u73c0\u65af\u7f07\u54c1\u724c\u63d0\u6848',
