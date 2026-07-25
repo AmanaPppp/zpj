@@ -33,50 +33,55 @@ function createPoster(
 }
 
 const posters: Poster[] = [
-  createPoster('Visual 01', 'A01', 'uploaded-01.png', '#b7f700', '2026.01'),
-  createPoster('Visual 02', 'A02', 'uploaded-02.png', '#ffbfd1', '2026.02'),
-  createPoster('Visual 03', 'A03', 'uploaded-03.jpg', '#9ae6ff', '2026.03'),
-  createPoster('Visual 04', 'A04', 'uploaded-04.jpg', '#f2ff00', '2026.04'),
-  createPoster('Visual 05', 'A05', 'uploaded-05.jpg', '#c7b8ff', '2026.05'),
-  createPoster('Visual 06', 'A06', 'uploaded-06.png', '#00ff66', '2026.06'),
-  createPoster('Visual 07', 'A07', 'uploaded-07.png', '#ffe8a3', '2026.07'),
-  createPoster('Visual 08', 'A08', 'uploaded-08.png', '#7dffea', '2026.08'),
-  createPoster('Visual 09', 'A09', 'uploaded-09.png', '#ff8cc6', '2026.09'),
-  createPoster('Visual 10', 'A10', 'uploaded-10.png', '#ddff44', '2026.10'),
-  createPoster('Visual 11', 'B01', 'uploaded-11.png', '#ffffff', '2026.11'),
-  createPoster('Visual 12', 'B02', 'uploaded-12.png', '#acf6ff', '2026.12'),
-  createPoster('Visual 13', 'B03', 'uploaded-13.png', '#deff00', '2027.01'),
-  createPoster('Visual 14', 'B04', 'uploaded-14.png', '#ffc8d8', '2027.02'),
-  createPoster('Visual 15', 'B05', 'uploaded-15.jpg', '#d7c7ff', '2027.03'),
-  createPoster('Visual 16', 'B06', 'uploaded-16.jpg', '#00ff99', '2027.04'),
-  createPoster('Visual 17', 'B07', 'uploaded-17.png', '#fff0a6', '2027.05'),
-  createPoster('Visual 18', 'B08', 'uploaded-18.png', '#bffcff', '2027.06'),
-  createPoster('Visual 19', 'B09', 'uploaded-19.png', '#ff9abc', '2027.07'),
-  createPoster('Visual 20', 'B10', 'uploaded-20.png', '#dfff4a', '2027.08'),
-  createPoster('Visual 21', 'C01', 'uploaded-21.png', '#aafff0', '2027.09'),
-  createPoster('Visual 22', 'C02', 'uploaded-22.png', '#f5ff7a', '2027.10'),
-  createPoster('Visual 23', 'C03', 'uploaded-23.png', '#ffd1e6', '2027.11'),
-  createPoster('Visual 24', 'C04', 'uploaded-24.png', '#b9ff00', '2027.12'),
-  createPoster('Visual 25', 'C05', 'uploaded-25.png', '#99e7ff', '2028.01'),
-  createPoster('Visual 26', 'C06', 'uploaded-26.png', '#ffffff', '2028.02'),
-  createPoster('Visual 27', 'C07', 'uploaded-27.png', '#d8ff2f', '2028.03'),
-  createPoster('Visual 28', 'C08', 'uploaded-28.png', '#ffbdd8', '2028.04'),
-  createPoster('Visual 29', 'D01', 'uploaded-29.png', '#b7f700', '2028.05'),
-  createPoster('Visual 30', 'D02', 'uploaded-30.png', '#ffbfd1', '2028.06'),
-  createPoster('Visual 31', 'D03', 'uploaded-31.png', '#9ae6ff', '2028.07'),
-  createPoster('Visual 32', 'D04', 'uploaded-32.png', '#f2ff00', '2028.08'),
-  createPoster('Visual 33', 'D05', 'uploaded-33.jpg', '#c7b8ff', '2028.09'),
-  createPoster('Visual 34', 'D06', 'uploaded-34.jpg', '#00ff66', '2028.10'),
-  createPoster('Visual 35', 'D07', 'uploaded-35.jpg', '#ffe8a3', '2028.11'),
-  createPoster('Raven Peak', 'D08', 'raven-peak.jpg', '#ffffff', '2028.12', true),
-  createPoster('Visual 36', 'D09', 'uploaded-36.png', '#ffbfd1', '2029.01'),
-  createPoster('Visual 37', 'D10', 'uploaded-37.png', '#9ae6ff', '2029.02'),
-  createPoster('Visual 38', 'D11', 'uploaded-38.jpg', '#99e7ff', '2029.03'),
-  createPoster('Visual 39', 'D12', 'uploaded-39.png', '#f2ff00', '2029.04'),
-  createPoster('Visual 40', 'D13', 'uploaded-40.png', '#ffbfd1', '2029.05'),
-  createPoster('Visual 41', 'D14', 'uploaded-41.png', '#c7b8ff', '2029.06'),
-  createPoster('Visual 42', 'D15', 'uploaded-42.png', '#00ff66', '2029.07'),
-  createPoster('Visual 43', 'D16', 'uploaded-43.png', '#ffffff', '2029.08'),
+  createPoster('Visual 01', 'A01', 'uploaded-01.png', '#b7f700', '2026.04'),
+  createPoster('Visual 02', 'A02', 'uploaded-02.png', '#ffbfd1', '2025.11'),
+  createPoster('Visual 03', 'A03', 'uploaded-03.jpg', '#9ae6ff', '2025.03'),
+  createPoster('Visual 04', 'A04', 'uploaded-04.jpg', '#f2ff00', '2026.09'),
+  createPoster('Visual 05', 'A05', 'uploaded-05.jpg', '#c7b8ff', '2025.07'),
+  createPoster('Visual 06', 'A06', 'uploaded-06.png', '#00ff66', '2026.01'),
+  createPoster('Visual 07', 'A07', 'uploaded-07.png', '#ffe8a3', '2025.12'),
+  createPoster('Visual 08', 'A08', 'uploaded-08.png', '#7dffea', '2026.06'),
+  createPoster('Visual 09', 'A09', 'uploaded-09.png', '#ff8cc6', '2025.02'),
+  createPoster('Visual 10', 'A10', 'uploaded-10.png', '#ddff44', '2026.11'),
+  createPoster('Visual 11', 'B01', 'uploaded-11.png', '#ffffff', '2025.09'),
+  createPoster('Visual 12', 'B02', 'uploaded-12.png', '#acf6ff', '2026.03'),
+  createPoster('Visual 13', 'B03', 'uploaded-13.png', '#deff00', '2025.05'),
+  createPoster('Visual 14', 'B04', 'uploaded-14.png', '#ffc8d8', '2026.08'),
+  createPoster('Visual 15', 'B05', 'uploaded-15.jpg', '#d7c7ff', '2025.10'),
+  createPoster('Visual 16', 'B06', 'uploaded-16.jpg', '#00ff99', '2026.02'),
+  createPoster('Visual 17', 'B07', 'uploaded-17.png', '#fff0a6', '2025.01'),
+  createPoster('Visual 18', 'B08', 'uploaded-18.png', '#bffcff', '2026.12'),
+  createPoster('Visual 19', 'B09', 'uploaded-19.png', '#ff9abc', '2025.08'),
+  createPoster('Visual 20', 'B10', 'uploaded-20.png', '#dfff4a', '2026.05'),
+  createPoster('Visual 21', 'C01', 'uploaded-21.png', '#aafff0', '2025.04'),
+  createPoster('Visual 22', 'C02', 'uploaded-22.png', '#f5ff7a', '2026.10'),
+  createPoster('Visual 23', 'C03', 'uploaded-23.png', '#ffd1e6', '2025.06'),
+  createPoster('Visual 24', 'C04', 'uploaded-24.png', '#b9ff00', '2026.07'),
+  createPoster('Visual 25', 'C05', 'uploaded-25.png', '#99e7ff', '2026.01'),
+  createPoster('Visual 26', 'C06', 'uploaded-26.png', '#ffffff', '2025.12'),
+  createPoster('Visual 27', 'C07', 'uploaded-27.png', '#d8ff2f', '2026.04'),
+  createPoster('Visual 28', 'C08', 'uploaded-28.png', '#ffbdd8', '2025.03'),
+  createPoster('Visual 29', 'D01', 'uploaded-29.png', '#b7f700', '2026.09'),
+  createPoster('Visual 30', 'D02', 'uploaded-30.png', '#ffbfd1', '2025.07'),
+  createPoster('Visual 31', 'D03', 'uploaded-31.png', '#9ae6ff', '2026.11'),
+  createPoster('Visual 32', 'D04', 'uploaded-32.png', '#f2ff00', '2025.02'),
+  createPoster('Visual 33', 'D05', 'uploaded-33.jpg', '#c7b8ff', '2026.06'),
+  createPoster('Visual 34', 'D06', 'uploaded-34.jpg', '#00ff66', '2025.10'),
+  createPoster('Visual 35', 'D07', 'uploaded-35.jpg', '#ffe8a3', '2026.03'),
+  createPoster('Raven Peak', 'D08', 'raven-peak.jpg', '#ffffff', '2025.05', true),
+  createPoster('Visual 36', 'D09', 'uploaded-36.png', '#ffbfd1', '2026.08'),
+  createPoster('Visual 37', 'D10', 'uploaded-37.png', '#9ae6ff', '2025.11'),
+  createPoster('Visual 38', 'D11', 'uploaded-38.jpg', '#99e7ff', '2026.02'),
+  createPoster('Visual 39', 'D12', 'uploaded-39.png', '#f2ff00', '2025.04'),
+  createPoster('Visual 40', 'D13', 'uploaded-40.png', '#ffbfd1', '2026.12'),
+  createPoster('Visual 41', 'D14', 'uploaded-41.png', '#c7b8ff', '2025.08'),
+  createPoster('Visual 42', 'D15', 'uploaded-42.png', '#00ff66', '2026.05'),
+  createPoster('Visual 43', 'D16', 'uploaded-43.png', '#ffffff', '2025.01'),
+  createPoster('Visual 44', 'D17', 'uploaded-44.png', '#d8ff2f', '2026.10'),
+  createPoster('Visual 45', 'D18', 'uploaded-45.png', '#ff8cc6', '2025.06'),
+  createPoster('Visual 46', 'D19', 'uploaded-46.png', '#9ae6ff', '2026.07'),
+  createPoster('Visual 47', 'D20', 'uploaded-47.png', '#f2ff00', '2025.09'),
+  createPoster('Visual 48', 'D21', 'uploaded-48.png', '#c7b8ff', '2026.04'),
 ];
 
 const posterWallImageUrls = posters.map((poster) => poster.image);
@@ -112,8 +117,40 @@ export function preloadPosterWallImages(): Promise<unknown> {
   return Promise.all(posterWallImageUrls.map(preloadPosterWallImage));
 }
 
+function getGreatestCommonDivisor(left: number, right: number): number {
+  return right === 0 ? left : getGreatestCommonDivisor(right, left % right);
+}
+
+function getPosterScatterStep(length: number): number {
+  let step = Math.max(1, Math.floor(length / 3));
+
+  while (step > 1 && getGreatestCommonDivisor(step, length) !== 1) {
+    step -= 1;
+  }
+
+  return step;
+}
+
+const posterScatterStep = getPosterScatterStep(posters.length);
+const distributedPosters = posters.map((_, index) => (
+  posters[(index * posterScatterStep) % posters.length]
+));
+
+function getCoprimeStep(length: number, preferredStep: number) {
+  let step = wrapIndex(preferredStep, length);
+
+  while (step > 1 && getGreatestCommonDivisor(step, length) !== 1) {
+    step = wrapIndex(step + 1, length);
+  }
+
+  return Math.max(step, 1);
+}
+
+const horizontalPosterStep = getCoprimeStep(distributedPosters.length, posterScatterStep);
+const verticalPosterStep = getCoprimeStep(distributedPosters.length, posterScatterStep + 1);
+
 const posterTiles = Array.from({ length: 160 }, (_, index) => ({
-  ...posters[index % posters.length],
+  ...distributedPosters[index % distributedPosters.length],
   tileId: index,
 }));
 
@@ -130,6 +167,10 @@ function wrapCoordinate(value: number, min: number, max: number) {
 
 function roundUpToMultiple(value: number, multiple: number) {
   return Math.ceil(value / multiple) * multiple;
+}
+
+function wrapIndex(value: number, length: number) {
+  return ((value % length) + length) % length;
 }
 
 type InfiniteFluidPosterWallProps = {
@@ -325,6 +366,29 @@ export default function InfiniteFluidPosterWall({ onReturn }: InfiniteFluidPoste
       cards.forEach((card, index) => {
         const layout = layouts[index];
         if (!layout) return;
+        const horizontalWrap = Math.floor((layout.baseX + offsetX - wrapMinX) / worldWidth);
+        const verticalWrap = Math.floor((layout.baseY + offsetY - wrapMinY) / worldHeight);
+        const posterIndex = wrapIndex(
+          index + horizontalWrap * horizontalPosterStep + verticalWrap * verticalPosterStep,
+          distributedPosters.length,
+        );
+        const poster = distributedPosters[posterIndex];
+        const image = card.querySelector<HTMLImageElement>('img');
+        const code = card.querySelector<HTMLElement>('.fluid-poster-copy span');
+        const title = card.querySelector<HTMLElement>('.fluid-poster-copy strong');
+        const expandedDate = card.querySelector<HTMLElement>('.poster-card-expanded-meta span');
+        const expandedTitle = card.querySelector<HTMLElement>('.poster-card-expanded-meta strong');
+
+        if (card.dataset.posterImage !== poster.image) {
+          card.dataset.posterImage = poster.image;
+          card.style.setProperty('--poster-accent', poster.accent);
+          if (image) image.src = poster.image;
+          if (code) code.textContent = poster.code;
+          if (title) title.textContent = poster.title;
+          if (expandedDate) expandedDate.textContent = poster.date;
+          if (expandedTitle) expandedTitle.textContent = poster.title;
+        }
+
         const wrappedX = wrapCoordinate(layout.baseX + offsetX, wrapMinX, wrapMinX + worldWidth);
         const wrappedY = wrapCoordinate(layout.baseY + offsetY, wrapMinY, wrapMinY + worldHeight);
         card.style.transform = `translate3d(${wrappedX - offsetX}px, ${wrappedY - offsetY}px, 0)`;
@@ -333,6 +397,33 @@ export default function InfiniteFluidPosterWall({ onReturn }: InfiniteFluidPoste
 
     const sync = () => {
       renderCards(Number(gsap.getProperty(grid, 'x')) || 0, Number(gsap.getProperty(grid, 'y')) || 0);
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      const card = target.closest<HTMLElement>('.fluid-poster-card');
+      if (!card || card.classList.contains('poster-card-expanded-clone')) return;
+
+      pressedCard = card;
+      pressX = event.clientX;
+      pressY = event.clientY;
+    };
+
+    const handlePointerUp = (event: PointerEvent) => {
+      if (!pressedCard) return;
+
+      const card = pressedCard;
+      pressedCard = null;
+      const moved = Math.hypot(event.clientX - pressX, event.clientY - pressY);
+      if (moved <= 8) {
+        expandCard(card);
+      }
+    };
+
+    const clearPressedCard = () => {
+      pressedCard = null;
     };
 
     const zoomCameraOut = () => {
@@ -375,14 +466,15 @@ export default function InfiniteFluidPosterWall({ onReturn }: InfiniteFluidPoste
       cursor: 'grab',
       activeCursor: 'grabbing',
       allowNativeTouchScrolling: false,
-      minimumMovement: 1,
+      minimumMovement: 8,
       onPress(this: Draggable) {
         const target = this.pointerEvent.target;
         if (target instanceof Element && target.closest('.poster-wall-brand')) {
           this.endDrag(this.pointerEvent);
           return;
         }
-
+      },
+      onDragStart() {
         root.classList.add('is-dragging');
         zoomCameraOut();
       },
@@ -392,52 +484,23 @@ export default function InfiniteFluidPosterWall({ onReturn }: InfiniteFluidPoste
       onDragEnd: releaseDragState,
     })[0];
 
-    const handlePointerDown = (event: PointerEvent) => {
-      if (expandedClone) return;
-
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-
-      const card = target.closest<HTMLElement>('.fluid-poster-card');
-      if (!card || !root.contains(card) || card.classList.contains('poster-card-expanded-clone')) return;
-
-      pressedCard = card;
-      pressX = event.clientX;
-      pressY = event.clientY;
-    };
-
-    const handlePointerUp = (event: PointerEvent) => {
-      if (!pressedCard || expandedClone) {
-        pressedCard = null;
-        return;
-      }
-
-      const moved = Math.hypot(event.clientX - pressX, event.clientY - pressY);
-      const card = pressedCard;
-      pressedCard = null;
-
-      if (moved <= 8) {
-        expandCard(card);
-      }
-    };
-
-    root.addEventListener('pointerdown', handlePointerDown, true);
-    root.addEventListener('pointerup', handlePointerUp, true);
+    root.addEventListener('pointerdown', handlePointerDown);
+    root.addEventListener('pointerup', handlePointerUp);
+    root.addEventListener('pointercancel', clearPressedCard);
+    root.addEventListener('pointerleave', clearPressedCard);
 
     const resizeObserver = new ResizeObserver(layoutCards);
     resizeObserver.observe(root);
 
     return () => {
       resizeObserver.disconnect();
-      root.removeEventListener('pointerdown', handlePointerDown, true);
-      root.removeEventListener('pointerup', handlePointerUp, true);
+      root.removeEventListener('pointerdown', handlePointerDown);
+      root.removeEventListener('pointerup', handlePointerUp);
+      root.removeEventListener('pointercancel', clearPressedCard);
+      root.removeEventListener('pointerleave', clearPressedCard);
       draggable?.kill();
-      expandedFloatTween?.kill();
-      expandedReturnTween?.kill();
-      expandedClone?.remove();
-      expandedSourceCard?.classList.remove('is-card-source-hidden');
+      gsap.killTweensOf([grid, depth].filter(Boolean));
       restoreExpandedCardRef.current = null;
-      gsap.killTweensOf([grid, depth, expandedClone].filter(Boolean));
       if (logoResetTimerRef.current !== null) {
         window.clearTimeout(logoResetTimerRef.current);
       }
@@ -537,12 +600,6 @@ export default function InfiniteFluidPosterWall({ onReturn }: InfiniteFluidPoste
         />
       </div>
 
-      {hasExpandedCard && (
-        <button type="button" className="poster-card-return" onClick={handleExpandedCardReturn}>
-          RETURN
-        </button>
-      )}
-
       {(['top', 'right', 'bottom', 'left'] as const).map((side) => (
         <div key={side} className={`drag-marquee-border drag-marquee-border--${side}`} aria-hidden="true">
           <div>
@@ -555,6 +612,12 @@ export default function InfiniteFluidPosterWall({ onReturn }: InfiniteFluidPoste
           </div>
         </div>
       ))}
+
+      {hasExpandedCard && (
+        <button className="poster-card-return" type="button" onClick={handleExpandedCardReturn}>
+          RETURN
+        </button>
+      )}
     </div>
   );
 }

@@ -560,18 +560,73 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
   pageInner.className = 'project-image-page-inner';
   let detailGalleryMountTimer = 0;
   let mountDetailImages: (() => void) | null = null;
+  let detailImagesMounted = false;
+  let detailGalleryColumnCount = 0;
+  let detailGalleryColumns: HTMLDivElement[] = [];
+  const detailGalleryFigures: HTMLElement[] = [];
+  let syncDetailGalleryColumns = () => undefined;
 
   if (detailImages.length > 0) {
     const gallery = document.createElement('div');
     gallery.className = 'project-image-page-gallery';
     gallery.dataset.projectDetailId = detailId;
 
+    const getDetailGalleryColumnCount = () => {
+      if (window.innerWidth <= 720) return 1;
+      if (window.innerWidth <= 1100) return 2;
+      return 3;
+    };
+
+    const getShortestGalleryColumn = () => (
+      detailGalleryColumns.reduce((shortestColumn, column) => {
+        const shortestHeight = shortestColumn.offsetHeight;
+        const columnHeight = column.offsetHeight;
+
+        if (columnHeight === shortestHeight) {
+          return column.childElementCount < shortestColumn.childElementCount ? column : shortestColumn;
+        }
+
+        return columnHeight < shortestHeight ? column : shortestColumn;
+      }, detailGalleryColumns[0])
+    );
+
+    const placeDetailGalleryFigures = () => {
+      if (detailGalleryColumns.length === 0) return;
+
+      detailGalleryColumns.forEach((column) => column.replaceChildren());
+      detailGalleryFigures.forEach((figure) => {
+        getShortestGalleryColumn().appendChild(figure);
+      });
+    };
+
+    syncDetailGalleryColumns = () => {
+      const nextColumnCount = getDetailGalleryColumnCount();
+      if (nextColumnCount === detailGalleryColumnCount) return;
+
+      detailGalleryColumnCount = nextColumnCount;
+      gallery.style.setProperty('--project-image-gallery-columns', String(nextColumnCount));
+      gallery.replaceChildren();
+      detailGalleryColumns = Array.from({ length: nextColumnCount }, (_, index) => {
+        const column = document.createElement('div');
+        column.className = 'project-image-page-column';
+        column.dataset.column = String(index + 1);
+        return column;
+      });
+      gallery.append(...detailGalleryColumns);
+      placeDetailGalleryFigures();
+    };
+
+    const scheduleDetailGalleryLayout = () => {
+      window.requestAnimationFrame(placeDetailGalleryFigures);
+    };
+
     const appendDetailImagesChunk = (startIndex: number) => {
       if (cleaned) return;
 
-      const fragment = document.createDocumentFragment();
       const chunkSize = startIndex === 0 ? DETAIL_IMAGE_INITIAL_MOUNT_COUNT : 2;
       const endIndex = Math.min(startIndex + chunkSize, detailImages.length);
+
+      syncDetailGalleryColumns();
 
       for (let index = startIndex; index < endIndex; index += 1) {
         const image = detailImages[index];
@@ -586,12 +641,13 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
         img.decoding = 'async';
         img.sizes = '(max-width: 720px) 100vw, (max-width: 1100px) 50vw, 33vw';
         img.setAttribute('fetchpriority', isPriorityImage ? 'high' : 'low');
+        img.addEventListener('load', scheduleDetailGalleryLayout, { once: true });
 
         figure.appendChild(img);
-        fragment.appendChild(figure);
+        detailGalleryFigures.push(figure);
       }
 
-      gallery.appendChild(fragment);
+      placeDetailGalleryFigures();
 
       if (endIndex < detailImages.length) {
         detailGalleryMountTimer = window.setTimeout(() => appendDetailImagesChunk(endIndex), 90);
@@ -599,10 +655,13 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
     };
 
     mountDetailImages = () => {
-      if (gallery.childElementCount > 0 || detailGalleryMountTimer || cleaned) return;
+      if (detailImagesMounted || detailGalleryMountTimer || cleaned) return;
+      detailImagesMounted = true;
       detailGalleryMountTimer = window.setTimeout(() => appendDetailImagesChunk(0), 0);
     };
 
+    syncDetailGalleryColumns();
+    window.addEventListener('resize', syncDetailGalleryColumns);
     pageInner.appendChild(gallery);
   } else {
     const pageHeading = document.createElement('header');
@@ -896,6 +955,7 @@ function startFullscreenTransition(root: HTMLElement, payload: ProjectTransition
     closeButton.removeEventListener('click', close);
     window.removeEventListener('keydown', handleKeyDown);
     window.removeEventListener('keydown', handlePageKeyDown);
+    window.removeEventListener('resize', syncDetailGalleryColumns);
     root.classList.remove('is-fullscreen-transitioning');
     document.body.classList.remove('project-image-transition-open');
     highResolutionImage = null;

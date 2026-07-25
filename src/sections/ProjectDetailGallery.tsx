@@ -20,6 +20,10 @@ import brandVisual12 from '@/assets/project-detail-optimized/brand-visual/12.web
 import brandVisual13 from '@/assets/project-detail-optimized/brand-visual/13.webp';
 import brandVisual14 from '@/assets/project-detail-optimized/brand-visual/14.webp';
 import brandVisual15 from '@/assets/project-detail-optimized/brand-visual/15.webp';
+import brandVisual16 from '@/assets/project-detail-optimized/brand-visual/16.webp';
+import brandVisual17 from '@/assets/project-detail-optimized/brand-visual/17.webp';
+import brandVisual18 from '@/assets/project-detail-optimized/brand-visual/18.webp';
+import brandVisual19 from '@/assets/project-detail-optimized/brand-visual/19.webp';
 import pawsitivityBrandProposal from '@/assets/project-detail-optimized/pawsitivity/1.webp';
 import pawsitivityDetail02 from '@/assets/project-detail-optimized/pawsitivity/2.webp';
 import pawsitivityDetail03 from '@/assets/project-detail-optimized/pawsitivity/3.webp';
@@ -59,6 +63,7 @@ import applicationImage21 from '@/assets/project-detail-optimized/brand-applicat
 import applicationImage22 from '@/assets/project-detail-optimized/brand-applications/resource-22.webp';
 import applicationImage23 from '@/assets/project-detail-optimized/brand-applications/resource-23.webp';
 import applicationImage24 from '@/assets/project-detail-optimized/brand-applications/resource-24.webp';
+import applicationImage25 from '@/assets/project-detail-optimized/brand-applications/resource-25.webp';
 import touchpointImage01 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-01.webp';
 import touchpointImage02 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-02.webp';
 import touchpointImage03 from '@/assets/project-detail-optimized/brand-touchpoints/touchpoint-03.webp';
@@ -93,9 +98,13 @@ export const projectGalleryItems = [
       brandVisual13,
       brandVisual14,
       brandVisual15,
+      brandVisual16,
+      brandVisual17,
+      brandVisual18,
+      brandVisual19,
     ],
-    title: '\u54c1\u724c\u4e3b\u89c6\u89c9',
-    subtitle: 'Visual Identity',
+    title: 'Echo\u5496\u5561\u54c1\u724c\u63d0\u6848',
+    subtitle: 'Echo Coffee Brand Proposal',
     image: brandDetail01,
     previewImage: brandDetail01Preview,
   },
@@ -121,9 +130,10 @@ export const projectGalleryItems = [
       applicationImage22,
       applicationImage23,
       applicationImage24,
+      applicationImage25,
     ],
-    title: '\u5e94\u7528\u573a\u666f\u5ef6\u5c55',
-    subtitle: 'Brand Applications',
+    title: 'Moo-onday\u6253\u5de5\u725b\u54c1\u724c\u63d0\u6848',
+    subtitle: 'Moo-onday Brand Proposal',
     image: brandDetail02,
     previewImage: brandDetail02Preview,
   },
@@ -144,8 +154,8 @@ export const projectGalleryItems = [
       touchpointImage12,
       touchpointImage13,
     ],
-    title: '\u7269\u6599\u4e0e\u89e6\u70b9',
-    subtitle: 'Touchpoint System',
+    title: 'Crisp Awake\u9165\u9192\u54c1\u724c\u63d0\u6848',
+    subtitle: 'Crisp Awake Brand Proposal',
     image: brandDetail03,
     previewImage: brandDetail03Preview,
   },
@@ -173,7 +183,7 @@ export const projectGalleryItems = [
       pawsitivityDetail19,
       pawsitivityDetailExtra02,
     ],
-    title: '\u73c0\u65af\u7f07\u54c1\u724c\u63d0\u6848',
+    title: 'Pawsitivity\u73c0\u65af\u7f07\u54c1\u724c\u63d0\u6848',
     subtitle: 'Pawsitivity Brand Proposal',
     image: pawsitivityBrandProposal,
     previewImage: pawsitivityBrandProposalPreview,
