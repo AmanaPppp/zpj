@@ -86,6 +86,10 @@ const posters: Poster[] = [
 
 const posterWallImageUrls = posters.map((poster) => poster.image);
 const posterWallPreloadCache = new Map<string, Promise<void>>();
+const POSTER_WALL_PRELOAD_COUNT = 18;
+const POSTER_WALL_EAGER_TILE_COUNT = 18;
+const POSTER_WALL_WARMUP_BATCH_SIZE = 6;
+const POSTER_WALL_WARMUP_INTERVAL_MS = 650;
 
 function preloadPosterWallImage(src: string): Promise<void> {
   const existing = posterWallPreloadCache.get(src);
@@ -99,7 +103,7 @@ function preloadPosterWallImage(src: string): Promise<void> {
 
     const image = new Image();
     image.decoding = 'async';
-    image.loading = 'eager';
+    image.loading = 'lazy';
     image.onload = () => image.decode().then(resolve, resolve);
     image.onerror = () => resolve();
     image.src = src;
@@ -113,8 +117,39 @@ function preloadPosterWallImage(src: string): Promise<void> {
   return promise;
 }
 
-export function preloadPosterWallImages(): Promise<unknown> {
-  return Promise.all(posterWallImageUrls.map(preloadPosterWallImage));
+export function preloadPosterWallImages(limit = POSTER_WALL_PRELOAD_COUNT): Promise<unknown> {
+  return Promise.all(posterWallImageUrls.slice(0, limit).map(preloadPosterWallImage));
+}
+
+export function schedulePosterWallImageWarmup(
+  startIndex = 0,
+  batchSize = POSTER_WALL_WARMUP_BATCH_SIZE,
+  intervalMs = POSTER_WALL_WARMUP_INTERVAL_MS,
+): () => void {
+  if (typeof window === 'undefined') return () => undefined;
+
+  let cancelled = false;
+  let nextIndex = startIndex;
+  let timer = 0;
+
+  const loadNextBatch = () => {
+    if (cancelled || nextIndex >= posterWallImageUrls.length) return;
+
+    const batch = posterWallImageUrls.slice(nextIndex, nextIndex + batchSize);
+    nextIndex += batch.length;
+    batch.forEach((src) => preloadPosterWallImage(src).catch(() => undefined));
+
+    if (nextIndex < posterWallImageUrls.length) {
+      timer = window.setTimeout(loadNextBatch, intervalMs);
+    }
+  };
+
+  timer = window.setTimeout(loadNextBatch, intervalMs);
+
+  return () => {
+    cancelled = true;
+    if (timer) window.clearTimeout(timer);
+  };
 }
 
 function getGreatestCommonDivisor(left: number, right: number): number {
@@ -187,6 +222,7 @@ export default function InfiniteFluidPosterWall({ onReturn }: InfiniteFluidPoste
 
   useEffect(() => {
     preloadPosterWallImages().catch(() => undefined);
+    return schedulePosterWallImageWarmup(POSTER_WALL_PRELOAD_COUNT, 8, 420);
   }, []);
 
   useEffect(() => {
@@ -545,7 +581,7 @@ export default function InfiniteFluidPosterWall({ onReturn }: InfiniteFluidPoste
     <div ref={rootRef} className="infinite-fluid-poster-wall" data-lenis-prevent>
       <div className="poster-wall-depth">
         <div ref={gridRef} className="poster-wall-grid" aria-label="Infinite fluid draggable poster wall">
-          {posterTiles.map((poster) => (
+          {posterTiles.map((poster, index) => (
             <article
               key={`${poster.code}-${poster.tileId}`}
               className="fluid-poster-card"
@@ -555,7 +591,7 @@ export default function InfiniteFluidPosterWall({ onReturn }: InfiniteFluidPoste
                 src={poster.image}
                 alt=""
                 draggable={false}
-                loading="eager"
+                loading={index < POSTER_WALL_EAGER_TILE_COUNT ? 'eager' : 'lazy'}
                 decoding="async"
               />
               <div className="fluid-poster-shade" />

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
 import gsap from 'gsap';
-import { preloadProjectDetailImages } from '../sections/ProjectDetailGallery';
 
 const RINGS = [
   'AMANAP  BRAND DESIGN PORTFOLIO  ',
@@ -83,7 +82,6 @@ export default function IntroGate() {
       markReady();
     };
 
-    preloadProjectDetailImages().catch(() => undefined);
     window.addEventListener('portfolio-scene-ready', handleSceneReady);
     if (!sceneReady) {
       sceneReadyFallbackTimer = window.setTimeout(handleSceneReady, SCENE_READY_TIMEOUT_MS);

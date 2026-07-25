@@ -16,6 +16,8 @@ import HeroNavigationOverlay, { type HeroArea } from './components/HeroNavigatio
 import PageTransitionOverlay, {
   type PageTransitionOverlayHandle,
 } from './components/PageTransitionOverlay';
+import { schedulePosterWallImageWarmup } from './components/InfiniteFluidPosterWall';
+import { preloadProjectDetailImages } from './sections/ProjectDetailGallery';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -64,6 +66,32 @@ export default function App() {
       document.body.classList.remove('hero-area-open');
     };
   }, [activeHeroArea]);
+
+  useEffect(() => {
+    let warmupTimer = 0;
+    let cancelPosterWarmup: (() => void) | null = null;
+
+    const startResourceWarmup = () => {
+      if (warmupTimer || cancelPosterWarmup) return;
+
+      warmupTimer = window.setTimeout(() => {
+        preloadProjectDetailImages().catch(() => undefined);
+        cancelPosterWarmup = schedulePosterWallImageWarmup();
+      }, 1800);
+    };
+
+    if (document.documentElement.dataset.portfolioEntered === 'true') {
+      startResourceWarmup();
+    } else {
+      window.addEventListener('portfolio-enter', startResourceWarmup, { once: true });
+    }
+
+    return () => {
+      window.removeEventListener('portfolio-enter', startResourceWarmup);
+      if (warmupTimer) window.clearTimeout(warmupTimer);
+      cancelPosterWarmup?.();
+    };
+  }, []);
 
   const handleHeroAreaChange = useCallback((area: HeroArea) => {
     if (area === activeHeroArea) return;

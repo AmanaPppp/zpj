@@ -185,10 +185,6 @@ export default function SkillsSection() {
   }, []);
 
   useEffect(() => {
-    preloadPosterWallImages().catch(() => undefined);
-  }, []);
-
-  useEffect(() => {
     return () => {
       portalTimelineRef.current?.kill();
       releasePortalScroll();
