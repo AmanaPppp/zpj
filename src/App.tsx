@@ -9,7 +9,6 @@ import SkillsSection from './sections/SkillsSection';
 import ProjectsSection from './sections/ProjectsSection';
 import ContactSection from './sections/ContactSection';
 import Scene3D from './components/Scene3D';
-import MusicPlayer from './components/MusicPlayer';
 import IntroGate from './components/IntroGate';
 import { useMouseParallax } from './hooks/useMouseParallax';
 import HeroNavigationOverlay, { type HeroArea } from './components/HeroNavigationOverlay';
@@ -142,8 +141,6 @@ export default function App() {
 
       <HeroNavigationOverlay activeArea={activeHeroArea} />
 
-      {/* Music Player - fixed bottom left */}
-      <MusicPlayer />
       <IntroGate />
       <PageTransitionOverlay ref={pageTransitionRef} />
     </div>

@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import DecryptedText from '../components/DecryptedText';
-import VariableProximity from '../components/VariableProximity';
 import type { HeroArea } from '../components/HeroNavigationOverlay';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -36,11 +35,10 @@ export default function Hero({
 }: HeroProps) {
   const containerRef = useRef<HTMLDivElement>(null!);
   const titleRef = useRef<HTMLDivElement>(null!);
-  const subtitleRef = useRef<HTMLDivElement>(null!);
   const transitionRef = useRef<HTMLDivElement>(null!);
   const textProximityRef = useRef<HTMLDivElement>(null!);
   const navRef = useRef<HTMLElement>(null!);
-  const titleText = 'AmanaP-Portfolio';
+  const titleText = 'AMANAP-PORTFOLIO';
   const [titleVisible, setTitleVisible] = useState(false);
   const [navExpanded, setNavExpanded] = useState(false);
 
@@ -87,20 +85,6 @@ export default function Hero({
         },
       });
 
-      gsap.to(subtitleRef.current, {
-        y: -52,
-        opacity: 0,
-        scale: 0.98,
-        filter: 'blur(6px)',
-        ease: 'none',
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: '10% top',
-          end: '40% top',
-          scrub: 0.8,
-        },
-      });
-
       gsap.set(transitionRef.current, { autoAlpha: 0 });
 
       const bridgeTimeline = gsap.timeline({
@@ -135,7 +119,7 @@ export default function Hero({
       });
     }, containerRef);
 
-    gsap.set([navRef.current, titleRef.current, subtitleRef.current], {
+    gsap.set([navRef.current, titleRef.current], {
       autoAlpha: 0,
       pointerEvents: 'none',
     });
@@ -151,9 +135,8 @@ export default function Hero({
     const showHeroText = () => {
       setTitleVisible(false);
       titleRef.current?.classList.remove('is-title-visible');
-      subtitleRef.current?.classList.remove('is-subtitle-visible');
 
-      gsap.to([navRef.current, titleRef.current, subtitleRef.current], {
+      gsap.to([navRef.current, titleRef.current], {
         autoAlpha: 1,
         y: 0,
         duration: 0.9,
@@ -163,7 +146,6 @@ export default function Hero({
           window.requestAnimationFrame(() => {
             setTitleVisible(true);
             titleRef.current?.classList.add('is-title-visible');
-            subtitleRef.current?.classList.add('is-subtitle-visible');
           });
         },
         onComplete: () => {
@@ -245,30 +227,6 @@ export default function Hero({
             </h1>
           </div>
 
-          <div ref={subtitleRef} className="space-hero-subtitle">
-            <p className="space-hero-kicker font-medium uppercase">
-              <VariableProximity
-                label="Brand Design Portfolio"
-                containerRef={textProximityRef}
-                fromFontVariationSettings="'wght' 500"
-                toFontVariationSettings="'wght' 800"
-                radius={105}
-                falloff="linear"
-                letterClassName="space-hero-subtitle-letter"
-              />
-            </p>
-            <p className="space-hero-caption mt-2 uppercase">
-              <VariableProximity
-                label="品牌设计作品集"
-                containerRef={textProximityRef}
-                fromFontVariationSettings="'wght' 400"
-                toFontVariationSettings="'wght' 700"
-                radius={105}
-                falloff="linear"
-                letterClassName="space-hero-subtitle-letter"
-              />
-            </p>
-          </div>
         </div>
       </div>
       </section>
