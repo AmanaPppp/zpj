@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import gsap from 'gsap';
 
 const RINGS = [
@@ -21,6 +21,7 @@ export default function IntroGate() {
     x: number;
     y: number;
   } | null>(null);
+  const [dismissed, setDismissed] = useState(false);
 
   const ringLetters = useMemo(() => RINGS.map((item) => item.repeat(2).split('')), []);
 
@@ -162,9 +163,9 @@ export default function IntroGate() {
         .timeline({
           defaults: { ease: 'power4.inOut' },
           onComplete: () => {
-            overlay.remove();
             document.documentElement.dataset.portfolioEntered = 'true';
             window.dispatchEvent(new CustomEvent('portfolio-enter'));
+            setDismissed(true);
           },
         })
         .set(rings, {
@@ -287,6 +288,8 @@ export default function IntroGate() {
 
     enterRef.current();
   };
+
+  if (dismissed) return null;
 
   return (
     <div ref={overlayRef} id="intro-gate" aria-label="Portfolio entrance">
