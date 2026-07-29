@@ -43,6 +43,7 @@ import pawsitivityDetail16 from '@/assets/project-detail-optimized/pawsitivity/1
 import pawsitivityDetail17 from '@/assets/project-detail-optimized/pawsitivity/17-jpg.webp';
 import pawsitivityDetail18 from '@/assets/project-detail-optimized/pawsitivity/18-jpg.webp';
 import pawsitivityDetail19 from '@/assets/project-detail-optimized/pawsitivity/19.webp';
+import pawsitivityDetail20 from '@/assets/project-detail-optimized/pawsitivity/20.webp';
 import pawsitivityDetailExtra02 from '@/assets/project-detail-optimized/pawsitivity/02.jpg';
 import applicationImage03 from '@/assets/project-detail-optimized/brand-applications/resource-03.webp';
 import applicationImage04 from '@/assets/project-detail-optimized/brand-applications/resource-04.webp';
@@ -178,11 +179,12 @@ export const projectGalleryItems = [
       pawsitivityDetail14,
       pawsitivityDetail15,
       pawsitivityDetail16,
-      pawsitivityDetail17,
-      pawsitivityDetail18,
-      pawsitivityDetail19,
-      pawsitivityDetailExtra02,
-    ],
+    pawsitivityDetail17,
+    pawsitivityDetail18,
+    pawsitivityDetail19,
+    pawsitivityDetail20,
+    pawsitivityDetailExtra02,
+  ],
     title: 'Pawsitivity\u73c0\u65af\u7f07\u54c1\u724c\u63d0\u6848',
     subtitle: 'Pawsitivity Brand Proposal',
     image: pawsitivityBrandProposal,
